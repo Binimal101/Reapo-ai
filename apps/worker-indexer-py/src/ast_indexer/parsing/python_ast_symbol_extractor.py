@@ -67,6 +67,7 @@ class PythonAstSymbolExtractor:
             kind='function',
             line=node.lineno,
             signature=self._build_signature(node.name, node.args),
+            docstring=self._extract_docstring(node),
             callees=self._collect_callees(node, import_aliases),
         )
 
@@ -84,6 +85,7 @@ class PythonAstSymbolExtractor:
             kind='async_function',
             line=node.lineno,
             signature='async ' + self._build_signature(node.name, node.args),
+            docstring=self._extract_docstring(node),
             callees=self._collect_callees(node, import_aliases),
         )
 
@@ -95,6 +97,7 @@ class PythonAstSymbolExtractor:
             kind='class',
             line=node.lineno,
             signature=f'class {node.name}',
+            docstring=self._extract_docstring(node),
             callees=(),
         )
 
@@ -118,8 +121,23 @@ class PythonAstSymbolExtractor:
             kind=kind,
             line=node.lineno,
             signature=prefix + self._build_signature(method_name, node.args),
+            docstring=self._extract_docstring(node),
             callees=self._collect_callees(node, import_aliases, class_name=class_name),
         )
+
+    def _extract_docstring(
+        self, node: ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef
+    ) -> str | None:
+        if not node.body:
+            return None
+        first = node.body[0]
+        if (
+            isinstance(first, ast.Expr)
+            and isinstance(first.value, ast.Constant)
+            and isinstance(first.value.value, str)
+        ):
+            return first.value.value
+        return None
 
     def _build_signature(self, name: str, args: ast.arguments) -> str:
         parts = [arg.arg for arg in args.args]

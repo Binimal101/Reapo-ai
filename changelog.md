@@ -4,7 +4,7 @@
 Reapo-ai
 
 ## Last Updated
-2026-03-20
+2026-03-21
 
 ## Purpose of this changelog
 This document captures:
@@ -107,7 +107,48 @@ Location: apps/worker-indexer-py
 
 ---
 
-## 2.4 Increment completed in latest session
+## 2.5 Increment completed in latest session
+
+### Goal
+Repository-aware call graph linkage and runnable CLI entrypoint.
+
+### New modules
+- `parsing/module_path_resolver.py` — converts repo-relative file paths to dotted module names (strips `src/`, `__init__`, normalises separators)
+- `parsing/cross_file_linker.py` — resolves raw callee strings to canonical `path::symbol` IDs across all indexed files using three resolution strategies: exact name match, exact module-qualified match, and suffix match for partial module paths
+- `__main__.py` — CLI entrypoint; run with `PYTHONPATH=src python -m ast_indexer --repo <name> --workspace <path> --state <path>`
+
+### Domain changes
+- `SymbolRecord` gains `linked_callees: tuple[str, ...]` — resolved canonical callee IDs
+- `IndexRunMetrics` gains `linked_edges: int` — total linked edges for the run
+
+### Service changes
+- `IndexPythonRepositoryService` restructured to two-phase flow:
+  1. Parse all files (per-file spans emitted as before)
+  2. Cross-file link all symbols (`link_callees` span emitted with `linked_edges` count)
+  3. Upsert enriched symbols
+- Constructor gains `linker: CrossFileLinker` and `module_resolver: ModulePathResolver`
+- Factory functions in `main.py` updated accordingly
+
+### Persistence changes
+- `JsonFileSymbolIndexStoreAdapter` serialises and deserialises `linked_callees`
+
+### New tests
+- `test_cross_file_linker.py` — 5 integration tests covering:
+  - Cross-file callee resolution (orders → pricing)
+  - Intra-file callee resolution (Pricer.compute → apply_discount)
+  - Empty linked_callees for leaf functions
+  - Persistence and reload of linked_callees
+  - `link_callees` span emission and output payload
+
+### Validation
+- Test count: 12 passed
+- Coverage: 86.97%
+- Threshold: pass (required >= 60)
+- CLI smoke-test: indexed `worker-indexer-py` itself — 24 files, 88 symbols, 91 linked edges
+
+---
+
+## 2.4 Increment completed in previous session
 
 ### Functional improvements
 
@@ -218,26 +259,20 @@ Location: apps/worker-indexer-py
 ## 5.1 Immediate next increment (next coding session)
 
 ### Goal
-Advance Python indexer from single-file direct-call extraction to repository-aware call graph linkage and runnable entrypoint.
+Queue/job abstraction for index requests and structured correlation IDs across all spans.
 
 ### Planned tasks
-1. Build module path resolver
-   - derive module names from repository-relative paths
-   - support package and relative import mapping baseline
-2. Add cross-file call linking phase
-   - map collected call targets to known symbols across indexed files
-   - produce linked edge metadata for resolvable targets
-3. Add command-line entrypoint
-   - run persistent indexing by repo name/path
-   - emit run summary (files, symbols, linked edges, duration)
-4. Add integration test fixture repo
-   - multiple files with import aliases and inter-file calls
-   - assert linked edge output and persistence reload correctness
+1. Add `RunRequest` domain model (repo, trace_id, requested_at)
+2. Add `JobQueuePort` protocol — enqueue/dequeue run requests
+3. Implement `InMemoryJobQueueAdapter` for local/test use
+4. Add `run_id` to all span payloads for correlation
+5. Add a `WorkerLoop` application service that drains the queue and calls `IndexPythonRepositoryService`
+6. Tests for queue draining and correlation ID propagation
 
 ### Exit criteria
-- Integration tests pass
-- Coverage remains >= 60 (target >= 85)
-- Persistent index reload and linked-edge assertions pass
+- Tests pass
+- Coverage remains >= 60
+- Correlation IDs visible in all span payloads end-to-end
 
 ---
 
