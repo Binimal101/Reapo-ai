@@ -63,6 +63,53 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
             return ResearchObjective(intent=intent, entities=entities, repos_in_scope=suggested_repos)
         return ResearchObjective(intent=intent, entities=entities, repos_in_scope=repos_in_scope)
 
+    def summarize_reducer_context(
+        self,
+        *,
+        symbol: str,
+        signature: str,
+        path: str,
+        repo: str,
+        kind: str,
+        docstring: str | None,
+        body: str,
+        resolved_callees: tuple[str, ...],
+        token_budget: int,
+    ) -> dict:
+        system_prompt = (
+            'You are a code reducer for orchestration agents. '
+            'Produce concise, factual JSON with fields: '
+            'abstract (string), evidence_snippets (array of short code snippets), '
+            'open_questions (array of strings). '
+            'Preserve function names and behavior. '
+            'Do not invent facts. '
+            f'Target budget is approximately {max(32, token_budget)} tokens.'
+        )
+        user_prompt = json.dumps(
+            {
+                'symbol': symbol,
+                'signature': signature,
+                'path': path,
+                'repo': repo,
+                'kind': kind,
+                'docstring': docstring,
+                'resolved_callees': list(resolved_callees),
+                'body': body,
+            }
+        )
+
+        response = self._client.chat.completions.create(
+            model=self._model,
+            response_format={'type': 'json_object'},
+            temperature=0,
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt},
+            ],
+        )
+        payload = json.loads(response.choices[0].message.content or '{}')
+        return payload if isinstance(payload, dict) else {}
+
 
 class OpenAIQueryProdder(QueryProdderPort):
     def __init__(

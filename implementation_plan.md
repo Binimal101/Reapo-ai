@@ -283,20 +283,46 @@ Deliverables:
 Goal: Fit selected context into token budget while preserving key symbols.
 
 Steps:
-1. Implement reducer batch planner and tier scheduler.
-2. Define reducer input/output contracts.
-3. Build token budget calculator and stop condition.
-4. Preserve mandatory entities:
+1. Implement deterministic reducer planner:
+   - stable candidate ordering
+   - bounded context selection (`max_contexts`)
+   - greedy per-item budget allocation with hard budget cap
+2. Define explicit reducer contracts:
+   - input schema: enriched context, token budget, max contexts
+   - output schema: reduced context, truncation flags, token estimates
+   - metadata schema: consumed tokens, utilization, dropped contexts, overrun flag
+3. Add production safeguards:
+   - enforce minimum/maximum per-item token budget
+   - stop processing when token budget reaches zero
+   - guarantee `consumed_tokens <= token_budget`
+4. Preserve mandatory entities in reduced output:
    - symbol IDs
    - repo names
    - file paths
    - open questions
-5. Add overrun safeguards and tier max limits.
-6. Emit reducer tier spans and compression metrics.
+5. Add retry-safe behavior and failure boundaries:
+   - reducer failures must not corrupt upstream retrieval state
+   - reducer span must always close with success/error metadata
+6. Build out observability for every reducer run:
+   - `reducer_engine` span input: enriched_count, token_budget, max_contexts
+   - `reducer_engine` span output: reduced_count, reduced_context
+   - `reducer_engine` span metadata: planner, consumed_tokens, token_utilization, truncation_ratio, dropped_contexts, overrun
+   - child/parent linkage validated in Langfuse call-depth view
+7. Add Phase 6 test matrix:
+   - normal budget (no truncation)
+   - tight budget (truncation expected)
+   - over-constrained contexts (drop path exercised)
+   - observability assertions for span presence and metadata completeness
+8. Add operational alerting for reducer quality:
+   - overrun should always remain false (pager if true)
+   - truncation ratio threshold alerts
+   - high dropped-context count alerts
 
 Deliverables:
 - Final context block under target token budget
 - reducer overrun alert configured
+- Langfuse reducer spans include full production metadata
+- reducer test matrix passing in CI
 
 ---
 

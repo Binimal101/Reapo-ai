@@ -4,12 +4,13 @@ import ast
 import concurrent.futures
 import math
 import re
+import textwrap
 from dataclasses import asdict, dataclass
 from typing import Protocol, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from ast_indexer.domain.models import SymbolRecord, VectorRecord
+from ast_indexer.domain.models import SymbolRecord, TraceSpan, VectorRecord
 from ast_indexer.parsing.python_ast_symbol_extractor import PythonAstSymbolExtractor
 from ast_indexer.ports.embedding_generator import EmbeddingGeneratorPort
 from ast_indexer.ports.index_store import IndexStorePort
@@ -112,7 +113,7 @@ class ResearchState(TypedDict, total=False):
     relevant_candidates: tuple[RelevancyCandidate, ...]
     enriched_context: tuple[EnrichedResearchContext, ...]
     reduced_context: tuple[ReducedResearchContext, ...]
-    _active_retrieval_span: object
+    _active_retrieval_span: TraceSpan | None
 
 
 class ResearchPipeline:
@@ -398,6 +399,9 @@ class ResearchPipeline:
         retrieval_span = state.get('_active_retrieval_span')
         token_budget = max(16, int(state.get('reducer_token_budget', 2500)))
         max_contexts = max(1, int(state.get('reducer_max_contexts', state.get('top_k', 8))))
+        selected_count = min(len(enriched), max_contexts)
+        dropped_contexts = max(0, len(enriched) - selected_count)
+        pre_reduce_estimated_tokens = sum(_token_estimate(row.body) for row in enriched[:selected_count])
 
         span = self._observability.start_span(
             'reducer_engine',
@@ -415,6 +419,8 @@ class ResearchPipeline:
             token_budget=token_budget,
             max_contexts=max_contexts,
         )
+        consumed_tokens = sum(row.estimated_tokens for row in reduced)
+        reduced_truncations = sum(1 for row in reduced if row.body_was_truncated)
         self._observability.end_span(
             span,
             output_payload={
@@ -422,9 +428,16 @@ class ResearchPipeline:
                 'reduced_context': [_serialize_reduced_context(row) for row in reduced],
             },
             metadata={
+                'planner': 'greedy_budgeted',
                 'token_budget': token_budget,
-                'consumed_tokens': sum(row.estimated_tokens for row in reduced),
-                'reduced_body_truncations': sum(1 for row in reduced if row.body_was_truncated),
+                'consumed_tokens': consumed_tokens,
+                'token_utilization': _safe_ratio(consumed_tokens, token_budget),
+                'pre_reduce_estimated_tokens': pre_reduce_estimated_tokens,
+                'dropped_contexts': dropped_contexts,
+                'selected_contexts': selected_count,
+                'reduced_body_truncations': reduced_truncations,
+                'truncation_ratio': _safe_ratio(reduced_truncations, len(reduced)),
+                'overrun': consumed_tokens > token_budget,
             },
         )
 
@@ -441,6 +454,9 @@ class ResearchPipeline:
                         if enriched
                         else 0.0
                     ),
+                    'selected_contexts': selected_count,
+                    'dropped_contexts': dropped_contexts,
+                    'reducer_token_budget': token_budget,
                 },
             )
 
@@ -562,12 +578,28 @@ class ResearchPipeline:
             return ()
 
         reduced: list[ReducedResearchContext] = []
-        remaining_tokens = token_budget
+        remaining_tokens = max(0, token_budget)
         remaining_items = len(selected)
 
         for row in selected:
-            per_item_budget = max(32, remaining_tokens // remaining_items)
-            reduced_body, body_tokens, truncated = _truncate_to_token_budget(row.body, per_item_budget)
+            if remaining_tokens <= 0:
+                break
+
+            # Greedy allocator: spread remaining budget across remaining rows while preserving at least 32 tokens.
+            per_item_budget = max(32, remaining_tokens // max(1, remaining_items))
+            summarized_body, body_tokens, truncated = self._summarize_context_for_agent(
+                row=row,
+                token_budget=per_item_budget,
+            )
+
+            # Enforce hard budget guard for production safety.
+            if body_tokens > remaining_tokens:
+                summarized_body, body_tokens, truncated_guard = _truncate_to_token_budget(
+                    summarized_body,
+                    remaining_tokens,
+                )
+                truncated = truncated or truncated_guard
+
             reduced.append(
                 ReducedResearchContext(
                     repo=row.repo,
@@ -576,7 +608,7 @@ class ResearchPipeline:
                     kind=row.kind,
                     signature=row.signature,
                     docstring=row.docstring,
-                    reduced_body=reduced_body,
+                    reduced_body=summarized_body,
                     estimated_tokens=body_tokens,
                     body_was_truncated=truncated,
                     callees=row.callees,
@@ -586,7 +618,181 @@ class ResearchPipeline:
             remaining_tokens = max(0, remaining_tokens - body_tokens)
             remaining_items -= 1
 
-        return tuple(reduced)
+        return self._recursive_reduce_groups(
+            reduced,
+            token_budget=max(16, token_budget),
+            max_contexts=max(1, max_contexts),
+        )
+
+    def _summarize_context_for_agent(
+        self,
+        *,
+        row: EnrichedResearchContext,
+        token_budget: int,
+    ) -> tuple[str, int, bool]:
+        original_tokens = _token_estimate(row.body)
+        evidence = _extract_evidence_snippets(row.body)
+        fallback = _format_reducer_brief(
+            symbol=row.symbol,
+            signature=row.signature,
+            path=row.path,
+            abstract=f'Implements {row.kind} {row.symbol} for {row.repo}.',
+            evidence_snippets=evidence,
+            open_questions=_derive_open_questions(row),
+            resolved_callees=row.resolved_callees,
+        )
+
+        inference_result = self._invoke_reducer_inference(
+            row=row,
+            token_budget=token_budget,
+            evidence_snippets=evidence,
+        )
+        candidate = inference_result or fallback
+        reduced_body, body_tokens, truncated_by_budget = _truncate_to_token_budget(candidate, token_budget)
+        truncated = truncated_by_budget or body_tokens < original_tokens
+        return reduced_body, body_tokens, truncated
+
+    def _invoke_reducer_inference(
+        self,
+        *,
+        row: EnrichedResearchContext,
+        token_budget: int,
+        evidence_snippets: tuple[str, ...],
+    ) -> str | None:
+        summarize = getattr(self._reasoning_agent, 'summarize_reducer_context', None)
+        if not callable(summarize):
+            return None
+
+        try:
+            payload = summarize(
+                symbol=row.symbol,
+                signature=row.signature,
+                path=row.path,
+                repo=row.repo,
+                kind=row.kind,
+                docstring=row.docstring,
+                body=row.body,
+                resolved_callees=row.resolved_callees,
+                token_budget=token_budget,
+            )
+        except Exception:  # noqa: BLE001
+            return None
+
+        if not isinstance(payload, dict):
+            return None
+
+        abstract = str(payload.get('abstract') or '').strip()
+        if not abstract:
+            return None
+
+        evidence = tuple(
+            str(item).strip()
+            for item in payload.get('evidence_snippets', [])
+            if str(item).strip()
+        )
+        if not evidence:
+            evidence = evidence_snippets
+
+        open_questions = tuple(
+            str(item).strip()
+            for item in payload.get('open_questions', [])
+            if str(item).strip()
+        )
+
+        return _format_reducer_brief(
+            symbol=row.symbol,
+            signature=row.signature,
+            path=row.path,
+            abstract=abstract,
+            evidence_snippets=evidence,
+            open_questions=open_questions,
+            resolved_callees=row.resolved_callees,
+        )
+
+    def _recursive_reduce_groups(
+        self,
+        contexts: list[ReducedResearchContext],
+        *,
+        token_budget: int,
+        max_contexts: int,
+    ) -> tuple[ReducedResearchContext, ...]:
+        if not contexts:
+            return ()
+
+        current = list(contexts)
+        total_tokens = sum(row.estimated_tokens for row in current)
+
+        while (len(current) > max_contexts or total_tokens > token_budget) and len(current) > 1:
+            merged: list[ReducedResearchContext] = []
+            pair_count = math.ceil(len(current) / 2)
+            per_pair_budget = max(48, token_budget // max(1, pair_count))
+            for idx in range(0, len(current), 2):
+                pair = current[idx : idx + 2]
+                if len(pair) == 1:
+                    merged.append(pair[0])
+                    continue
+                merged.append(self._merge_reducer_pair(pair, per_pair_budget))
+            current = merged
+            total_tokens = sum(row.estimated_tokens for row in current)
+
+        if current and sum(row.estimated_tokens for row in current) > token_budget:
+            first = current[0]
+            reduced_body, tokens, truncated = _truncate_to_token_budget(first.reduced_body, token_budget)
+            current[0] = ReducedResearchContext(
+                repo=first.repo,
+                path=first.path,
+                symbol=first.symbol,
+                kind=first.kind,
+                signature=first.signature,
+                docstring=first.docstring,
+                reduced_body=reduced_body,
+                estimated_tokens=tokens,
+                body_was_truncated=first.body_was_truncated or truncated,
+                callees=first.callees,
+                resolved_callees=first.resolved_callees,
+            )
+
+        return tuple(current[:max_contexts])
+
+    def _merge_reducer_pair(
+        self,
+        pair: list[ReducedResearchContext],
+        token_budget: int,
+    ) -> ReducedResearchContext:
+        symbols = [row.symbol for row in pair]
+        sources = [f'{row.repo}:{row.path}:{row.symbol}' for row in pair]
+        combined = '\n\n'.join(row.reduced_body for row in pair)
+        evidence = _extract_evidence_snippets(combined)
+
+        abstract = (
+            f'Combined reducer brief for {", ".join(symbols)}. '
+            'Use evidence snippets for direct code verification.'
+        )
+        merged_text = _format_reducer_brief(
+            symbol=' + '.join(symbols[:3]) + (' + ...' if len(symbols) > 3 else ''),
+            signature='aggregate cluster',
+            path='multiple files',
+            abstract=abstract,
+            evidence_snippets=evidence,
+            open_questions=(),
+            resolved_callees=tuple(dict.fromkeys(callee for row in pair for callee in row.resolved_callees)),
+            sources=tuple(sources),
+        )
+
+        reduced_body, tokens, truncated = _truncate_to_token_budget(merged_text, token_budget)
+        return ReducedResearchContext(
+            repo='multi',
+            path='multiple files',
+            symbol='cluster(' + ', '.join(symbols[:3]) + ('...' if len(symbols) > 3 else '') + ')',
+            kind='cluster',
+            signature='aggregate cluster',
+            docstring=None,
+            reduced_body=reduced_body,
+            estimated_tokens=tokens,
+            body_was_truncated=truncated or any(row.body_was_truncated for row in pair),
+            callees=tuple(dict.fromkeys(callee for row in pair for callee in row.callees)),
+            resolved_callees=tuple(dict.fromkeys(callee for row in pair for callee in row.resolved_callees)),
+        )
 
     def _enrich_candidates(self, candidates: tuple[ResearchCandidate, ...]) -> tuple[EnrichedResearchContext, ...]:
         canonical_map = _build_canonical_symbol_map(self._index_store.list_symbols())
@@ -622,6 +828,12 @@ class ResearchPipeline:
             )
 
         return tuple(enriched)
+
+
+def _safe_ratio(numerator: int | float, denominator: int | float) -> float:
+    if denominator <= 0:
+        return 0.0
+    return float(numerator) / float(denominator)
 
 
 def _cosine_similarity(left: tuple[float, ...], right: tuple[float, ...]) -> float:
@@ -724,6 +936,75 @@ def _truncate_to_token_budget(text: str, token_budget: int) -> tuple[str, int, b
         candidate = candidate[:-1].rstrip()
 
     return candidate, _token_estimate(candidate), True
+
+
+def _extract_evidence_snippets(text: str, *, max_snippets: int = 2, max_lines: int = 5) -> tuple[str, ...]:
+    if not text.strip():
+        return ()
+
+    lines = [line.rstrip() for line in text.splitlines() if line.strip()]
+    if not lines:
+        return ()
+
+    snippets: list[str] = []
+    window = max(1, min(max_lines, len(lines)))
+    for idx in range(0, len(lines), max(1, len(lines) // max(1, max_snippets))):
+        segment = '\n'.join(lines[idx : idx + window]).strip()
+        if not segment:
+            continue
+        if segment not in snippets:
+            snippets.append(segment)
+        if len(snippets) >= max_snippets:
+            break
+
+    return tuple(snippets)
+
+
+def _derive_open_questions(row: EnrichedResearchContext) -> tuple[str, ...]:
+    if not row.resolved_callees:
+        return ('No resolved callees found; verify external dependencies manually.',)
+    return ('Confirm behavior of resolved callees used by this symbol.',)
+
+
+def _format_reducer_brief(
+    *,
+    symbol: str,
+    signature: str,
+    path: str,
+    abstract: str,
+    evidence_snippets: tuple[str, ...],
+    open_questions: tuple[str, ...],
+    resolved_callees: tuple[str, ...],
+    sources: tuple[str, ...] = (),
+) -> str:
+    parts = [
+        f'SYMBOL: {symbol}',
+        f'PATH: {path}',
+        f'SIGNATURE: {signature}',
+        'ABSTRACT:',
+        textwrap.fill(abstract, width=100),
+    ]
+
+    if sources:
+        parts.append('SOURCES:')
+        parts.extend(f'- {item}' for item in sources)
+
+    if resolved_callees:
+        parts.append('RESOLVED_CALLEES:')
+        parts.extend(f'- {item}' for item in resolved_callees[:8])
+
+    if open_questions:
+        parts.append('OPEN_QUESTIONS:')
+        parts.extend(f'- {item}' for item in open_questions[:3])
+
+    if evidence_snippets:
+        parts.append('EVIDENCE_SNIPPETS:')
+        for snippet in evidence_snippets[:2]:
+            parts.append('```python')
+            parts.append(snippet)
+            parts.append('```')
+
+    return '\n'.join(parts).strip()
 
 
 def _serialize_objective(objective: ResearchObjective) -> dict:
