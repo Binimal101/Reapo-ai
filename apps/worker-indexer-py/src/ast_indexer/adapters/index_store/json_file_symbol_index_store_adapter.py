@@ -38,6 +38,7 @@ class JsonFileSymbolIndexStoreAdapter(IndexStorePort):
                 line=row['line'],
                 signature=row['signature'],
                 callees=tuple(row.get('callees', [])),
+                linked_callees=tuple(row.get('linked_callees', [])),
             )
             key = (symbol.repo, symbol.path, symbol.kind, symbol.symbol)
             self._rows[key] = symbol
@@ -52,6 +53,7 @@ class JsonFileSymbolIndexStoreAdapter(IndexStorePort):
                 'line': symbol.line,
                 'signature': symbol.signature,
                 'callees': list(symbol.callees),
+                'linked_callees': list(symbol.linked_callees),
             }
             for symbol in self._rows.values()
         ]

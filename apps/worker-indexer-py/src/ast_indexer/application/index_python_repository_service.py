@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from ast_indexer.domain.models import IndexRunMetrics
+from ast_indexer.domain.models import IndexRunMetrics, SymbolRecord
+from ast_indexer.parsing.cross_file_linker import CrossFileLinker
+from ast_indexer.parsing.module_path_resolver import ModulePathResolver
 from ast_indexer.parsing.python_ast_symbol_extractor import PythonAstSymbolExtractor
 from ast_indexer.ports.index_store import IndexStorePort
 from ast_indexer.ports.observability import ObservabilityPort
@@ -16,11 +18,15 @@ class IndexPythonRepositoryService:
         index_store: IndexStorePort,
         observability: ObservabilityPort,
         extractor: PythonAstSymbolExtractor,
+        linker: CrossFileLinker,
+        module_resolver: ModulePathResolver,
     ) -> None:
         self._repository_reader = repository_reader
         self._index_store = index_store
         self._observability = observability
         self._extractor = extractor
+        self._linker = linker
+        self._module_resolver = module_resolver
 
     def index_repository(self, repo: str, trace_id: str) -> IndexRunMetrics:
         started = datetime.now(timezone.utc)
@@ -31,8 +37,9 @@ class IndexPythonRepositoryService:
         )
 
         files = self._repository_reader.list_python_files(repo)
-        total_symbols = 0
 
+        # Phase 1: parse all files, collect symbols
+        all_symbols: list[SymbolRecord] = []
         for file_path in files:
             file_span = self._observability.start_span(
                 name='parse_python_file',
@@ -40,9 +47,10 @@ class IndexPythonRepositoryService:
                 input_payload={'repo': repo, 'path': file_path},
             )
             repo_file = self._repository_reader.read_python_file(repo, file_path)
-            extracted = self._extractor.extract(repo=repo_file.repo, path=repo_file.path, source=repo_file.content)
-            total_symbols += len(extracted.symbols)
-            self._index_store.upsert_symbols(extracted.symbols)
+            extracted = self._extractor.extract(
+                repo=repo_file.repo, path=repo_file.path, source=repo_file.content
+            )
+            all_symbols.extend(extracted.symbols)
             self._observability.end_span(
                 file_span,
                 output_payload={
@@ -52,10 +60,27 @@ class IndexPythonRepositoryService:
                 },
             )
 
+        # Phase 2: cross-file call linking
+        link_span = self._observability.start_span(
+            name='link_callees',
+            trace_id=trace_id,
+            input_payload={'repo': repo, 'symbol_count': len(all_symbols)},
+        )
+        linked_symbols = self._linker.link(all_symbols, self._module_resolver)
+        linked_edges = sum(len(s.linked_callees) for s in linked_symbols)
+        self._observability.end_span(
+            link_span,
+            output_payload={'linked_edges': linked_edges},
+        )
+
+        # Phase 3: upsert enriched symbols
+        self._index_store.upsert_symbols(linked_symbols)
+
         finished = datetime.now(timezone.utc)
         metrics = IndexRunMetrics(
             files_scanned=len(files),
-            symbols_indexed=total_symbols,
+            symbols_indexed=len(all_symbols),
+            linked_edges=linked_edges,
             started_at=started,
             finished_at=finished,
         )
@@ -65,6 +90,7 @@ class IndexPythonRepositoryService:
                 'repo': repo,
                 'files_scanned': metrics.files_scanned,
                 'symbols_indexed': metrics.symbols_indexed,
+                'linked_edges': metrics.linked_edges,
             },
             metadata={'duration_ms': int((finished - started).total_seconds() * 1000)},
         )

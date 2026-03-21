@@ -13,12 +13,14 @@ class SymbolRecord:
     line: int
     signature: str
     callees: tuple[str, ...] = ()
+    linked_callees: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
 class IndexRunMetrics:
     files_scanned: int
     symbols_indexed: int
+    linked_edges: int
     started_at: datetime
     finished_at: datetime
 
