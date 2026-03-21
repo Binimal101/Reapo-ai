@@ -51,6 +51,7 @@ def test_http_handler_queues_push_event_when_signature_is_valid() -> None:
     assert response.status_code == 202
     assert response.payload['status'] == 'queued'
     assert response.payload['repo'] == 'checkout-service'
+    assert response.payload['repo_full_name'] == 'checkout-service'
     assert response.payload['correlation_id'] == 'corr-delivery-123'
     assert response.payload['user_id'] == 'octocat'
 
@@ -58,6 +59,47 @@ def test_http_handler_queues_push_event_when_signature_is_valid() -> None:
     assert queued is not None
     assert queued.repo == 'checkout-service'
     assert queued.trace_id == 'push-delivery-123'
+
+
+def test_http_handler_ignores_duplicate_delivery_id_when_replay_guard_is_enabled() -> None:
+    class _ReplayGuard:
+        def __init__(self) -> None:
+            self._seen: set[str] = set()
+
+        def seen_before_then_mark(self, delivery_id: str) -> bool:
+            if delivery_id in self._seen:
+                return True
+            self._seen.add(delivery_id)
+            return False
+
+    queue = InMemoryIndexJobQueueAdapter()
+    dispatch = IndexJobDispatchService(
+        queue=queue,
+        observability=InMemoryObservabilityAdapter(),
+        resolver=GithubPushPayloadResolver(),
+    )
+    handler = GithubWebhookHttpHandler(
+        verifier=HmacGithubSignatureVerifierAdapter('secret-dup'),
+        dispatch=dispatch,
+        replay_guard=_ReplayGuard(),
+    )
+
+    payload = {
+        'repository': {'name': 'checkout-service'},
+        'commits': [{'modified': ['src/orders.py']}],
+    }
+    body = json.dumps(payload).encode('utf-8')
+    headers = {
+        'X-GitHub-Event': 'push',
+        'X-GitHub-Delivery': 'delivery-dup-1',
+        'X-Hub-Signature-256': _signature('secret-dup', body),
+    }
+
+    first = handler.handle(headers=headers, body=body)
+    second = handler.handle(headers=headers, body=body)
+
+    assert first.payload['status'] == 'queued'
+    assert second.payload['status'] == 'ignored_duplicate'
 
 
 def test_http_handler_rejects_invalid_signature() -> None:

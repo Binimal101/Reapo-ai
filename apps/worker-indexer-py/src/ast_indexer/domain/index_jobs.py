@@ -9,6 +9,7 @@ class IndexJob:
     changed_paths: tuple[str, ...]
     deleted_paths: tuple[str, ...]
     trace_id: str
+    repo_full_name: str | None = None
     attempt: int = 0
     max_attempts: int = 3
     source: str = 'github_push'

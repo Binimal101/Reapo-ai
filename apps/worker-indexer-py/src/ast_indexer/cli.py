@@ -12,7 +12,7 @@ from uuid import uuid4
 from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
 from ast_indexer.application.call_graph_linker import CallGraphLinker
 from ast_indexer.domain.models import SymbolRecord
-from ast_indexer.main import build_persistent_index_service
+from ast_indexer.main import build_persistent_index_service, build_persistent_research_pipeline
 from ast_indexer.server import run_webhook_server
 
 
@@ -102,6 +102,86 @@ def _build_parser() -> argparse.ArgumentParser:
     index.add_argument('--langfuse-public-key', type=str, required=False, default=os.getenv('LANGFUSE_PUBLIC_KEY'))
     index.add_argument('--langfuse-secret-key', type=str, required=False, default=os.getenv('LANGFUSE_SECRET_KEY'))
     index.add_argument(
+        '--observability-strict',
+        action='store_true',
+        default=os.getenv('AST_INDEXER_OBSERVABILITY_STRICT', 'false').lower() in ('1', 'true', 'yes'),
+        help='Fail runtime operations when observability transport fails',
+    )
+
+    research = subparsers.add_parser('research', help='Run LangGraph research pipeline against indexed data')
+    research.add_argument('--workspace-root', type=Path, required=True, help='Base path that contains repositories')
+    research.add_argument('--state-root', type=Path, required=True, help='Path for persistent index and span files')
+    research.add_argument('--prompt', type=str, required=True, help='Natural language research prompt')
+    research.add_argument(
+        '--repo',
+        action='append',
+        default=[],
+        help='Repository name in scope. Repeat for multiple repos.',
+    )
+    research.add_argument('--trace-id', type=str, required=False, help='Optional explicit trace id')
+    research.add_argument('--top-k', type=int, default=8, help='Top K candidates to enrich')
+    research.add_argument(
+        '--research-model',
+        type=str,
+        default=os.getenv('AST_INDEXER_RESEARCH_MODEL', 'gpt-4o-mini'),
+        help='OpenAI model for reasoning + query generation',
+    )
+    research.add_argument(
+        '--embedding-backend',
+        type=str,
+        choices=['hash', 'sentence-transformers', 'openai'],
+        default=os.getenv('AST_INDEXER_EMBEDDING_BACKEND', 'hash'),
+        help='Embedding backend for retrieval query vectors',
+    )
+    research.add_argument(
+        '--embedding-model',
+        type=str,
+        default=os.getenv('AST_INDEXER_EMBEDDING_MODEL', 'sentence-transformers/all-MiniLM-L6-v2'),
+        help='Model name when embedding-backend=sentence-transformers or openai',
+    )
+    research.add_argument(
+        '--embedding-device',
+        type=str,
+        required=False,
+        help='Optional model device (e.g. cpu, cuda)',
+    )
+    research.add_argument(
+        '--openai-api-key',
+        type=str,
+        required=False,
+        default=os.getenv('OPENAI_API_KEY') or os.getenv('AST_INDEXER_OPENAI_API_KEY'),
+        help='OpenAI API key (falls back to OPENAI_API_KEY)',
+    )
+    research.add_argument(
+        '--openai-base-url',
+        type=str,
+        required=False,
+        default=os.getenv('AST_INDEXER_OPENAI_BASE_URL'),
+        help='Optional OpenAI-compatible base URL',
+    )
+    research.add_argument(
+        '--openai-dimensions',
+        type=int,
+        required=False,
+        default=_env_int('AST_INDEXER_OPENAI_DIMENSIONS'),
+        help='Optional embedding dimensions for text-embedding-3 models',
+    )
+    research.add_argument(
+        '--no-normalize-embeddings',
+        action='store_true',
+        help='Disable L2 normalization for sentence-transformers embeddings',
+    )
+    research.add_argument(
+        '--observability-backend',
+        type=str,
+        choices=['jsonl', 'langfuse'],
+        default=os.getenv('AST_INDEXER_OBSERVABILITY_BACKEND', 'jsonl'),
+        help='Observability backend for span export',
+    )
+    research.add_argument('--langfuse-host', type=str, required=False, default=os.getenv('LANGFUSE_HOST'))
+    research.add_argument('--langfuse-public-key', type=str, required=False, default=os.getenv('LANGFUSE_PUBLIC_KEY'))
+    research.add_argument('--langfuse-secret-key', type=str, required=False, default=os.getenv('LANGFUSE_SECRET_KEY'))
+    research.add_argument(
         '--observability-strict',
         action='store_true',
         default=os.getenv('AST_INDEXER_OBSERVABILITY_STRICT', 'false').lower() in ('1', 'true', 'yes'),
@@ -429,6 +509,64 @@ def main(argv: list[str] | None = None) -> int:
             langfuse_public_key=args.langfuse_public_key,
             langfuse_secret_key=args.langfuse_secret_key,
             observability_strict=args.observability_strict,
+        )
+        return 0
+
+    if args.command == 'research':
+        run_trace_id = args.trace_id or f'research-{datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")}-{uuid4().hex[:8]}'
+        pipeline = build_persistent_research_pipeline(
+            workspace_root=args.workspace_root,
+            state_root=args.state_root,
+            embedding_backend=args.embedding_backend,
+            embedding_model=args.embedding_model,
+            embedding_device=args.embedding_device,
+            normalize_embeddings=not args.no_normalize_embeddings,
+            openai_api_key=args.openai_api_key,
+            openai_base_url=args.openai_base_url,
+            openai_dimensions=args.openai_dimensions,
+            observability_backend=args.observability_backend,
+            langfuse_host=args.langfuse_host,
+            langfuse_public_key=args.langfuse_public_key,
+            langfuse_secret_key=args.langfuse_secret_key,
+            observability_strict=args.observability_strict,
+            research_model=args.research_model,
+        )
+        result = pipeline.run(
+            trace_id=run_trace_id,
+            prompt=args.prompt,
+            repos_in_scope=tuple(args.repo),
+            top_k=args.top_k,
+        )
+        print(
+            json.dumps(
+                {
+                    'status': 'ok',
+                    'trace_id': result.trace_id,
+                    'objective': {
+                        'intent': result.objective.intent,
+                        'entities': list(result.objective.entities),
+                        'repos_in_scope': list(result.objective.repos_in_scope),
+                    },
+                    'query_count': len(result.queries),
+                    'queries': list(result.queries),
+                    'candidate_count': len(result.candidates),
+                    'enriched_count': len(result.enriched_context),
+                    'enriched_context': [
+                        {
+                            'repo': row.repo,
+                            'path': row.path,
+                            'symbol': row.symbol,
+                            'kind': row.kind,
+                            'signature': row.signature,
+                            'docstring': row.docstring,
+                            'callees': list(row.callees),
+                            'resolved_callees': list(row.resolved_callees),
+                        }
+                        for row in result.enriched_context
+                    ],
+                },
+                indent=2,
+            )
         )
         return 0
 

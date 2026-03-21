@@ -18,6 +18,8 @@ from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import L
 from ast_indexer.adapters.vector_store.in_memory_vector_store_adapter import InMemoryVectorStoreAdapter
 from ast_indexer.adapters.vector_store.json_file_vector_store_adapter import JsonFileVectorStoreAdapter
 from ast_indexer.application.index_python_repository_service import IndexPythonRepositoryService
+from ast_indexer.application.research_openai_agents import OpenAIQueryProdder, OpenAIReasoningAgent
+from ast_indexer.application.research_pipeline import ResearchPipeline
 from ast_indexer.parsing.python_ast_symbol_extractor import PythonAstSymbolExtractor
 from ast_indexer.ports.embedding_generator import EmbeddingGeneratorPort
 from ast_indexer.ports.observability import ObservabilityPort
@@ -155,4 +157,64 @@ def build_persistent_index_service(
         extractor=extractor,
         embedding_generator=embedding_generator,
         vector_store=vector_store,
+    )
+
+
+def build_persistent_research_pipeline(
+    workspace_root: Path,
+    state_root: Path,
+    embedding_backend: Literal['hash', 'sentence-transformers', 'openai'] = 'hash',
+    embedding_model: str = 'sentence-transformers/all-MiniLM-L6-v2',
+    embedding_device: str | None = None,
+    normalize_embeddings: bool = True,
+    openai_api_key: str | None = None,
+    openai_base_url: str | None = None,
+    openai_dimensions: int | None = None,
+    observability_backend: Literal['jsonl', 'langfuse'] = 'jsonl',
+    langfuse_host: str | None = None,
+    langfuse_public_key: str | None = None,
+    langfuse_secret_key: str | None = None,
+    observability_strict: bool = False,
+    research_model: str = 'gpt-4o-mini',
+) -> ResearchPipeline:
+    observability = build_persistent_observability_adapter(
+        state_root=state_root,
+        backend=observability_backend,
+        langfuse_host=langfuse_host,
+        langfuse_public_key=langfuse_public_key,
+        langfuse_secret_key=langfuse_secret_key,
+        strict=observability_strict,
+    )
+    reader = LocalFsRepositoryReaderAdapter(workspace_root)
+    index_store = JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json')
+    vector_store = JsonFileVectorStoreAdapter(state_root / 'index' / 'vectors.json')
+    query_embedding_generator = _build_embedding_generator(
+        backend=embedding_backend,
+        model=embedding_model,
+        device=embedding_device,
+        normalize_embeddings=normalize_embeddings,
+        openai_api_key=openai_api_key,
+        openai_base_url=openai_base_url,
+        openai_dimensions=openai_dimensions,
+    )
+    extractor = PythonAstSymbolExtractor()
+    reasoning_agent = OpenAIReasoningAgent(
+        model=research_model,
+        api_key=openai_api_key,
+        base_url=openai_base_url,
+    )
+    query_prodder = OpenAIQueryProdder(
+        model=research_model,
+        api_key=openai_api_key,
+        base_url=openai_base_url,
+    )
+    return ResearchPipeline(
+        reasoning_agent=reasoning_agent,
+        query_prodder=query_prodder,
+        embedding_generator=query_embedding_generator,
+        vector_store=vector_store,
+        index_store=index_store,
+        repository_reader=reader,
+        extractor=extractor,
+        observability=observability,
     )

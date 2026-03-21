@@ -149,6 +149,7 @@ def test_server_app_exposes_retry_outcome_and_logs_span(tmp_path: Path) -> None:
                 status='retried',
                 job=IndexJob(
                     repo='checkout-service',
+                    repo_full_name='checkout-service',
                     changed_paths=('src/orders.py',),
                     deleted_paths=(),
                     trace_id='push-server-test-retry',
@@ -199,6 +200,7 @@ def test_server_app_exposes_dead_letter_outcome(tmp_path: Path) -> None:
                 status='dead_lettered',
                 job=IndexJob(
                     repo='checkout-service',
+                    repo_full_name='checkout-service',
                     changed_paths=('src/orders.py',),
                     deleted_paths=(),
                     trace_id='push-server-test-dead',

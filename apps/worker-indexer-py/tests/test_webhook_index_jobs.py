@@ -28,6 +28,7 @@ def test_resolver_extracts_python_changes_and_deletions() -> None:
 
     delta = resolver.resolve(payload)
     assert delta.repo == 'checkout-service'
+    assert delta.repo_full_name == 'checkout-service'
     assert delta.changed_paths == ('src/new_flow.py', 'src/orders.py')
     assert delta.deleted_paths == ('src/old.py',)
 
@@ -44,6 +45,7 @@ def test_dispatch_enqueues_job_from_push_payload() -> None:
     job = dispatch.enqueue_from_github_push(payload, trace_id='trace-push-1')
 
     assert job.repo == 'checkout-service'
+    assert job.repo_full_name == 'checkout-service'
     assert job.changed_paths == ('src/orders.py',)
     assert job.deleted_paths == ()
     assert job.max_attempts == 3
@@ -106,6 +108,7 @@ def test_worker_processes_enqueued_job(tmp_path: Path) -> None:
     queue.enqueue(
         IndexJob(
             repo='checkout-service',
+            repo_full_name='checkout-service',
             changed_paths=('src/orders.py',),
             deleted_paths=(),
             trace_id='trace-worker-1',
@@ -144,6 +147,7 @@ def test_worker_requeues_job_until_max_attempts_then_dead_letters() -> None:
     queue.enqueue(
         IndexJob(
             repo='checkout-service',
+            repo_full_name='checkout-service',
             changed_paths=('src/orders.py',),
             deleted_paths=(),
             trace_id='trace-worker-fail-1',

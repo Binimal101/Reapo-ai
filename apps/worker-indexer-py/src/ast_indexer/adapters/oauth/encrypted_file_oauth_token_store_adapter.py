@@ -27,6 +27,7 @@ class EncryptedFileOAuthTokenStoreAdapter(OAuthTokenStorePort):
             'access_token': token.access_token,
             'expires_at': token.expires_at.isoformat(),
             'scopes': list(token.scopes),
+            'refresh_token': token.refresh_token,
         }
         self._write_records(records)
 
@@ -49,7 +50,12 @@ class EncryptedFileOAuthTokenStoreAdapter(OAuthTokenStorePort):
             access_token=row.get('access_token', ''),
             expires_at=datetime.fromisoformat(expires_at_raw),
             scopes=tuple(scope for scope in scopes_raw if isinstance(scope, str)),
+            refresh_token=row.get('refresh_token') if isinstance(row.get('refresh_token'), str) else None,
         )
+
+    def list_user_ids(self) -> list[str]:
+        records = self._read_records()
+        return sorted(records.keys())
 
     def _read_records(self) -> dict[str, dict]:
         if not self._file_path.exists():

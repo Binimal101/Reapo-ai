@@ -43,6 +43,7 @@ class IndexJobDispatchService:
         delta = self._resolver.resolve(payload)
         job = IndexJob(
             repo=delta.repo,
+            repo_full_name=delta.repo_full_name,
             changed_paths=delta.changed_paths,
             deleted_paths=delta.deleted_paths,
             trace_id=trace_id,
@@ -54,6 +55,7 @@ class IndexJobDispatchService:
             span,
             output_payload={
                 'repo': job.repo,
+                'repo_full_name': job.repo_full_name,
                 'changed_files': len(job.changed_paths),
                 'deleted_files': len(job.deleted_paths),
                 'correlation_id': correlation_id,

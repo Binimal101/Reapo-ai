@@ -27,6 +27,18 @@ Use an iterative vertical-slice approach:
 3. Scale to multi-repo + write path only after core loop is stable.
 4. Harden for production (security, rate limits, retries, runbooks).
 
+### 2.1) Reality Check Notes (Do Not Regress)
+These notes capture implementation-time learnings and must remain true unless intentionally changed:
+1. Phase 4 is a bounded LangGraph read-only retrieval slice. It is not expected to produce very large context sets.
+2. Candidate breadth in Phase 4 is constrained by:
+   - explicit repo scope provided at runtime
+   - semantic query count produced by the prodder node
+   - top-k cap (CLI default is 8 unless overridden)
+3. "Large" cross-repo breadth is a Phase 5 expectation and depends on iterative expansion/reducer behavior, not the Phase 4 single-pass graph.
+4. In Langfuse mode, non-hex trace IDs (for example, `research-*`) are normalized to provider-compatible 32-hex trace IDs.
+5. When trace normalization occurs, the original caller trace ID must be retained in metadata (for example, `original_trace_id`) for debugging.
+6. `parse_python_file` span floods indicate indexing activity, not necessarily research-graph node expansion.
+
 ---
 
 ## 3) System Decomposition
@@ -193,28 +205,65 @@ Deliverables:
 
 ---
 
-### Phase 4 - Research Pipeline (Read-Only MVP)
-Goal: Convert prompt into relevant live code context.
+### Phase 4 - Research Pipeline (LangGraph Read-Only MVP)
+Goal: Convert a raw prompt into a structured research objective, generate semantic queries, and perform live codebase retrieval via a bounded LangGraph state machine.
 
-Steps:
-1. Implement Reasoning Agent output schema (ResearchObjective).
-2. Implement Semantic Prodder multi-query generation.
-3. Add vector search and dedupe logic.
-4. Build Live Repo Reader:
-   - fetch blobs by sha/path
-   - ETag caching
-   - AST call-graph expansion with depth cap
-5. Return enriched candidate bundles for relevancy stage.
-6. Instrument each stage with spans and metrics.
+Scope guardrail for this phase:
+- This phase is intentionally single-pass and bounded by top-k.
+- Do not treat low candidate counts here as Phase 5 regressions.
 
-Deliverables:
-- Single-run endpoint returns enriched context candidates
-- cache hit and blob fetch stats visible in Langfuse
+**Iterative Development Steps:**
+1. **LangGraph State Definition & Initialization:**
+   - Define the `ResearchState` graph state typed schema (e.g., `raw_prompt`, `research_objective`, `search_queries`, `candidate_snippets`, `enriched_context`).
+   - Scaffold the LangGraph runner class and its core edges (`reasoning_node` -> `prodder_node` -> `retrieval_node`).
+2. **Implement Reasoning Agent Node:**
+   - Write prompt templates to instruct the LLM to parse `raw_prompt` into a structured `ResearchObjective` (intent, explicit entities, repos in scope).
+   - Hook up Langchain/OpenAI wrapper and emit `reasoning_agent` trace span.
+3. **Implement Semantic Prodder Node:**
+   - Translate the `ResearchObjective` into an array of context-rich query strings designed for vector retrieval.
+4. **Vector Search & Deduplication Logic:**
+   - Integrate vector store API to fetch top-K indexed symbols matching the generated query strings.
+   - Combine and deduplicate returned signature records.
+5. **Build Live Repo Reader Node:**
+   - Receive candidate `sig_ids` and fetch raw Python blobs using the GitHub API adapter.
+   - Implement ETag cache wraping to avoid re-fetching unchanged blobs.
+   - Parse AST of downloaded blobs to extract the symbol body and its immediate `callees` (up to depth 2 or 3).
+6. **Graph Compilation & Observability Wiring:**
+   - Connect nodes into the compiled LangGraph execution graph.
+   - Ensure each node emits distinct spans and metrics (e.g., cache hits, blob fetches, token usage) into Langfuse via the LangGraph native callbacks or custom middleware.
+
+**Testing Strategy:**
+- **Unit Tests:** Validate specific Node boundaries (e.g., ensure Reasoning Agent returns a valid Pydantic/JSON schema for `ResearchObjective`).
+- **Mocked Integration:** Run the compiled LangGraph with a mocked Vector DB and GitHub API to assert state transitions happen correctly (prompt -> objective -> queries -> fetched blobs).
+- **Evaluation:** Inject 3 distinct prompt styles ("Where is XYZ defined?", "How does auth work?", "Fix the bug in the order processor") and assert the generated search queries are logically sound.
+
+**Usage Example:**
+```python
+from research_pipeline.graph import ResearchGraph
+
+# Initialize the LangGraph-based research pipeline
+graph = ResearchGraph(vector_store=pgvector_adapter, github_api=gh_client)
+
+# Execute the graph synchronously for a user request
+final_state = graph.invoke({
+    "raw_prompt": "How does the webhook signature verification actually work in the python worker?",
+    "repos_in_scope": ["worker-indexer-py"]
+})
+
+# Access the resulting enriched call-graphs from the terminal state
+print(f"Objective parsed: {final_state['research_objective'].intent}")
+for candidate in final_state['enriched_context']:
+    print(f"Found {candidate.symbol} in {candidate.path}, body length: {len(candidate.body)}")
+```
 
 ---
 
 ### Phase 5 - Parallel Relevancy System
-Goal: Filter and rank context with confidence-based scoring.
+Goal: Filter and rank context with confidence-based scoring and support larger cross-repo candidate frontiers.
+
+Expected behavior shift from Phase 4:
+- This phase is where breadth should increase meaningfully via broader candidate sets and parallel scoring.
+- If breadth remains small, validate repo scope, expansion policy, and threshold settings before blaming reducers.
 
 Steps:
 1. Implement worker pool and load balancer.

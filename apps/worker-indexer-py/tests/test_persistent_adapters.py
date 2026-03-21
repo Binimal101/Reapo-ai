@@ -1,8 +1,10 @@
 from pathlib import Path
 
+from ast_indexer.adapters.access.json_file_repo_capability_store_adapter import JsonFileRepoCapabilityStoreAdapter
 from ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter import JsonFileSymbolIndexStoreAdapter
 from ast_indexer.adapters.observability.jsonl_file_observability_adapter import JsonlFileObservabilityAdapter
 from ast_indexer.adapters.vector_store.json_file_vector_store_adapter import JsonFileVectorStoreAdapter
+from ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter import JsonFileWebhookReplayGuardAdapter
 from ast_indexer.domain.models import SymbolRecord, VectorRecord
 
 
@@ -153,3 +155,36 @@ def test_json_file_vector_store_deletes_paths_and_persists(tmp_path: Path) -> No
     vectors = reloaded.list_vectors()
     assert len(vectors) == 1
     assert vectors[0].symbol == 'process'
+
+
+def test_repo_capability_store_persists_and_normalizes_lookup_key(tmp_path: Path) -> None:
+    target = tmp_path / 'auth' / 'repo_capabilities.json'
+    store = JsonFileRepoCapabilityStoreAdapter(target)
+
+    store.upsert(
+        owner='Matth',
+        repo='Reapo-ai',
+        installation_id=123,
+        permissions={'contents': 'write'},
+        repository_selection='selected',
+    )
+
+    reloaded = JsonFileRepoCapabilityStoreAdapter(target)
+    row = reloaded.get(owner='matth', repo='reapo-ai')
+    assert row is not None
+    assert row['installation_id'] == 123
+    assert row['permissions']['contents'] == 'write'
+
+
+def test_webhook_replay_guard_marks_duplicate_delivery_ids(tmp_path: Path) -> None:
+    target = tmp_path / 'webhooks' / 'delivery_ids.json'
+    guard = JsonFileWebhookReplayGuardAdapter(target)
+
+    first_seen = guard.seen_before_then_mark('delivery-1')
+    second_seen = guard.seen_before_then_mark('delivery-1')
+
+    assert first_seen is False
+    assert second_seen is True
+
+    reloaded = JsonFileWebhookReplayGuardAdapter(target)
+    assert reloaded.seen_before_then_mark('delivery-1') is True

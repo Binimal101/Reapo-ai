@@ -1,0 +1,4486 @@
+[
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class JsonFileRepoCapabilityStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.__init__(self, file_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "JsonFileRepoCapabilityStoreAdapter._load"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.upsert",
+    "kind": "method",
+    "line": 15,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.upsert(self, owner, repo, installation_id, permissions, repository_selection)",
+    "docstring": null,
+    "callees": [
+      "lower",
+      "JsonFileRepoCapabilityStoreAdapter._persist",
+      "isoformat",
+      "datetime.datetime.now"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.get",
+    "kind": "method",
+    "line": 27,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.get(self, owner, repo)",
+    "docstring": null,
+    "callees": [
+      "get",
+      "lower"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter._load",
+    "kind": "method",
+    "line": 30,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter._load(self)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "isinstance",
+      "exists",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter._persist",
+    "kind": "method",
+    "line": 37,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter._persist(self)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/openai_embedding_generator_adapter.py",
+    "symbol": "OpenAIEmbeddingGeneratorAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class OpenAIEmbeddingGeneratorAdapter",
+    "docstring": "Embedding adapter backed by the OpenAI embeddings API.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/openai_embedding_generator_adapter.py",
+    "symbol": "OpenAIEmbeddingGeneratorAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def OpenAIEmbeddingGeneratorAdapter.__init__(self, model_name, api_key, base_url, dimensions)",
+    "docstring": null,
+    "callees": [
+      "OpenAI",
+      "os.getenv",
+      "RuntimeError",
+      "isinstance",
+      "strip"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/openai_embedding_generator_adapter.py",
+    "symbol": "OpenAIEmbeddingGeneratorAdapter.embed",
+    "kind": "method",
+    "line": 35,
+    "signature": "def OpenAIEmbeddingGeneratorAdapter.embed(self, texts)",
+    "docstring": null,
+    "callees": [
+      "create",
+      "tuple",
+      "float"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/sentence_transformers_embedding_generator_adapter.py",
+    "symbol": "SentenceTransformersEmbeddingGeneratorAdapter",
+    "kind": "class",
+    "line": 6,
+    "signature": "class SentenceTransformersEmbeddingGeneratorAdapter",
+    "docstring": "Semantic embedding adapter powered by sentence-transformers.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/sentence_transformers_embedding_generator_adapter.py",
+    "symbol": "SentenceTransformersEmbeddingGeneratorAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def SentenceTransformersEmbeddingGeneratorAdapter.__init__(self, model_name, device, normalize_embeddings, batch_size)",
+    "docstring": null,
+    "callees": [
+      "SentenceTransformer",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/sentence_transformers_embedding_generator_adapter.py",
+    "symbol": "SentenceTransformersEmbeddingGeneratorAdapter.embed",
+    "kind": "method",
+    "line": 28,
+    "signature": "def SentenceTransformersEmbeddingGeneratorAdapter.embed(self, texts)",
+    "docstring": null,
+    "callees": [
+      "encode",
+      "tuple",
+      "float",
+      "tolist"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/simple_hash_embedding_generator_adapter.py",
+    "symbol": "SimpleHashEmbeddingGeneratorAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class SimpleHashEmbeddingGeneratorAdapter",
+    "docstring": "Deterministic local embedding adapter for offline/dev indexing.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/simple_hash_embedding_generator_adapter.py",
+    "symbol": "SimpleHashEmbeddingGeneratorAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def SimpleHashEmbeddingGeneratorAdapter.__init__(self, dimensions)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/embeddings/simple_hash_embedding_generator_adapter.py",
+    "symbol": "SimpleHashEmbeddingGeneratorAdapter.embed",
+    "kind": "method",
+    "line": 14,
+    "signature": "def SimpleHashEmbeddingGeneratorAdapter.embed(self, texts)",
+    "docstring": null,
+    "callees": [
+      "digest",
+      "range",
+      "append",
+      "tuple",
+      "hashlib.sha256",
+      "encode",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter",
+    "kind": "class",
+    "line": 7,
+    "signature": "class InMemorySymbolIndexStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.__init__",
+    "kind": "method",
+    "line": 8,
+    "signature": "def InMemorySymbolIndexStoreAdapter.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.upsert_symbols",
+    "kind": "method",
+    "line": 11,
+    "signature": "def InMemorySymbolIndexStoreAdapter.upsert_symbols(self, symbols)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 16,
+    "signature": "def InMemorySymbolIndexStoreAdapter.delete_symbols_for_paths(self, repo, paths)",
+    "docstring": null,
+    "callees": [
+      "set",
+      "len",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.list_symbols",
+    "kind": "method",
+    "line": 29,
+    "signature": "def InMemorySymbolIndexStoreAdapter.list_symbols(self)",
+    "docstring": null,
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class JsonFileSymbolIndexStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.__init__(self, file_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "JsonFileSymbolIndexStoreAdapter._load_existing"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.upsert_symbols",
+    "kind": "method",
+    "line": 17,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.upsert_symbols(self, symbols)",
+    "docstring": null,
+    "callees": [
+      "JsonFileSymbolIndexStoreAdapter._persist"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 24,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths(self, repo, paths)",
+    "docstring": null,
+    "callees": [
+      "set",
+      "len",
+      "JsonFileSymbolIndexStoreAdapter._persist",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.list_symbols",
+    "kind": "method",
+    "line": 40,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.list_symbols(self)",
+    "docstring": null,
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "kind": "method",
+    "line": 43,
+    "signature": "def JsonFileSymbolIndexStoreAdapter._load_existing(self)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text",
+      "ast_indexer.domain.models.SymbolRecord",
+      "get",
+      "tuple"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "kind": "method",
+    "line": 62,
+    "signature": "def JsonFileSymbolIndexStoreAdapter._persist(self)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "json.dumps",
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class EncryptedFileOAuthTokenStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter.__init__(self, file_path, encryption_key)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "Fernet",
+      "encode",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter.save",
+    "kind": "method",
+    "line": 23,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter.save(self, token)",
+    "docstring": null,
+    "callees": [
+      "EncryptedFileOAuthTokenStoreAdapter._read_records",
+      "EncryptedFileOAuthTokenStoreAdapter._write_records",
+      "isoformat",
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter.get",
+    "kind": "method",
+    "line": 34,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter.get(self, user_id)",
+    "docstring": null,
+    "callees": [
+      "EncryptedFileOAuthTokenStoreAdapter._read_records",
+      "get",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "isinstance",
+      "ValueError",
+      "datetime.datetime.fromisoformat",
+      "tuple"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter.list_user_ids",
+    "kind": "method",
+    "line": 56,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter.list_user_ids(self)",
+    "docstring": null,
+    "callees": [
+      "EncryptedFileOAuthTokenStoreAdapter._read_records",
+      "sorted",
+      "keys"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "kind": "method",
+    "line": 60,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter._read_records(self)",
+    "docstring": null,
+    "callees": [
+      "read_bytes",
+      "json.loads",
+      "exists",
+      "decrypt",
+      "decode",
+      "isinstance",
+      "ValueError",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "EncryptedFileOAuthTokenStoreAdapter._write_records",
+    "kind": "method",
+    "line": 78,
+    "signature": "def EncryptedFileOAuthTokenStoreAdapter._write_records(self, records)",
+    "docstring": null,
+    "callees": [
+      "encode",
+      "encrypt",
+      "write_bytes",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter",
+    "kind": "class",
+    "line": 6,
+    "signature": "class InMemoryOAuthTokenStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.__init__",
+    "kind": "method",
+    "line": 7,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.save",
+    "kind": "method",
+    "line": 10,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.save(self, token)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.get",
+    "kind": "method",
+    "line": 13,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.get(self, user_id)",
+    "docstring": null,
+    "callees": [
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.list_user_ids",
+    "kind": "method",
+    "line": 16,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.list_user_ids(self)",
+    "docstring": null,
+    "callees": [
+      "sorted",
+      "keys"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class InMemoryObservabilityAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def InMemoryObservabilityAdapter.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.start_span",
+    "kind": "method",
+    "line": 14,
+    "signature": "def InMemoryObservabilityAdapter.start_span(self, name, trace_id, input_payload, session_id, user_id)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.TraceSpan",
+      "append",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.end_span",
+    "kind": "method",
+    "line": 34,
+    "signature": "def InMemoryObservabilityAdapter.end_span(self, span, output_payload, metadata)",
+    "docstring": null,
+    "callees": [
+      "finish"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.list_spans",
+    "kind": "method",
+    "line": 37,
+    "signature": "def InMemoryObservabilityAdapter.list_spans(self)",
+    "docstring": null,
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter",
+    "kind": "class",
+    "line": 12,
+    "signature": "class JsonlFileObservabilityAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.__init__",
+    "kind": "method",
+    "line": 13,
+    "signature": "def JsonlFileObservabilityAdapter.__init__(self, file_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.start_span",
+    "kind": "method",
+    "line": 18,
+    "signature": "def JsonlFileObservabilityAdapter.start_span(self, name, trace_id, input_payload, session_id, user_id)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.TraceSpan",
+      "append",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.end_span",
+    "kind": "method",
+    "line": 38,
+    "signature": "def JsonlFileObservabilityAdapter.end_span(self, span, output_payload, metadata)",
+    "docstring": null,
+    "callees": [
+      "finish",
+      "isoformat",
+      "open",
+      "write",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.list_spans",
+    "kind": "method",
+    "line": 55,
+    "signature": "def JsonlFileObservabilityAdapter.list_spans(self)",
+    "docstring": null,
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter",
+    "kind": "class",
+    "line": 11,
+    "signature": "class LangfuseObservabilityAdapter",
+    "docstring": "Observability adapter that mirrors spans to Langfuse and in-memory state.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter.__init__",
+    "kind": "method",
+    "line": 14,
+    "signature": "def LangfuseObservabilityAdapter.__init__(self, host, public_key, secret_key, strict, client)",
+    "docstring": null,
+    "callees": [
+      "Langfuse",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter._record_error",
+    "kind": "method",
+    "line": 40,
+    "signature": "def LangfuseObservabilityAdapter._record_error(self, stage, exc)",
+    "docstring": null,
+    "callees": [
+      "print",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter.start_span",
+    "kind": "method",
+    "line": 47,
+    "signature": "def LangfuseObservabilityAdapter.start_span(self, name, trace_id, input_payload, session_id, user_id)",
+    "docstring": null,
+    "callees": [
+      "_normalize_trace_id",
+      "ast_indexer.domain.models.TraceSpan",
+      "append",
+      "start_observation",
+      "datetime.datetime.now",
+      "LangfuseObservabilityAdapter._record_error",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter.end_span",
+    "kind": "method",
+    "line": 89,
+    "signature": "def LangfuseObservabilityAdapter.end_span(self, span, output_payload, metadata)",
+    "docstring": null,
+    "callees": [
+      "finish",
+      "pop",
+      "update",
+      "end",
+      "hasattr",
+      "flush",
+      "LangfuseObservabilityAdapter._record_error"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter.list_spans",
+    "kind": "method",
+    "line": 105,
+    "signature": "def LangfuseObservabilityAdapter.list_spans(self)",
+    "docstring": null,
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "LangfuseObservabilityAdapter.check_health",
+    "kind": "method",
+    "line": 108,
+    "signature": "def LangfuseObservabilityAdapter.check_health(self)",
+    "docstring": null,
+    "callees": [
+      "hasattr",
+      "flush",
+      "LangfuseObservabilityAdapter._record_error"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "_normalize_trace_id",
+    "kind": "function",
+    "line": 120,
+    "signature": "def _normalize_trace_id(trace_id)",
+    "docstring": null,
+    "callees": [
+      "lower",
+      "all",
+      "replace",
+      "len",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter",
+    "kind": "class",
+    "line": 7,
+    "signature": "class InMemoryIndexJobQueueAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter.__init__",
+    "kind": "method",
+    "line": 8,
+    "signature": "def InMemoryIndexJobQueueAdapter.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter.enqueue",
+    "kind": "method",
+    "line": 12,
+    "signature": "def InMemoryIndexJobQueueAdapter.enqueue(self, job)",
+    "docstring": null,
+    "callees": [
+      "append"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter.dequeue",
+    "kind": "method",
+    "line": 15,
+    "signature": "def InMemoryIndexJobQueueAdapter.dequeue(self)",
+    "docstring": null,
+    "callees": [
+      "pop"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter.enqueue_dead_letter",
+    "kind": "method",
+    "line": 20,
+    "signature": "def InMemoryIndexJobQueueAdapter.enqueue_dead_letter(self, entry)",
+    "docstring": null,
+    "callees": [
+      "append"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/in_memory_index_job_queue_adapter.py",
+    "symbol": "InMemoryIndexJobQueueAdapter.list_dead_letters",
+    "kind": "method",
+    "line": 23,
+    "signature": "def InMemoryIndexJobQueueAdapter.list_dead_letters(self)",
+    "docstring": null,
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "_RedisClientProtocol",
+    "kind": "class",
+    "line": 11,
+    "signature": "class _RedisClientProtocol",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "_RedisClientProtocol.rpush",
+    "kind": "method",
+    "line": 12,
+    "signature": "def _RedisClientProtocol.rpush(self, key, value)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "_RedisClientProtocol.lpop",
+    "kind": "method",
+    "line": 15,
+    "signature": "def _RedisClientProtocol.lpop(self, key)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter",
+    "kind": "class",
+    "line": 19,
+    "signature": "class RedisIndexJobQueueAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter.__init__",
+    "kind": "method",
+    "line": 20,
+    "signature": "def RedisIndexJobQueueAdapter.__init__(self, client, queue_key, dead_letter_key)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter.from_url",
+    "kind": "method",
+    "line": 31,
+    "signature": "def RedisIndexJobQueueAdapter.from_url(cls, url, queue_key, dead_letter_key)",
+    "docstring": null,
+    "callees": [
+      "from_url",
+      "cls",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter.enqueue",
+    "kind": "method",
+    "line": 45,
+    "signature": "def RedisIndexJobQueueAdapter.enqueue(self, job)",
+    "docstring": null,
+    "callees": [
+      "rpush",
+      "json.dumps",
+      "dataclasses.asdict"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter.dequeue",
+    "kind": "method",
+    "line": 48,
+    "signature": "def RedisIndexJobQueueAdapter.dequeue(self)",
+    "docstring": null,
+    "callees": [
+      "lpop",
+      "json.loads",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "isinstance",
+      "decode",
+      "tuple",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/queue/redis_index_job_queue_adapter.py",
+    "symbol": "RedisIndexJobQueueAdapter.enqueue_dead_letter",
+    "kind": "method",
+    "line": 65,
+    "signature": "def RedisIndexJobQueueAdapter.enqueue_dead_letter(self, entry)",
+    "docstring": null,
+    "callees": [
+      "rpush",
+      "json.dumps",
+      "dataclasses.asdict"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class GithubApiRepositoryReaderAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def GithubApiRepositoryReaderAdapter.__init__(self, token, http_json)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter.list_python_files",
+    "kind": "method",
+    "line": 13,
+    "signature": "def GithubApiRepositoryReaderAdapter.list_python_files(self, repo)",
+    "docstring": null,
+    "callees": [
+      "GithubApiRepositoryReaderAdapter._split_repo",
+      "GithubApiRepositoryReaderAdapter._http_json",
+      "sorted",
+      "GithubApiRepositoryReaderAdapter._headers",
+      "isinstance",
+      "get",
+      "endswith",
+      "append"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter.read_python_file",
+    "kind": "method",
+    "line": 33,
+    "signature": "def GithubApiRepositoryReaderAdapter.read_python_file(self, repo, path)",
+    "docstring": null,
+    "callees": [
+      "GithubApiRepositoryReaderAdapter._split_repo",
+      "GithubApiRepositoryReaderAdapter._http_json",
+      "isinstance",
+      "ast_indexer.ports.repository_reader.RepositoryFile",
+      "GithubApiRepositoryReaderAdapter._headers",
+      "get",
+      "ValueError",
+      "urllib.parse.quote"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter._headers",
+    "kind": "method",
+    "line": 52,
+    "signature": "def GithubApiRepositoryReaderAdapter._headers(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "symbol": "GithubApiRepositoryReaderAdapter._split_repo",
+    "kind": "method",
+    "line": 59,
+    "signature": "def GithubApiRepositoryReaderAdapter._split_repo(self, repo)",
+    "docstring": null,
+    "callees": [
+      "split",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter",
+    "kind": "class",
+    "line": 32,
+    "signature": "class LocalFsRepositoryReaderAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.__init__",
+    "kind": "method",
+    "line": 33,
+    "signature": "def LocalFsRepositoryReaderAdapter.__init__(self, base_path, indexignore_file)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.list_python_files",
+    "kind": "method",
+    "line": 37,
+    "signature": "def LocalFsRepositoryReaderAdapter.list_python_files(self, repo)",
+    "docstring": null,
+    "callees": [
+      "resolve",
+      "LocalFsRepositoryReaderAdapter._load_indexignore_patterns",
+      "LocalFsRepositoryReaderAdapter._build_ignore_matcher",
+      "os.walk",
+      "sorted",
+      "exists",
+      "pathlib.Path",
+      "as_posix",
+      "ignored",
+      "append",
+      "relative_to",
+      "endswith"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.read_python_file",
+    "kind": "method",
+    "line": 70,
+    "signature": "def LocalFsRepositoryReaderAdapter.read_python_file(self, repo, path)",
+    "docstring": null,
+    "callees": [
+      "resolve",
+      "read_text",
+      "ast_indexer.ports.repository_reader.RepositoryFile"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter._load_indexignore_patterns",
+    "kind": "method",
+    "line": 76,
+    "signature": "def LocalFsRepositoryReaderAdapter._load_indexignore_patterns(self, root)",
+    "docstring": null,
+    "callees": [
+      "splitlines",
+      "exists",
+      "strip",
+      "append",
+      "read_text",
+      "startswith",
+      "replace"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter._build_ignore_matcher",
+    "kind": "method",
+    "line": 90,
+    "signature": "def LocalFsRepositoryReaderAdapter._build_ignore_matcher(self, patterns)",
+    "docstring": null,
+    "callees": [
+      "strip",
+      "replace",
+      "endswith",
+      "fnmatch.fnmatch",
+      "startswith",
+      "rstrip",
+      "pathlib.Path"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/in_memory_vector_store_adapter.py",
+    "symbol": "InMemoryVectorStoreAdapter",
+    "kind": "class",
+    "line": 7,
+    "signature": "class InMemoryVectorStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/in_memory_vector_store_adapter.py",
+    "symbol": "InMemoryVectorStoreAdapter.__init__",
+    "kind": "method",
+    "line": 8,
+    "signature": "def InMemoryVectorStoreAdapter.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/in_memory_vector_store_adapter.py",
+    "symbol": "InMemoryVectorStoreAdapter.upsert_vectors",
+    "kind": "method",
+    "line": 11,
+    "signature": "def InMemoryVectorStoreAdapter.upsert_vectors(self, vectors)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/in_memory_vector_store_adapter.py",
+    "symbol": "InMemoryVectorStoreAdapter.delete_vectors_for_paths",
+    "kind": "method",
+    "line": 16,
+    "signature": "def InMemoryVectorStoreAdapter.delete_vectors_for_paths(self, repo, paths)",
+    "docstring": null,
+    "callees": [
+      "set",
+      "len",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/in_memory_vector_store_adapter.py",
+    "symbol": "InMemoryVectorStoreAdapter.list_vectors",
+    "kind": "method",
+    "line": 29,
+    "signature": "def InMemoryVectorStoreAdapter.list_vectors(self)",
+    "docstring": null,
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class JsonFileVectorStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def JsonFileVectorStoreAdapter.__init__(self, file_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "JsonFileVectorStoreAdapter._load_existing"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter.upsert_vectors",
+    "kind": "method",
+    "line": 17,
+    "signature": "def JsonFileVectorStoreAdapter.upsert_vectors(self, vectors)",
+    "docstring": null,
+    "callees": [
+      "JsonFileVectorStoreAdapter._persist"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter.delete_vectors_for_paths",
+    "kind": "method",
+    "line": 23,
+    "signature": "def JsonFileVectorStoreAdapter.delete_vectors_for_paths(self, repo, paths)",
+    "docstring": null,
+    "callees": [
+      "set",
+      "len",
+      "JsonFileVectorStoreAdapter._persist",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter.list_vectors",
+    "kind": "method",
+    "line": 39,
+    "signature": "def JsonFileVectorStoreAdapter.list_vectors(self)",
+    "docstring": null,
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter._load_existing",
+    "kind": "method",
+    "line": 42,
+    "signature": "def JsonFileVectorStoreAdapter._load_existing(self)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text",
+      "ast_indexer.domain.models.VectorRecord",
+      "get",
+      "tuple"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "symbol": "JsonFileVectorStoreAdapter._persist",
+    "kind": "method",
+    "line": 63,
+    "signature": "def JsonFileVectorStoreAdapter._persist(self)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "json.dumps",
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/hmac_github_signature_verifier_adapter.py",
+    "symbol": "HmacGithubSignatureVerifierAdapter",
+    "kind": "class",
+    "line": 9,
+    "signature": "class HmacGithubSignatureVerifierAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/hmac_github_signature_verifier_adapter.py",
+    "symbol": "HmacGithubSignatureVerifierAdapter.__init__",
+    "kind": "method",
+    "line": 10,
+    "signature": "def HmacGithubSignatureVerifierAdapter.__init__(self, secret)",
+    "docstring": null,
+    "callees": [
+      "encode"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/hmac_github_signature_verifier_adapter.py",
+    "symbol": "HmacGithubSignatureVerifierAdapter.verify",
+    "kind": "method",
+    "line": 13,
+    "signature": "def HmacGithubSignatureVerifierAdapter.verify(self, body, signature_header)",
+    "docstring": null,
+    "callees": [
+      "hmac.compare_digest",
+      "hexdigest",
+      "hmac.new"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class JsonFileWebhookReplayGuardAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def JsonFileWebhookReplayGuardAdapter.__init__(self, file_path, retention_hours)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "datetime.timedelta",
+      "JsonFileWebhookReplayGuardAdapter._load"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter.seen_before_then_mark",
+    "kind": "method",
+    "line": 16,
+    "signature": "def JsonFileWebhookReplayGuardAdapter.seen_before_then_mark(self, delivery_id)",
+    "docstring": null,
+    "callees": [
+      "JsonFileWebhookReplayGuardAdapter._prune",
+      "isoformat",
+      "JsonFileWebhookReplayGuardAdapter._persist",
+      "datetime.datetime.now"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter._load",
+    "kind": "method",
+    "line": 24,
+    "signature": "def JsonFileWebhookReplayGuardAdapter._load(self)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "isinstance",
+      "exists",
+      "read_text",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter._persist",
+    "kind": "method",
+    "line": 31,
+    "signature": "def JsonFileWebhookReplayGuardAdapter._persist(self)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "symbol": "JsonFileWebhookReplayGuardAdapter._prune",
+    "kind": "method",
+    "line": 34,
+    "signature": "def JsonFileWebhookReplayGuardAdapter._prune(self)",
+    "docstring": null,
+    "callees": [
+      "datetime.datetime.now",
+      "items",
+      "JsonFileWebhookReplayGuardAdapter._persist",
+      "datetime.datetime.fromisoformat"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport",
+    "kind": "class",
+    "line": 40,
+    "signature": "class CallGraphLinkReport",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport.total_edges",
+    "kind": "method",
+    "line": 45,
+    "signature": "def CallGraphLinkReport.total_edges(self)",
+    "docstring": null,
+    "callees": [
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport.actionable_unresolved_edges",
+    "kind": "method",
+    "line": 49,
+    "signature": "def CallGraphLinkReport.actionable_unresolved_edges(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport.actionable_total_edges",
+    "kind": "method",
+    "line": 53,
+    "signature": "def CallGraphLinkReport.actionable_total_edges(self)",
+    "docstring": null,
+    "callees": [
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport.resolution_rate",
+    "kind": "method",
+    "line": 57,
+    "signature": "def CallGraphLinkReport.resolution_rate(self)",
+    "docstring": null,
+    "callees": [
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinkReport.actionable_resolution_rate",
+    "kind": "method",
+    "line": 63,
+    "signature": "def CallGraphLinkReport.actionable_resolution_rate(self)",
+    "docstring": null,
+    "callees": [
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker",
+    "kind": "class",
+    "line": 69,
+    "signature": "class CallGraphLinker",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker.link",
+    "kind": "method",
+    "line": 70,
+    "signature": "def CallGraphLinker.link(self, symbols)",
+    "docstring": null,
+    "callees": [
+      "CallGraphLinker.link_report"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker.link_report",
+    "kind": "method",
+    "line": 73,
+    "signature": "def CallGraphLinker.link_report(self, symbols)",
+    "docstring": null,
+    "callees": [
+      "set",
+      "sorted",
+      "CallGraphLinkReport",
+      "CallGraphLinker._canonical_names",
+      "CallGraphLinker._module_name",
+      "setdefault",
+      "add",
+      "get",
+      "append",
+      "CallGraphLinker._classify_unresolved",
+      "ast_indexer.domain.models.CallEdge",
+      "split",
+      "ast_indexer.domain.models.UnresolvedCallEdge"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker._canonical_names",
+    "kind": "method",
+    "line": 116,
+    "signature": "def CallGraphLinker._canonical_names(self, symbol)",
+    "docstring": null,
+    "callees": [
+      "CallGraphLinker._module_name"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker._module_name",
+    "kind": "method",
+    "line": 122,
+    "signature": "def CallGraphLinker._module_name(self, path)",
+    "docstring": null,
+    "callees": [
+      "strip",
+      "endswith",
+      "replace",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker._classify_unresolved",
+    "kind": "method",
+    "line": 133,
+    "signature": "def CallGraphLinker._classify_unresolved(self, callee, module_prefixes)",
+    "docstring": null,
+    "callees": [
+      "split",
+      "isupper"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppConfig",
+    "kind": "class",
+    "line": 20,
+    "signature": "class GithubAppConfig",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppConfig.from_env",
+    "kind": "method",
+    "line": 28,
+    "signature": "def GithubAppConfig.from_env(cls)",
+    "docstring": null,
+    "callees": [
+      "cls",
+      "os.getenv",
+      "pathlib.Path"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppConfig.missing_fields",
+    "kind": "method",
+    "line": 37,
+    "signature": "def GithubAppConfig.missing_fields(self)",
+    "docstring": null,
+    "callees": [
+      "append",
+      "str",
+      "exists"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService",
+    "kind": "class",
+    "line": 54,
+    "signature": "class GithubAppAuthService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.__init__",
+    "kind": "method",
+    "line": 55,
+    "signature": "def GithubAppAuthService.__init__(self, config, oauth_session_service, observability, http_json)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService._http_json_dict",
+    "kind": "method",
+    "line": 67,
+    "signature": "def GithubAppAuthService._http_json_dict(self, method, url, body, headers)",
+    "docstring": null,
+    "callees": [
+      "GithubAppAuthService._http_json",
+      "isinstance",
+      "RuntimeError",
+      "type"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.missing_fields",
+    "kind": "method",
+    "line": 73,
+    "signature": "def GithubAppAuthService.missing_fields(self)",
+    "docstring": null,
+    "callees": [
+      "missing_fields"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.is_configured",
+    "kind": "method",
+    "line": 76,
+    "signature": "def GithubAppAuthService.is_configured(self)",
+    "docstring": null,
+    "callees": [
+      "GithubAppAuthService.missing_fields"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.build_oauth_start_url",
+    "kind": "method",
+    "line": 79,
+    "signature": "def GithubAppAuthService.build_oauth_start_url(self, state, redirect_uri)",
+    "docstring": null,
+    "callees": [
+      "urllib.parse.urlencode"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.exchange_oauth_code",
+    "kind": "method",
+    "line": 89,
+    "signature": "def GithubAppAuthService.exchange_oauth_code(self, trace_id, code, state, redirect_uri)",
+    "docstring": null,
+    "callees": [
+      "start_span",
+      "GithubAppAuthService._http_json_dict",
+      "get",
+      "save_token",
+      "end_span",
+      "ValueError",
+      "isinstance",
+      "tuple",
+      "int",
+      "strip",
+      "bool",
+      "list",
+      "split",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.refresh_oauth_token",
+    "kind": "method",
+    "line": 171,
+    "signature": "def GithubAppAuthService.refresh_oauth_token(self, trace_id, refresh_token, user_id)",
+    "docstring": null,
+    "callees": [
+      "GithubAppAuthService._http_json_dict",
+      "get",
+      "save_token",
+      "ValueError",
+      "isinstance",
+      "tuple",
+      "int",
+      "strip",
+      "split"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.fetch_user_with_retry",
+    "kind": "method",
+    "line": 206,
+    "signature": "def GithubAppAuthService.fetch_user_with_retry(self, trace_id, user_id)",
+    "docstring": null,
+    "callees": [
+      "get_valid_token_with_refresh",
+      "ValueError",
+      "GithubAppAuthService._http_json_dict",
+      "GithubAppAuthService.refresh_oauth_token",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.create_installation_access_token",
+    "kind": "method",
+    "line": 254,
+    "signature": "def GithubAppAuthService.create_installation_access_token(self, trace_id, installation_id)",
+    "docstring": null,
+    "callees": [
+      "start_span",
+      "GithubAppAuthService._create_app_jwt",
+      "GithubAppAuthService._http_json_dict",
+      "end_span",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.resolve_installation_id_for_repo",
+    "kind": "method",
+    "line": 285,
+    "signature": "def GithubAppAuthService.resolve_installation_id_for_repo(self, trace_id, owner, repo)",
+    "docstring": null,
+    "callees": [
+      "start_span",
+      "GithubAppAuthService._create_app_jwt",
+      "GithubAppAuthService._http_json_dict",
+      "get",
+      "end_span",
+      "isinstance",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService.ensure_repository_webhook",
+    "kind": "method",
+    "line": 314,
+    "signature": "def GithubAppAuthService.ensure_repository_webhook(self, trace_id, owner, repo, webhook_url, events)",
+    "docstring": null,
+    "callees": [
+      "GithubAppAuthService.resolve_installation_id_for_repo",
+      "GithubAppAuthService.create_installation_access_token",
+      "get",
+      "GithubAppAuthService._http_json",
+      "ValueError",
+      "isinstance",
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "GithubAppAuthService._create_app_jwt",
+    "kind": "method",
+    "line": 379,
+    "signature": "def GithubAppAuthService._create_app_jwt(self)",
+    "docstring": null,
+    "callees": [
+      "read_text",
+      "int",
+      "encode",
+      "time.time",
+      "isinstance",
+      "decode",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_app_auth_service.py",
+    "symbol": "_http_json_request",
+    "kind": "function",
+    "line": 396,
+    "signature": "def _http_json_request(method, url, body, headers)",
+    "docstring": null,
+    "callees": [
+      "urllib.request.Request",
+      "items",
+      "encode",
+      "add_header",
+      "urllib.request.urlopen",
+      "decode",
+      "get",
+      "RuntimeError",
+      "json.dumps",
+      "json.loads",
+      "hasattr",
+      "read"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_push_payload_resolver.py",
+    "symbol": "PushDelta",
+    "kind": "class",
+    "line": 7,
+    "signature": "class PushDelta",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_push_payload_resolver.py",
+    "symbol": "GithubPushPayloadResolver",
+    "kind": "class",
+    "line": 14,
+    "signature": "class GithubPushPayloadResolver",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_push_payload_resolver.py",
+    "symbol": "GithubPushPayloadResolver.resolve",
+    "kind": "method",
+    "line": 15,
+    "signature": "def GithubPushPayloadResolver.resolve(self, payload)",
+    "docstring": null,
+    "callees": [
+      "get",
+      "set",
+      "PushDelta",
+      "ValueError",
+      "isinstance",
+      "split",
+      "strip",
+      "endswith",
+      "tuple",
+      "add",
+      "sorted"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "WebhookHttpResponse",
+    "kind": "class",
+    "line": 12,
+    "signature": "class WebhookHttpResponse",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "WebhookReplayGuardPort",
+    "kind": "class",
+    "line": 17,
+    "signature": "class WebhookReplayGuardPort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "WebhookReplayGuardPort.seen_before_then_mark",
+    "kind": "method",
+    "line": 18,
+    "signature": "def WebhookReplayGuardPort.seen_before_then_mark(self, delivery_id)",
+    "docstring": "Return True when delivery id is duplicate and must be ignored.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "GithubWebhookHttpHandler",
+    "kind": "class",
+    "line": 22,
+    "signature": "class GithubWebhookHttpHandler",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "GithubWebhookHttpHandler.__init__",
+    "kind": "method",
+    "line": 23,
+    "signature": "def GithubWebhookHttpHandler.__init__(self, verifier, dispatch, replay_guard)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/github_webhook_http_handler.py",
+    "symbol": "GithubWebhookHttpHandler.handle",
+    "kind": "method",
+    "line": 33,
+    "signature": "def GithubWebhookHttpHandler.handle(self, headers, body)",
+    "docstring": null,
+    "callees": [
+      "get",
+      "json.loads",
+      "enqueue_from_github_push_with_context",
+      "WebhookHttpResponse",
+      "lower",
+      "verify",
+      "seen_before_then_mark",
+      "decode",
+      "isinstance",
+      "items",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_dispatch_service.py",
+    "symbol": "IndexJobDispatchService",
+    "kind": "class",
+    "line": 9,
+    "signature": "class IndexJobDispatchService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_dispatch_service.py",
+    "symbol": "IndexJobDispatchService.__init__",
+    "kind": "method",
+    "line": 10,
+    "signature": "def IndexJobDispatchService.__init__(self, queue, observability, resolver, max_attempts)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_dispatch_service.py",
+    "symbol": "IndexJobDispatchService.enqueue_from_github_push",
+    "kind": "method",
+    "line": 22,
+    "signature": "def IndexJobDispatchService.enqueue_from_github_push(self, payload, trace_id)",
+    "docstring": null,
+    "callees": [
+      "IndexJobDispatchService.enqueue_from_github_push_with_context"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_dispatch_service.py",
+    "symbol": "IndexJobDispatchService.enqueue_from_github_push_with_context",
+    "kind": "method",
+    "line": 25,
+    "signature": "def IndexJobDispatchService.enqueue_from_github_push_with_context(self, payload, trace_id, correlation_id)",
+    "docstring": null,
+    "callees": [
+      "IndexJobDispatchService._resolve_user_id",
+      "start_span",
+      "resolve",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "enqueue",
+      "end_span",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_dispatch_service.py",
+    "symbol": "IndexJobDispatchService._resolve_user_id",
+    "kind": "method",
+    "line": 67,
+    "signature": "def IndexJobDispatchService._resolve_user_id(self, payload)",
+    "docstring": null,
+    "callees": [
+      "isinstance",
+      "get",
+      "strip"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_worker_service.py",
+    "symbol": "IndexJobProcessOutcome",
+    "kind": "class",
+    "line": 13,
+    "signature": "class IndexJobProcessOutcome",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_worker_service.py",
+    "symbol": "IndexJobWorkerService",
+    "kind": "class",
+    "line": 20,
+    "signature": "class IndexJobWorkerService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_worker_service.py",
+    "symbol": "IndexJobWorkerService.__init__",
+    "kind": "method",
+    "line": 21,
+    "signature": "def IndexJobWorkerService.__init__(self, queue, index_service)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_job_worker_service.py",
+    "symbol": "IndexJobWorkerService.process_next",
+    "kind": "method",
+    "line": 25,
+    "signature": "def IndexJobWorkerService.process_next(self)",
+    "docstring": null,
+    "callees": [
+      "dequeue",
+      "IndexJobProcessOutcome",
+      "index_repository_subset",
+      "strip",
+      "enqueue_dead_letter",
+      "list",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "enqueue",
+      "ast_indexer.domain.index_jobs.DeadLetterIndexJob",
+      "join",
+      "str",
+      "traceback.format_exception_only",
+      "type"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService",
+    "kind": "class",
+    "line": 15,
+    "signature": "class IndexPythonRepositoryService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.__init__",
+    "kind": "method",
+    "line": 16,
+    "signature": "def IndexPythonRepositoryService.__init__(self, repository_reader, index_store, observability, extractor, embedding_generator, vector_store, access_level)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.index_repository",
+    "kind": "method",
+    "line": 34,
+    "signature": "def IndexPythonRepositoryService.index_repository(self, repo, trace_id)",
+    "docstring": null,
+    "callees": [
+      "list_python_files",
+      "IndexPythonRepositoryService.index_repository_subset"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.index_repository_subset",
+    "kind": "method",
+    "line": 43,
+    "signature": "def IndexPythonRepositoryService.index_repository_subset(self, repo, trace_id, file_paths, deleted_paths)",
+    "docstring": null,
+    "callees": [
+      "datetime.datetime.now",
+      "start_span",
+      "delete_symbols_for_paths",
+      "ast_indexer.domain.models.IndexRunMetrics",
+      "end_span",
+      "delete_vectors_for_paths",
+      "read_python_file",
+      "extract",
+      "len",
+      "upsert_symbols",
+      "IndexPythonRepositoryService._compute_tree_sha",
+      "upsert_vectors",
+      "hexdigest",
+      "embed",
+      "zip",
+      "ast_indexer.domain.models.VectorRecord",
+      "strip",
+      "append",
+      "int",
+      "hashlib.sha256",
+      "encode",
+      "total_seconds"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService._compute_tree_sha",
+    "kind": "method",
+    "line": 160,
+    "signature": "def IndexPythonRepositoryService._compute_tree_sha(self, file_blob_shas)",
+    "docstring": null,
+    "callees": [
+      "join",
+      "hexdigest",
+      "hashlib.sha256",
+      "sorted",
+      "encode",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService",
+    "kind": "class",
+    "line": 10,
+    "signature": "class OAuthSessionService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def OAuthSessionService.__init__(self, token_store, observability)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.save_token",
+    "kind": "method",
+    "line": 15,
+    "signature": "def OAuthSessionService.save_token(self, trace_id, user_id, access_token, scopes, expires_in_seconds, refresh_token)",
+    "docstring": null,
+    "callees": [
+      "start_span",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "save",
+      "end_span",
+      "list",
+      "bool",
+      "datetime.datetime.now",
+      "datetime.timedelta",
+      "isoformat"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.get_valid_token",
+    "kind": "method",
+    "line": 52,
+    "signature": "def OAuthSessionService.get_valid_token(self, trace_id, user_id)",
+    "docstring": null,
+    "callees": [
+      "start_span",
+      "get",
+      "datetime.datetime.now",
+      "end_span"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.get_valid_token_with_refresh",
+    "kind": "method",
+    "line": 68,
+    "signature": "def OAuthSessionService.get_valid_token_with_refresh(self, trace_id, user_id, refresh)",
+    "docstring": null,
+    "callees": [
+      "get",
+      "datetime.datetime.now",
+      "refresh",
+      "OAuthSessionService.save_token",
+      "isinstance",
+      "tuple",
+      "int",
+      "strip",
+      "split"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_env_int",
+    "kind": "function",
+    "line": 19,
+    "signature": "def _env_int(name)",
+    "docstring": null,
+    "callees": [
+      "os.getenv",
+      "int",
+      "strip",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_load_environment",
+    "kind": "function",
+    "line": 29,
+    "signature": "def _load_environment()",
+    "docstring": null,
+    "callees": [
+      "find_dotenv",
+      "load_dotenv"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_build_parser",
+    "kind": "function",
+    "line": 40,
+    "signature": "def _build_parser()",
+    "docstring": null,
+    "callees": [
+      "argparse.ArgumentParser",
+      "add_subparsers",
+      "add_parser",
+      "add_argument",
+      "os.getenv",
+      "_env_int",
+      "lower"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "run_index_once",
+    "kind": "function",
+    "line": 209,
+    "signature": "def run_index_once(workspace_root, repo, state_root, trace_id, embedding_backend, embedding_model, embedding_device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions, observability_backend, langfuse_host, langfuse_public_key, langfuse_secret_key, observability_strict)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.main.build_persistent_index_service",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "list_python_files",
+      "_read_manifest",
+      "set",
+      "sorted",
+      "index_repository_subset",
+      "_write_manifest",
+      "_read_symbols",
+      "link_report",
+      "mkdir",
+      "write_text",
+      "hexdigest",
+      "len",
+      "json.dumps",
+      "round",
+      "int",
+      "str",
+      "read_python_file",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker",
+      "strftime",
+      "hashlib.sha256",
+      "total_seconds",
+      "encode",
+      "get",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_read_symbols",
+    "kind": "function",
+    "line": 348,
+    "signature": "def _read_symbols(index_file)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text",
+      "ast_indexer.domain.models.SymbolRecord",
+      "get",
+      "tuple"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_read_manifest",
+    "kind": "function",
+    "line": 368,
+    "signature": "def _read_manifest(manifest_file)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_write_manifest",
+    "kind": "function",
+    "line": 374,
+    "signature": "def _write_manifest(manifest_file, manifest)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "main",
+    "kind": "function",
+    "line": 379,
+    "signature": "def main(argv)",
+    "docstring": null,
+    "callees": [
+      "_load_environment",
+      "_build_parser",
+      "parse_args",
+      "error",
+      "run_index_once",
+      "print",
+      "ast_indexer.server.run_webhook_server",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/index_jobs.py",
+    "symbol": "IndexJob",
+    "kind": "class",
+    "line": 7,
+    "signature": "class IndexJob",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/index_jobs.py",
+    "symbol": "DeadLetterIndexJob",
+    "kind": "class",
+    "line": 19,
+    "signature": "class DeadLetterIndexJob",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "SymbolRecord",
+    "kind": "class",
+    "line": 8,
+    "signature": "class SymbolRecord",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "VectorRecord",
+    "kind": "class",
+    "line": 20,
+    "signature": "class VectorRecord",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "CallEdge",
+    "kind": "class",
+    "line": 34,
+    "signature": "class CallEdge",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "UnresolvedCallEdge",
+    "kind": "class",
+    "line": 45,
+    "signature": "class UnresolvedCallEdge",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "IndexRunMetrics",
+    "kind": "class",
+    "line": 55,
+    "signature": "class IndexRunMetrics",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "TraceSpan",
+    "kind": "class",
+    "line": 65,
+    "signature": "class TraceSpan",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "TraceSpan.finish",
+    "kind": "method",
+    "line": 77,
+    "signature": "def TraceSpan.finish(self, output_payload, metadata)",
+    "docstring": null,
+    "callees": [
+      "datetime.datetime.now"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "_build_embedding_generator",
+    "kind": "function",
+    "line": 26,
+    "signature": "def _build_embedding_generator(backend, model, device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.embeddings.simple_hash_embedding_generator_adapter.SimpleHashEmbeddingGeneratorAdapter",
+      "ast_indexer.adapters.embeddings.sentence_transformers_embedding_generator_adapter.SentenceTransformersEmbeddingGeneratorAdapter",
+      "ast_indexer.adapters.embeddings.openai_embedding_generator_adapter.OpenAIEmbeddingGeneratorAdapter"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "build_persistent_observability_adapter",
+    "kind": "function",
+    "line": 54,
+    "signature": "def build_persistent_observability_adapter(state_root, backend, langfuse_host, langfuse_public_key, langfuse_secret_key, strict)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.jsonl_file_observability_adapter.JsonlFileObservabilityAdapter",
+      "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+      "os.getenv",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "build_index_service",
+    "kind": "function",
+    "line": 80,
+    "signature": "def build_index_service(workspace_root, embedding_backend, embedding_model, embedding_device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.adapters.vector_store.in_memory_vector_store_adapter.InMemoryVectorStoreAdapter",
+      "_build_embedding_generator",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "build_persistent_index_service",
+    "kind": "function",
+    "line": 114,
+    "signature": "def build_persistent_index_service(workspace_root, state_root, embedding_backend, embedding_model, embedding_device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions, observability_backend, langfuse_host, langfuse_public_key, langfuse_secret_key, observability_strict)",
+    "docstring": null,
+    "callees": [
+      "build_persistent_observability_adapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "ast_indexer.adapters.vector_store.json_file_vector_store_adapter.JsonFileVectorStoreAdapter",
+      "_build_embedding_generator",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "ExtractedFile",
+    "kind": "class",
+    "line": 10,
+    "signature": "class ExtractedFile",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "ImportAliases",
+    "kind": "class",
+    "line": 16,
+    "signature": "class ImportAliases",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor",
+    "kind": "class",
+    "line": 20,
+    "signature": "class PythonAstSymbolExtractor",
+    "docstring": "Extract function/class symbols and direct call graph edges from Python source.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor.extract",
+    "kind": "method",
+    "line": 23,
+    "signature": "def PythonAstSymbolExtractor.extract(self, repo, path, source)",
+    "docstring": null,
+    "callees": [
+      "ast.parse",
+      "PythonAstSymbolExtractor._collect_import_aliases",
+      "ExtractedFile",
+      "isinstance",
+      "append",
+      "PythonAstSymbolExtractor._function_symbol",
+      "PythonAstSymbolExtractor._async_function_symbol",
+      "PythonAstSymbolExtractor._class_symbol",
+      "PythonAstSymbolExtractor._method_symbol"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._function_symbol",
+    "kind": "method",
+    "line": 62,
+    "signature": "def PythonAstSymbolExtractor._function_symbol(self, repo, path, node, import_aliases)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "PythonAstSymbolExtractor._build_signature",
+      "ast.get_docstring",
+      "PythonAstSymbolExtractor._collect_callees"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "kind": "method",
+    "line": 74,
+    "signature": "def PythonAstSymbolExtractor._async_function_symbol(self, repo, path, node, import_aliases)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "ast.get_docstring",
+      "PythonAstSymbolExtractor._collect_callees",
+      "PythonAstSymbolExtractor._build_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._class_symbol",
+    "kind": "method",
+    "line": 92,
+    "signature": "def PythonAstSymbolExtractor._class_symbol(self, repo, path, node)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "ast.get_docstring"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._method_symbol",
+    "kind": "method",
+    "line": 104,
+    "signature": "def PythonAstSymbolExtractor._method_symbol(self, repo, path, class_name, node, is_async, import_aliases)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "ast.get_docstring",
+      "PythonAstSymbolExtractor._collect_callees",
+      "PythonAstSymbolExtractor._build_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._build_signature",
+    "kind": "method",
+    "line": 128,
+    "signature": "def PythonAstSymbolExtractor._build_signature(self, name, args)",
+    "docstring": null,
+    "callees": [
+      "join"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "kind": "method",
+    "line": 132,
+    "signature": "def PythonAstSymbolExtractor._collect_import_aliases(self, tree)",
+    "docstring": null,
+    "callees": [
+      "ImportAliases",
+      "isinstance",
+      "split"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._collect_callees",
+    "kind": "method",
+    "line": 149,
+    "signature": "def PythonAstSymbolExtractor._collect_callees(self, node, import_aliases, class_name)",
+    "docstring": null,
+    "callees": [
+      "ast.walk",
+      "tuple",
+      "isinstance",
+      "fromkeys",
+      "append",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/embedding_generator.py",
+    "symbol": "EmbeddingGeneratorPort",
+    "kind": "class",
+    "line": 6,
+    "signature": "class EmbeddingGeneratorPort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/embedding_generator.py",
+    "symbol": "EmbeddingGeneratorPort.embed",
+    "kind": "method",
+    "line": 7,
+    "signature": "def EmbeddingGeneratorPort.embed(self, texts)",
+    "docstring": "Generate embedding vectors for a list of texts.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_job_queue.py",
+    "symbol": "IndexJobQueuePort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class IndexJobQueuePort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_job_queue.py",
+    "symbol": "IndexJobQueuePort.enqueue",
+    "kind": "method",
+    "line": 9,
+    "signature": "def IndexJobQueuePort.enqueue(self, job)",
+    "docstring": "Push a new index job onto the queue.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_job_queue.py",
+    "symbol": "IndexJobQueuePort.dequeue",
+    "kind": "method",
+    "line": 12,
+    "signature": "def IndexJobQueuePort.dequeue(self)",
+    "docstring": "Pop the next index job or None when queue is empty.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_job_queue.py",
+    "symbol": "IndexJobQueuePort.enqueue_dead_letter",
+    "kind": "method",
+    "line": 15,
+    "signature": "def IndexJobQueuePort.enqueue_dead_letter(self, entry)",
+    "docstring": "Move a permanently failed job to dead-letter storage.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class IndexStorePort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.upsert_symbols",
+    "kind": "method",
+    "line": 9,
+    "signature": "def IndexStorePort.upsert_symbols(self, symbols)",
+    "docstring": "Insert or update symbol records.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 12,
+    "signature": "def IndexStorePort.delete_symbols_for_paths(self, repo, paths)",
+    "docstring": "Delete symbols for repo-scoped file paths and return number removed.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.list_symbols",
+    "kind": "method",
+    "line": 15,
+    "signature": "def IndexStorePort.list_symbols(self)",
+    "docstring": "Return currently stored symbols.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenRecord",
+    "kind": "class",
+    "line": 9,
+    "signature": "class OAuthTokenRecord",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort",
+    "kind": "class",
+    "line": 17,
+    "signature": "class OAuthTokenStorePort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort.save",
+    "kind": "method",
+    "line": 18,
+    "signature": "def OAuthTokenStorePort.save(self, token)",
+    "docstring": "Persist oauth token record.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort.get",
+    "kind": "method",
+    "line": 21,
+    "signature": "def OAuthTokenStorePort.get(self, user_id)",
+    "docstring": "Fetch oauth token for user if available.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort.list_user_ids",
+    "kind": "method",
+    "line": 24,
+    "signature": "def OAuthTokenStorePort.list_user_ids(self)",
+    "docstring": "Return all known user ids for status/diagnostics.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class ObservabilityPort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.start_span",
+    "kind": "method",
+    "line": 9,
+    "signature": "def ObservabilityPort.start_span(self, name, trace_id, input_payload, session_id, user_id)",
+    "docstring": "Start and register a span.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.end_span",
+    "kind": "method",
+    "line": 19,
+    "signature": "def ObservabilityPort.end_span(self, span, output_payload, metadata)",
+    "docstring": "Finish and persist span details.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.list_spans",
+    "kind": "method",
+    "line": 22,
+    "signature": "def ObservabilityPort.list_spans(self)",
+    "docstring": "Return all captured spans in insertion order.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryFile",
+    "kind": "class",
+    "line": 8,
+    "signature": "class RepositoryFile",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort",
+    "kind": "class",
+    "line": 14,
+    "signature": "class RepositoryReaderPort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort.list_python_files",
+    "kind": "method",
+    "line": 15,
+    "signature": "def RepositoryReaderPort.list_python_files(self, repo)",
+    "docstring": "List python file paths for the given repository root.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort.read_python_file",
+    "kind": "method",
+    "line": 18,
+    "signature": "def RepositoryReaderPort.read_python_file(self, repo, path)",
+    "docstring": "Read a python file from repository root and return content.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/vector_store.py",
+    "symbol": "VectorStorePort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class VectorStorePort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/vector_store.py",
+    "symbol": "VectorStorePort.upsert_vectors",
+    "kind": "method",
+    "line": 9,
+    "signature": "def VectorStorePort.upsert_vectors(self, vectors)",
+    "docstring": "Insert or update vector records for symbols.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/vector_store.py",
+    "symbol": "VectorStorePort.delete_vectors_for_paths",
+    "kind": "method",
+    "line": 12,
+    "signature": "def VectorStorePort.delete_vectors_for_paths(self, repo, paths)",
+    "docstring": "Delete vectors for repo-scoped file paths and return number removed.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/vector_store.py",
+    "symbol": "VectorStorePort.list_vectors",
+    "kind": "method",
+    "line": 15,
+    "signature": "def VectorStorePort.list_vectors(self)",
+    "docstring": "Return currently stored vectors.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/webhook_signature_verifier.py",
+    "symbol": "WebhookSignatureVerifierPort",
+    "kind": "class",
+    "line": 6,
+    "signature": "class WebhookSignatureVerifierPort",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/webhook_signature_verifier.py",
+    "symbol": "WebhookSignatureVerifierPort.verify",
+    "kind": "method",
+    "line": 7,
+    "signature": "def WebhookSignatureVerifierPort.verify(self, body, signature_header)",
+    "docstring": "Return True when webhook signature is valid for the request body.",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp",
+    "kind": "class",
+    "line": 31,
+    "signature": "class GithubWebhookServerApp",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.__init__",
+    "kind": "method",
+    "line": 32,
+    "signature": "def GithubWebhookServerApp.__init__(self, workspace_root, state_root, webhook_secret, queue_backend, redis_url, redis_key, redis_dead_letter_key, max_attempts, embedding_backend, embedding_model, embedding_device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions, observability_backend, langfuse_host, langfuse_public_key, langfuse_secret_key, observability_strict, queue, github_app_auth_service)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.main.build_persistent_observability_adapter",
+      "GithubWebhookServerApp._build_oauth_token_store",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "ast_indexer.adapters.access.json_file_repo_capability_store_adapter.JsonFileRepoCapabilityStoreAdapter",
+      "ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter.JsonFileWebhookReplayGuardAdapter",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter",
+      "ast_indexer.application.github_webhook_http_handler.GithubWebhookHttpHandler",
+      "ast_indexer.application.index_job_worker_service.IndexJobWorkerService",
+      "_build_queue",
+      "GithubWebhookServerApp._build_github_app_auth_service",
+      "ast_indexer.main.build_persistent_index_service"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp._build_oauth_token_store",
+    "kind": "method",
+    "line": 116,
+    "signature": "def GithubWebhookServerApp._build_oauth_token_store(self, state_root)",
+    "docstring": null,
+    "callees": [
+      "os.getenv",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "pathlib.Path",
+      "ast_indexer.adapters.oauth.encrypted_file_oauth_token_store_adapter.EncryptedFileOAuthTokenStoreAdapter",
+      "is_absolute"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp._build_github_app_auth_service",
+    "kind": "method",
+    "line": 128,
+    "signature": "def GithubWebhookServerApp._build_github_app_auth_service(self)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.application.github_app_auth_service.GithubAppConfig.from_env",
+      "missing_fields",
+      "ast_indexer.application.github_app_auth_service.GithubAppAuthService"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_auth_status",
+    "kind": "method",
+    "line": 138,
+    "signature": "def GithubWebhookServerApp.github_auth_status(self)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.application.github_app_auth_service.GithubAppConfig.from_env",
+      "missing_fields",
+      "len",
+      "list_user_ids"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_auth_start",
+    "kind": "method",
+    "line": 152,
+    "signature": "def GithubWebhookServerApp.github_auth_start(self, state, redirect_uri)",
+    "docstring": null,
+    "callees": [
+      "GithubWebhookServerApp.github_auth_status",
+      "build_oauth_start_url"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_auth_callback",
+    "kind": "method",
+    "line": 176,
+    "signature": "def GithubWebhookServerApp.github_auth_callback(self, code, state, redirect_uri)",
+    "docstring": null,
+    "callees": [
+      "exchange_oauth_code",
+      "GithubWebhookServerApp.github_auth_status",
+      "isoformat",
+      "list",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_installation_token",
+    "kind": "method",
+    "line": 204,
+    "signature": "def GithubWebhookServerApp.github_installation_token(self, installation_id, owner, repo, operation)",
+    "docstring": null,
+    "callees": [
+      "create_installation_access_token",
+      "get",
+      "GithubWebhookServerApp.github_auth_status",
+      "uuid.uuid4",
+      "upsert",
+      "resolve_installation_id_for_repo",
+      "isinstance",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_repo_access",
+    "kind": "method",
+    "line": 292,
+    "signature": "def GithubWebhookServerApp.github_repo_access(self, owner, repo)",
+    "docstring": null,
+    "callees": [
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.github_register_webhook",
+    "kind": "method",
+    "line": 306,
+    "signature": "def GithubWebhookServerApp.github_register_webhook(self, owner, repo, webhook_url)",
+    "docstring": null,
+    "callees": [
+      "ensure_repository_webhook",
+      "GithubWebhookServerApp.github_auth_status",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.handle_github_webhook",
+    "kind": "method",
+    "line": 327,
+    "signature": "def GithubWebhookServerApp.handle_github_webhook(self, headers, body)",
+    "docstring": null,
+    "callees": [
+      "handle",
+      "str",
+      "start_span",
+      "process_next",
+      "dict",
+      "end_span",
+      "ast_indexer.application.github_webhook_http_handler.WebhookHttpResponse",
+      "get",
+      "update"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "GithubWebhookServerApp.readiness",
+    "kind": "method",
+    "line": 393,
+    "signature": "def GithubWebhookServerApp.readiness(self)",
+    "docstring": null,
+    "callees": [
+      "getattr",
+      "callable",
+      "all",
+      "bool",
+      "values",
+      "hasattr",
+      "check_health",
+      "ping"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "_build_queue",
+    "kind": "function",
+    "line": 421,
+    "signature": "def _build_queue(backend, redis_url, redis_key, redis_dead_letter_key)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.redis_index_job_queue_adapter.RedisIndexJobQueueAdapter.from_url",
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ValueError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "_make_handler",
+    "kind": "function",
+    "line": 439,
+    "signature": "def _make_handler(app)",
+    "docstring": null,
+    "callees": [
+      "urllib.parse.urlparse",
+      "int",
+      "read",
+      "handle_github_webhook",
+      "dict",
+      "setdefault",
+      "_send_json",
+      "encode",
+      "send_response",
+      "send_header",
+      "items",
+      "end_headers",
+      "write",
+      "get",
+      "readiness",
+      "github_auth_status",
+      "urllib.parse.parse_qs",
+      "github_auth_start",
+      "github_repo_access",
+      "str",
+      "github_installation_token",
+      "github_register_webhook",
+      "github_auth_callback",
+      "json.dumps",
+      "len",
+      "json.loads",
+      "isinstance",
+      "strip",
+      "decode",
+      "uuid.uuid4",
+      "isdigit"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "run_webhook_server",
+    "kind": "function",
+    "line": 572,
+    "signature": "def run_webhook_server(workspace_root, state_root, webhook_secret, host, port, queue_backend, redis_url, redis_key, redis_dead_letter_key, max_attempts, embedding_backend, embedding_model, embedding_device, normalize_embeddings, openai_api_key, openai_base_url, openai_dimensions, observability_backend, langfuse_host, langfuse_public_key, langfuse_secret_key, observability_strict)",
+    "docstring": null,
+    "callees": [
+      "GithubWebhookServerApp",
+      "http.server.ThreadingHTTPServer",
+      "_make_handler",
+      "serve_forever",
+      "server_close"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/server.py",
+    "symbol": "main",
+    "kind": "function",
+    "line": 625,
+    "signature": "def main(argv)",
+    "docstring": null,
+    "callees": [
+      "argparse.ArgumentParser",
+      "add_argument",
+      "parse_args",
+      "run_webhook_server"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_call_graph_linker.py",
+    "symbol": "test_links_cross_file_calls_using_module_qualified_callee",
+    "kind": "function",
+    "line": 5,
+    "signature": "def test_links_cross_file_calls_using_module_qualified_callee()",
+    "docstring": null,
+    "callees": [
+      "link",
+      "ast_indexer.domain.models.SymbolRecord",
+      "len",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_call_graph_linker.py",
+    "symbol": "test_reports_unresolved_edges_and_resolution_rate",
+    "kind": "function",
+    "line": 34,
+    "signature": "def test_reports_unresolved_edges_and_resolution_rate()",
+    "docstring": null,
+    "callees": [
+      "link_report",
+      "ast_indexer.domain.models.SymbolRecord",
+      "len",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_call_graph_linker.py",
+    "symbol": "test_builtin_and_dynamic_calls_are_non_actionable",
+    "kind": "function",
+    "line": 66,
+    "signature": "def test_builtin_and_dynamic_calls_are_non_actionable()",
+    "docstring": null,
+    "callees": [
+      "link_report",
+      "ast_indexer.domain.models.SymbolRecord",
+      "len",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_cli_mvp.py",
+    "symbol": "test_cli_index_command_creates_persistent_artifacts",
+    "kind": "function",
+    "line": 7,
+    "signature": "def test_cli_index_command_creates_persistent_artifacts(tmp_path, capsys)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.cli.main",
+      "readouterr",
+      "json.loads",
+      "exists",
+      "splitlines",
+      "read_text",
+      "len",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_cli_mvp.py",
+    "symbol": "test_cli_index_command_is_incremental_across_runs",
+    "kind": "function",
+    "line": 89,
+    "signature": "def test_cli_index_command_is_incremental_across_runs(tmp_path, capsys)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.cli.main",
+      "readouterr",
+      "unlink",
+      "json.loads",
+      "read_text",
+      "len",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "test_encrypted_store_round_trip",
+    "kind": "function",
+    "line": 10,
+    "signature": "def test_encrypted_store_round_trip(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "pytest.importorskip",
+      "decode",
+      "ast_indexer.adapters.oauth.encrypted_file_oauth_token_store_adapter.EncryptedFileOAuthTokenStoreAdapter",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "save",
+      "get",
+      "read_text",
+      "generate_key",
+      "datetime.datetime.now",
+      "datetime.timedelta"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_encrypted_file_oauth_token_store_adapter.py",
+    "symbol": "test_encrypted_store_rejects_wrong_key",
+    "kind": "function",
+    "line": 35,
+    "signature": "def test_encrypted_store_rejects_wrong_key(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "pytest.importorskip",
+      "decode",
+      "ast_indexer.adapters.oauth.encrypted_file_oauth_token_store_adapter.EncryptedFileOAuthTokenStoreAdapter",
+      "save",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "pytest.raises",
+      "get",
+      "generate_key",
+      "datetime.datetime.now",
+      "datetime.timedelta"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_api_repository_reader_adapter.py",
+    "symbol": "test_list_python_files_filters_blob_python_paths",
+    "kind": "function",
+    "line": 6,
+    "signature": "def test_list_python_files_filters_blob_python_paths()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.repository.github_api_repository_reader_adapter.GithubApiRepositoryReaderAdapter",
+      "list_python_files"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_api_repository_reader_adapter.py",
+    "symbol": "test_read_python_file_returns_downloaded_plain_text_content",
+    "kind": "function",
+    "line": 26,
+    "signature": "def test_read_python_file_returns_downloaded_plain_text_content()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.repository.github_api_repository_reader_adapter.GithubApiRepositoryReaderAdapter",
+      "read_python_file",
+      "append",
+      "AssertionError",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_api_repository_reader_adapter.py",
+    "symbol": "test_read_python_file_requires_download_url",
+    "kind": "function",
+    "line": 46,
+    "signature": "def test_read_python_file_requires_download_url()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.repository.github_api_repository_reader_adapter.GithubApiRepositoryReaderAdapter",
+      "AssertionError",
+      "read_python_file",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_auth_service.py",
+    "symbol": "test_github_app_config_detects_missing_fields",
+    "kind": "function",
+    "line": 11,
+    "signature": "def test_github_app_config_detects_missing_fields(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.application.github_app_auth_service.GithubAppConfig",
+      "missing_fields"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_auth_service.py",
+    "symbol": "test_build_oauth_start_url_contains_expected_query_values",
+    "kind": "function",
+    "line": 27,
+    "signature": "def test_build_oauth_start_url_contains_expected_query_values(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "ast_indexer.application.github_app_auth_service.GithubAppConfig",
+      "ast_indexer.application.github_app_auth_service.GithubAppAuthService",
+      "build_oauth_start_url",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_auth_service.py",
+    "symbol": "test_exchange_oauth_code_saves_token_for_user",
+    "kind": "function",
+    "line": 50,
+    "signature": "def test_exchange_oauth_code_saves_token_for_user(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "ast_indexer.application.github_app_auth_service.GithubAppAuthService",
+      "exchange_oauth_code",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "endswith",
+      "AssertionError",
+      "get",
+      "ast_indexer.application.github_app_auth_service.GithubAppConfig"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService",
+    "kind": "class",
+    "line": 10,
+    "signature": "class _FakeGithubAppAuthService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def _FakeGithubAppAuthService.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService.build_oauth_start_url",
+    "kind": "method",
+    "line": 14,
+    "signature": "def _FakeGithubAppAuthService.build_oauth_start_url(self, state, redirect_uri)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService.exchange_oauth_code",
+    "kind": "method",
+    "line": 18,
+    "signature": "def _FakeGithubAppAuthService.exchange_oauth_code(self, trace_id, code, state, redirect_uri)",
+    "docstring": null,
+    "callees": [
+      "_Token",
+      "_Date",
+      "_expires_at_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService.resolve_installation_id_for_repo",
+    "kind": "method",
+    "line": 39,
+    "signature": "def _FakeGithubAppAuthService.resolve_installation_id_for_repo(self, trace_id, owner, repo)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_FakeGithubAppAuthService.create_installation_access_token",
+    "kind": "method",
+    "line": 43,
+    "signature": "def _FakeGithubAppAuthService.create_installation_access_token(self, trace_id, installation_id)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "_build_app",
+    "kind": "function",
+    "line": 54,
+    "signature": "def _build_app(tmp_path, auth_service)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "test_github_auth_start_returns_503_when_env_not_configured",
+    "kind": "function",
+    "line": 65,
+    "signature": "def test_github_auth_start_returns_503_when_env_not_configured(tmp_path, monkeypatch)",
+    "docstring": null,
+    "callees": [
+      "delenv",
+      "_build_app",
+      "github_auth_start"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_app_server_auth.py",
+    "symbol": "test_github_auth_flows_use_injected_service",
+    "kind": "function",
+    "line": 80,
+    "signature": "def test_github_auth_flows_use_injected_service(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "_FakeGithubAppAuthService",
+      "_build_app",
+      "github_auth_start",
+      "github_auth_callback",
+      "github_installation_token"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "_signature",
+    "kind": "function",
+    "line": 13,
+    "signature": "def _signature(secret, body)",
+    "docstring": null,
+    "callees": [
+      "hexdigest",
+      "hmac.new",
+      "encode"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "test_signature_verifier_validates_expected_signature",
+    "kind": "function",
+    "line": 17,
+    "signature": "def test_signature_verifier_validates_expected_signature()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter",
+      "_signature",
+      "verify"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "test_http_handler_queues_push_event_when_signature_is_valid",
+    "kind": "function",
+    "line": 26,
+    "signature": "def test_http_handler_queues_push_event_when_signature_is_valid()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "ast_indexer.application.github_webhook_http_handler.GithubWebhookHttpHandler",
+      "encode",
+      "handle",
+      "dequeue",
+      "_signature",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "test_http_handler_ignores_duplicate_delivery_id_when_replay_guard_is_enabled",
+    "kind": "function",
+    "line": 64,
+    "signature": "def test_http_handler_ignores_duplicate_delivery_id_when_replay_guard_is_enabled()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "ast_indexer.application.github_webhook_http_handler.GithubWebhookHttpHandler",
+      "encode",
+      "handle",
+      "_signature",
+      "set",
+      "add",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter",
+      "_ReplayGuard",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "test_http_handler_rejects_invalid_signature",
+    "kind": "function",
+    "line": 105,
+    "signature": "def test_http_handler_rejects_invalid_signature()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "ast_indexer.application.github_webhook_http_handler.GithubWebhookHttpHandler",
+      "handle",
+      "dequeue",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_github_webhook_http_handler.py",
+    "symbol": "test_http_handler_ignores_non_push_event",
+    "kind": "function",
+    "line": 132,
+    "signature": "def test_http_handler_ignores_non_push_event()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "ast_indexer.application.github_webhook_http_handler.GithubWebhookHttpHandler",
+      "handle",
+      "dequeue",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter.HmacGithubSignatureVerifierAdapter",
+      "_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_index_python_repository_service.py",
+    "symbol": "test_index_repository_collects_symbols_and_emits_spans",
+    "kind": "function",
+    "line": 12,
+    "signature": "def test_index_repository_collects_symbols_and_emits_spans(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.adapters.vector_store.in_memory_vector_store_adapter.InMemoryVectorStoreAdapter",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService",
+      "index_repository",
+      "list_vectors",
+      "list_spans",
+      "len",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.adapters.embeddings.simple_hash_embedding_generator_adapter.SimpleHashEmbeddingGeneratorAdapter",
+      "list_symbols"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_index_python_repository_service.py",
+    "symbol": "test_index_repository_subset_prunes_deleted_paths",
+    "kind": "function",
+    "line": 57,
+    "signature": "def test_index_repository_subset_prunes_deleted_paths(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.adapters.vector_store.in_memory_vector_store_adapter.InMemoryVectorStoreAdapter",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService",
+      "index_repository",
+      "index_repository_subset",
+      "list_symbols",
+      "list_vectors",
+      "len",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.adapters.embeddings.simple_hash_embedding_generator_adapter.SimpleHashEmbeddingGeneratorAdapter"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeLiveSpan",
+    "kind": "class",
+    "line": 6,
+    "signature": "class _FakeLiveSpan",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeLiveSpan.__init__",
+    "kind": "method",
+    "line": 7,
+    "signature": "def _FakeLiveSpan.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeLiveSpan.update",
+    "kind": "method",
+    "line": 12,
+    "signature": "def _FakeLiveSpan.update(self, output, metadata)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeLiveSpan.end",
+    "kind": "method",
+    "line": 16,
+    "signature": "def _FakeLiveSpan.end(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeClient",
+    "kind": "class",
+    "line": 20,
+    "signature": "class _FakeClient",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeClient.__init__",
+    "kind": "method",
+    "line": 21,
+    "signature": "def _FakeClient.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeClient.start_observation",
+    "kind": "method",
+    "line": 28,
+    "signature": "def _FakeClient.start_observation(self)",
+    "docstring": null,
+    "callees": [
+      "_FakeLiveSpan",
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "_FakeClient.flush",
+    "kind": "method",
+    "line": 36,
+    "signature": "def _FakeClient.flush(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "test_langfuse_adapter_creates_and_finishes_remote_span",
+    "kind": "function",
+    "line": 40,
+    "signature": "def test_langfuse_adapter_creates_and_finishes_remote_span()",
+    "docstring": null,
+    "callees": [
+      "_FakeClient",
+      "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+      "start_span",
+      "end_span",
+      "isinstance",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "test_langfuse_adapter_health_check_uses_flush",
+    "kind": "function",
+    "line": 72,
+    "signature": "def test_langfuse_adapter_health_check_uses_flush()",
+    "docstring": null,
+    "callees": [
+      "_FakeClient",
+      "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+      "check_health"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "test_langfuse_adapter_strict_mode_raises_on_start_failure",
+    "kind": "function",
+    "line": 85,
+    "signature": "def test_langfuse_adapter_strict_mode_raises_on_start_failure()",
+    "docstring": null,
+    "callees": [
+      "_FakeClient",
+      "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+      "start_span",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_local_fs_repository_reader_adapter.py",
+    "symbol": "test_list_python_files_uses_gitignore_patterns",
+    "kind": "function",
+    "line": 6,
+    "signature": "def test_list_python_files_uses_gitignore_patterns(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "list_python_files"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_local_fs_repository_reader_adapter.py",
+    "symbol": "test_list_python_files_always_excludes_venv_and_pycache",
+    "kind": "function",
+    "line": 20,
+    "signature": "def test_list_python_files_always_excludes_venv_and_pycache(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "list_python_files"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_oauth_session_service.py",
+    "symbol": "test_save_and_get_valid_token",
+    "kind": "function",
+    "line": 9,
+    "signature": "def test_save_and_get_valid_token()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "save_token",
+      "get_valid_token"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_oauth_session_service.py",
+    "symbol": "test_expired_token_returns_none",
+    "kind": "function",
+    "line": 26,
+    "signature": "def test_expired_token_returns_none()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "save",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "get_valid_token",
+      "datetime.datetime"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_openai_embedding_generator_adapter.py",
+    "symbol": "_FakeEmbeddingsApi",
+    "kind": "class",
+    "line": 8,
+    "signature": "class _FakeEmbeddingsApi",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_openai_embedding_generator_adapter.py",
+    "symbol": "_FakeEmbeddingsApi.create",
+    "kind": "method",
+    "line": 9,
+    "signature": "def _FakeEmbeddingsApi.create(self)",
+    "docstring": null,
+    "callees": [
+      "types.SimpleNamespace"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_openai_embedding_generator_adapter.py",
+    "symbol": "_FakeOpenAI",
+    "kind": "class",
+    "line": 15,
+    "signature": "class _FakeOpenAI",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_openai_embedding_generator_adapter.py",
+    "symbol": "_FakeOpenAI.__init__",
+    "kind": "method",
+    "line": 18,
+    "signature": "def _FakeOpenAI.__init__(self, api_key, base_url)",
+    "docstring": null,
+    "callees": [
+      "_FakeEmbeddingsApi"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_openai_embedding_generator_adapter.py",
+    "symbol": "test_blank_base_url_is_normalized",
+    "kind": "function",
+    "line": 23,
+    "signature": "def test_blank_base_url_is_normalized(monkeypatch)",
+    "docstring": null,
+    "callees": [
+      "types.SimpleNamespace",
+      "setitem",
+      "ast_indexer.adapters.embeddings.openai_embedding_generator_adapter.OpenAIEmbeddingGeneratorAdapter",
+      "embed",
+      "__import__"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_symbol_store_persists_and_reloads",
+    "kind": "function",
+    "line": 11,
+    "signature": "def test_json_file_symbol_store_persists_and_reloads(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "upsert_symbols",
+      "exists",
+      "list_symbols",
+      "len",
+      "ast_indexer.domain.models.SymbolRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_jsonl_observability_writes_completed_span",
+    "kind": "function",
+    "line": 38,
+    "signature": "def test_jsonl_observability_writes_completed_span(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.jsonl_file_observability_adapter.JsonlFileObservabilityAdapter",
+      "start_span",
+      "end_span",
+      "exists",
+      "splitlines",
+      "len",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_symbol_store_deletes_paths_and_persists",
+    "kind": "function",
+    "line": 52,
+    "signature": "def test_json_file_symbol_store_deletes_paths_and_persists(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "upsert_symbols",
+      "delete_symbols_for_paths",
+      "list_symbols",
+      "len",
+      "ast_indexer.domain.models.SymbolRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_vector_store_persists_and_reloads",
+    "kind": "function",
+    "line": 88,
+    "signature": "def test_json_file_vector_store_persists_and_reloads(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.vector_store.json_file_vector_store_adapter.JsonFileVectorStoreAdapter",
+      "upsert_vectors",
+      "exists",
+      "list_vectors",
+      "len",
+      "ast_indexer.domain.models.VectorRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_vector_store_deletes_paths_and_persists",
+    "kind": "function",
+    "line": 118,
+    "signature": "def test_json_file_vector_store_deletes_paths_and_persists(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.vector_store.json_file_vector_store_adapter.JsonFileVectorStoreAdapter",
+      "upsert_vectors",
+      "delete_vectors_for_paths",
+      "list_vectors",
+      "len",
+      "ast_indexer.domain.models.VectorRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_repo_capability_store_persists_and_normalizes_lookup_key",
+    "kind": "function",
+    "line": 160,
+    "signature": "def test_repo_capability_store_persists_and_normalizes_lookup_key(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.access.json_file_repo_capability_store_adapter.JsonFileRepoCapabilityStoreAdapter",
+      "upsert",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_webhook_replay_guard_marks_duplicate_delivery_ids",
+    "kind": "function",
+    "line": 179,
+    "signature": "def test_webhook_replay_guard_marks_duplicate_delivery_ids(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter.JsonFileWebhookReplayGuardAdapter",
+      "seen_before_then_mark"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_python_ast_symbol_extractor.py",
+    "symbol": "test_extracts_functions_classes_methods_and_callees",
+    "kind": "function",
+    "line": 4,
+    "signature": "def test_extracts_functions_classes_methods_and_callees()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "extract",
+      "next"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_python_ast_symbol_extractor.py",
+    "symbol": "test_resolves_import_aliases_and_self_method_calls",
+    "kind": "function",
+    "line": 31,
+    "signature": "def test_resolves_import_aliases_and_self_method_calls()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "extract",
+      "next"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "_FakeRedisClient",
+    "kind": "class",
+    "line": 9,
+    "signature": "class _FakeRedisClient",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "_FakeRedisClient.__init__",
+    "kind": "method",
+    "line": 10,
+    "signature": "def _FakeRedisClient.__init__(self)",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "_FakeRedisClient.rpush",
+    "kind": "method",
+    "line": 13,
+    "signature": "def _FakeRedisClient.rpush(self, key, value)",
+    "docstring": null,
+    "callees": [
+      "append",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "_FakeRedisClient.lpop",
+    "kind": "method",
+    "line": 19,
+    "signature": "def _FakeRedisClient.lpop(self, key)",
+    "docstring": null,
+    "callees": [
+      "pop"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "_FakeRedisClient.list_entries",
+    "kind": "method",
+    "line": 24,
+    "signature": "def _FakeRedisClient.list_entries(self, key)",
+    "docstring": null,
+    "callees": [
+      "list",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "test_redis_queue_adapter_round_trip",
+    "kind": "function",
+    "line": 28,
+    "signature": "def test_redis_queue_adapter_round_trip()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.redis_index_job_queue_adapter.RedisIndexJobQueueAdapter",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "enqueue",
+      "dequeue",
+      "_FakeRedisClient"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "test_redis_queue_adapter_dequeue_empty",
+    "kind": "function",
+    "line": 47,
+    "signature": "def test_redis_queue_adapter_dequeue_empty()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.redis_index_job_queue_adapter.RedisIndexJobQueueAdapter",
+      "dequeue",
+      "_FakeRedisClient"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_redis_queue_adapter.py",
+    "symbol": "test_redis_queue_adapter_writes_dead_letter_payload",
+    "kind": "function",
+    "line": 52,
+    "signature": "def test_redis_queue_adapter_writes_dead_letter_payload()",
+    "docstring": null,
+    "callees": [
+      "_FakeRedisClient",
+      "ast_indexer.adapters.queue.redis_index_job_queue_adapter.RedisIndexJobQueueAdapter",
+      "enqueue_dead_letter",
+      "list_entries",
+      "json.loads",
+      "ast_indexer.domain.index_jobs.DeadLetterIndexJob",
+      "len",
+      "ast_indexer.domain.index_jobs.IndexJob"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "_signature",
+    "kind": "function",
+    "line": 14,
+    "signature": "def _signature(secret, body)",
+    "docstring": null,
+    "callees": [
+      "hexdigest",
+      "hmac.new",
+      "encode"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_handles_valid_push_and_processes_job",
+    "kind": "function",
+    "line": 18,
+    "signature": "def test_server_app_handles_valid_push_and_processes_job(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "encode",
+      "handle_github_webhook",
+      "json.dumps",
+      "_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_rejects_invalid_signature",
+    "kind": "function",
+    "line": 51,
+    "signature": "def test_server_app_rejects_invalid_signature(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "handle_github_webhook"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_requires_redis_url_for_redis_backend",
+    "kind": "function",
+    "line": 71,
+    "signature": "def test_server_app_requires_redis_url_for_redis_backend(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "pytest.raises",
+      "ast_indexer.server.GithubWebhookServerApp"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_uses_redis_queue_factory_when_requested",
+    "kind": "function",
+    "line": 84,
+    "signature": "def test_server_app_uses_redis_queue_factory_when_requested(tmp_path, monkeypatch)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "setattr",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "encode",
+      "handle_github_webhook",
+      "classmethod",
+      "json.dumps",
+      "_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_exposes_retry_outcome_and_logs_span",
+    "kind": "function",
+    "line": 139,
+    "signature": "def test_server_app_exposes_retry_outcome_and_logs_span(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "_FakeRetryWorker",
+      "encode",
+      "handle_github_webhook",
+      "json.loads",
+      "len",
+      "ast_indexer.application.index_job_worker_service.IndexJobProcessOutcome",
+      "json.dumps",
+      "splitlines",
+      "_signature",
+      "get",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_exposes_dead_letter_outcome",
+    "kind": "function",
+    "line": 190,
+    "signature": "def test_server_app_exposes_dead_letter_outcome(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "_FakeDeadLetterWorker",
+      "encode",
+      "handle_github_webhook",
+      "ast_indexer.application.index_job_worker_service.IndexJobProcessOutcome",
+      "json.dumps",
+      "_signature",
+      "ast_indexer.domain.index_jobs.IndexJob"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_readiness_reports_ready_for_memory_backend",
+    "kind": "function",
+    "line": 235,
+    "signature": "def test_server_app_readiness_reports_ready_for_memory_backend(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "readiness"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_server_runtime.py",
+    "symbol": "test_server_app_readiness_reports_not_ready_when_redis_ping_fails",
+    "kind": "function",
+    "line": 251,
+    "signature": "def test_server_app_readiness_reports_not_ready_when_redis_ping_fails(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "ast_indexer.server.GithubWebhookServerApp",
+      "readiness",
+      "RuntimeError",
+      "_DownRedisClient",
+      "_QueueWithRedisClient"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_resolver_extracts_python_changes_and_deletions",
+    "kind": "function",
+    "line": 16,
+    "signature": "def test_resolver_extracts_python_changes_and_deletions()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver",
+      "resolve"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_dispatch_enqueues_job_from_push_payload",
+    "kind": "function",
+    "line": 36,
+    "signature": "def test_dispatch_enqueues_job_from_push_payload()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "enqueue_from_github_push",
+      "dequeue",
+      "list_spans",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_dispatch_applies_custom_max_attempts",
+    "kind": "function",
+    "line": 62,
+    "signature": "def test_dispatch_applies_custom_max_attempts()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "enqueue_from_github_push",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_dispatch_enriches_span_with_session_and_user_context",
+    "kind": "function",
+    "line": 76,
+    "signature": "def test_dispatch_enriches_span_with_session_and_user_context()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.application.index_job_dispatch_service.IndexJobDispatchService",
+      "enqueue_from_github_push_with_context",
+      "list_spans",
+      "ast_indexer.application.github_push_payload_resolver.GithubPushPayloadResolver"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_worker_processes_enqueued_job",
+    "kind": "function",
+    "line": 99,
+    "signature": "def test_worker_processes_enqueued_job(tmp_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "enqueue",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService",
+      "ast_indexer.application.index_job_worker_service.IndexJobWorkerService",
+      "process_next",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "len",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "list_symbols"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "_AlwaysFailIndexService",
+    "kind": "class",
+    "line": 140,
+    "signature": "class _AlwaysFailIndexService",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "_AlwaysFailIndexService.index_repository_subset",
+    "kind": "method",
+    "line": 141,
+    "signature": "def _AlwaysFailIndexService.index_repository_subset(self)",
+    "docstring": null,
+    "callees": [
+      "RuntimeError"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_webhook_index_jobs.py",
+    "symbol": "test_worker_requeues_job_until_max_attempts_then_dead_letters",
+    "kind": "function",
+    "line": 145,
+    "signature": "def test_worker_requeues_job_until_max_attempts_then_dead_letters()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.queue.in_memory_index_job_queue_adapter.InMemoryIndexJobQueueAdapter",
+      "enqueue",
+      "ast_indexer.application.index_job_worker_service.IndexJobWorkerService",
+      "process_next",
+      "dequeue",
+      "list_dead_letters",
+      "ast_indexer.domain.index_jobs.IndexJob",
+      "_AlwaysFailIndexService",
+      "len"
+    ]
+  }
+]

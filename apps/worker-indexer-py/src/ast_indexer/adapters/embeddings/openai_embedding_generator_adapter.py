@@ -27,7 +27,8 @@ class OpenAIEmbeddingGeneratorAdapter(EmbeddingGeneratorPort):
         if not resolved_api_key:
             raise RuntimeError('OPENAI_API_KEY is required for embedding-backend=openai')
 
-        self._client = OpenAI(api_key=resolved_api_key, base_url=base_url)
+        resolved_base_url = base_url.strip() if isinstance(base_url, str) else None
+        self._client = OpenAI(api_key=resolved_api_key, base_url=resolved_base_url or None)
         self._model_name = model_name
         self._dimensions = dimensions
 

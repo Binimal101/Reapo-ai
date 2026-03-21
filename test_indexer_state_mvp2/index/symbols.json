@@ -1,0 +1,81 @@
+[
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class JsonFileRepoCapabilityStoreAdapter",
+    "docstring": null,
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.__init__(self, file_path)",
+    "docstring": null,
+    "callees": [
+      "mkdir",
+      "JsonFileRepoCapabilityStoreAdapter._load"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.upsert",
+    "kind": "method",
+    "line": 15,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.upsert(self, owner, repo, installation_id, permissions, repository_selection)",
+    "docstring": null,
+    "callees": [
+      "lower",
+      "JsonFileRepoCapabilityStoreAdapter._persist",
+      "isoformat",
+      "datetime.datetime.now"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter.get",
+    "kind": "method",
+    "line": 27,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter.get(self, owner, repo)",
+    "docstring": null,
+    "callees": [
+      "get",
+      "lower"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter._load",
+    "kind": "method",
+    "line": 30,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter._load(self)",
+    "docstring": null,
+    "callees": [
+      "json.loads",
+      "isinstance",
+      "exists",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "symbol": "JsonFileRepoCapabilityStoreAdapter._persist",
+    "kind": "method",
+    "line": 37,
+    "signature": "def JsonFileRepoCapabilityStoreAdapter._persist(self)",
+    "docstring": null,
+    "callees": [
+      "write_text",
+      "json.dumps"
+    ]
+  }
+]

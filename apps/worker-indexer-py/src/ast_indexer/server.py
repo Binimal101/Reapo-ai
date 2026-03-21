@@ -12,9 +12,11 @@ from uuid import uuid4
 
 from ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter import InMemoryOAuthTokenStoreAdapter
 from ast_indexer.adapters.oauth.encrypted_file_oauth_token_store_adapter import EncryptedFileOAuthTokenStoreAdapter
+from ast_indexer.adapters.access.json_file_repo_capability_store_adapter import JsonFileRepoCapabilityStoreAdapter
 from ast_indexer.adapters.queue.in_memory_index_job_queue_adapter import InMemoryIndexJobQueueAdapter
 from ast_indexer.adapters.queue.redis_index_job_queue_adapter import RedisIndexJobQueueAdapter
 from ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter import HmacGithubSignatureVerifierAdapter
+from ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter import JsonFileWebhookReplayGuardAdapter
 from ast_indexer.application.github_app_auth_service import GithubAppAuthService, GithubAppConfig
 from ast_indexer.application.github_push_payload_resolver import GithubPushPayloadResolver
 from ast_indexer.application.github_webhook_http_handler import GithubWebhookHttpHandler, WebhookHttpResponse
@@ -74,6 +76,8 @@ class GithubWebhookServerApp:
             token_store=self._oauth_token_store,
             observability=observability,
         )
+        self._repo_capability_store = JsonFileRepoCapabilityStoreAdapter(state_root / 'auth' / 'repo_capabilities.json')
+        self._webhook_replay_guard = JsonFileWebhookReplayGuardAdapter(state_root / 'webhooks' / 'delivery_ids.json')
         resolver = GithubPushPayloadResolver()
         dispatch = IndexJobDispatchService(
             queue=run_queue,
@@ -83,7 +87,11 @@ class GithubWebhookServerApp:
         )
         verifier = HmacGithubSignatureVerifierAdapter(webhook_secret)
 
-        self._http_handler = GithubWebhookHttpHandler(verifier=verifier, dispatch=dispatch)
+        self._http_handler = GithubWebhookHttpHandler(
+            verifier=verifier,
+            dispatch=dispatch,
+            replay_guard=self._webhook_replay_guard,
+        )
         self._worker = IndexJobWorkerService(
             queue=run_queue,
             index_service=build_persistent_index_service(
@@ -137,7 +145,7 @@ class GithubWebhookServerApp:
                 'status': 'ok',
                 'configured': configured,
                 'missing_fields': missing_fields,
-                'oauth_tokens_cached': len(self._oauth_token_store._records),  # noqa: SLF001
+                'oauth_tokens_cached': len(self._oauth_token_store.list_user_ids()),
             },
         )
 
@@ -198,6 +206,7 @@ class GithubWebhookServerApp:
         installation_id: int | None = None,
         owner: str | None = None,
         repo: str | None = None,
+        operation: str = 'read',
     ) -> tuple[int, dict]:
         if self._github_app_auth is None:
             _, status = self.github_auth_status()
@@ -221,16 +230,53 @@ class GithubWebhookServerApp:
                         'reason': 'installation_id or owner/repo is required',
                     },
                 )
-            resolved_installation_id = self._github_app_auth.resolve_installation_id_for_repo(
-                trace_id=trace_id,
-                owner=owner,
-                repo=repo,
-            )
+            try:
+                resolved_installation_id = self._github_app_auth.resolve_installation_id_for_repo(
+                    trace_id=trace_id,
+                    owner=owner,
+                    repo=repo,
+                )
+            except RuntimeError as exc:
+                if 'HTTP 404' in str(exc):
+                    return (
+                        404,
+                        {
+                            'status': 'needs_installation',
+                            'owner': owner,
+                            'repo': repo,
+                            'operation': operation,
+                            'reason': 'github_app_not_installed_for_repo',
+                            'next_action': 'install_github_app_for_owner_or_repo',
+                        },
+                    )
+                raise
 
         token_payload = self._github_app_auth.create_installation_access_token(
             trace_id=trace_id,
             installation_id=resolved_installation_id,
         )
+        permissions = token_payload.get('permissions', {})
+        if operation == 'write':
+            contents_permission = permissions.get('contents') if isinstance(permissions, dict) else None
+            if contents_permission not in ('write', 'admin'):
+                return (
+                    403,
+                    {
+                        'status': 'error',
+                        'reason': 'insufficient_repo_permission',
+                        'required': 'contents:write',
+                        'actual': contents_permission or 'unknown',
+                    },
+                )
+
+        if owner and repo:
+            self._repo_capability_store.upsert(
+                owner=owner,
+                repo=repo,
+                installation_id=resolved_installation_id,
+                permissions=permissions if isinstance(permissions, dict) else {},
+                repository_selection=token_payload.get('repository_selection') if isinstance(token_payload.get('repository_selection'), str) else None,
+            )
         return (
             200,
             {
@@ -238,10 +284,45 @@ class GithubWebhookServerApp:
                 'installation_id': resolved_installation_id,
                 'expires_at': token_payload.get('expires_at'),
                 'token': token_payload.get('token'),
-                'permissions': token_payload.get('permissions', {}),
+                'permissions': permissions if isinstance(permissions, dict) else {},
                 'repository_selection': token_payload.get('repository_selection'),
             },
         )
+
+    def github_repo_access(self, owner: str, repo: str) -> tuple[int, dict]:
+        record = self._repo_capability_store.get(owner=owner, repo=repo)
+        if record is None:
+            return (
+                404,
+                {
+                    'status': 'error',
+                    'reason': 'access_record_not_found',
+                    'owner': owner,
+                    'repo': repo,
+                },
+            )
+        return (200, {'status': 'ok', 'record': record})
+
+    def github_register_webhook(self, owner: str, repo: str, webhook_url: str) -> tuple[int, dict]:
+        if self._github_app_auth is None:
+            _, status = self.github_auth_status()
+            return (
+                503,
+                {
+                    'status': 'error',
+                    'reason': 'github_app_not_configured',
+                    'missing_fields': status['missing_fields'],
+                },
+            )
+
+        result = self._github_app_auth.ensure_repository_webhook(
+            trace_id=uuid4().hex,
+            owner=owner,
+            repo=repo,
+            webhook_url=webhook_url,
+            events=('push',),
+        )
+        return (200, {'status': 'ok', **result})
 
     def handle_github_webhook(self, headers: dict[str, str], body: bytes) -> WebhookHttpResponse:
         response = self._http_handler.handle(headers=headers, body=body)
@@ -371,12 +452,35 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     installation_id = body.get('installation_id')
                     owner = body.get('owner')
                     repo = body.get('repo')
+                    operation = body.get('operation')
                     response_code, payload = app.github_installation_token(
                         installation_id=int(installation_id) if isinstance(installation_id, int | str) and str(installation_id).isdigit() else None,
                         owner=owner if isinstance(owner, str) else None,
                         repo=repo if isinstance(repo, str) else None,
+                        operation=operation if isinstance(operation, str) and operation in ('read', 'write') else 'read',
                     )
                     self._send_json(response_code, payload)
+                except Exception as exc:
+                    self._send_json(500, {'status': 'error', 'reason': str(exc)})
+                return
+
+            if parsed.path == '/auth/github/webhook/register':
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                owner = body.get('owner')
+                repo = body.get('repo')
+                webhook_url = body.get('webhook_url')
+                if not isinstance(owner, str) or not isinstance(repo, str) or not isinstance(webhook_url, str):
+                    self._send_json(400, {'status': 'error', 'reason': 'owner, repo, webhook_url are required'})
+                    return
+                try:
+                    code, payload = app.github_register_webhook(owner=owner, repo=repo, webhook_url=webhook_url)
+                    self._send_json(code, payload)
                 except Exception as exc:
                     self._send_json(500, {'status': 'error', 'reason': str(exc)})
                 return
@@ -436,6 +540,16 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     self._send_json(status_code, payload)
                 except Exception as exc:
                     self._send_json(500, {'status': 'error', 'reason': str(exc)})
+                return
+            if parsed.path == '/auth/github/access':
+                query = parse_qs(parsed.query)
+                owner = query.get('owner', [None])[0]
+                repo = query.get('repo', [None])[0]
+                if not isinstance(owner, str) or not isinstance(repo, str):
+                    self._send_json(400, {'status': 'error', 'reason': 'owner and repo are required'})
+                    return
+                code, payload = app.github_repo_access(owner=owner, repo=repo)
+                self._send_json(code, payload)
                 return
             self._send_json(404, {'status': 'error', 'reason': 'not_found'})
 

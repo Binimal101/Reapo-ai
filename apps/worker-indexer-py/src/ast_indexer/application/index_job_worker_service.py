@@ -39,6 +39,7 @@ class IndexJobWorkerService:
             if job.attempt + 1 < job.max_attempts:
                 retried_job = IndexJob(
                     repo=job.repo,
+                    repo_full_name=job.repo_full_name,
                     changed_paths=job.changed_paths,
                     deleted_paths=job.deleted_paths,
                     trace_id=job.trace_id,
