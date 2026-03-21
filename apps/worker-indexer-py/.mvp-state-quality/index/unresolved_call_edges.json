@@ -1915,6 +1915,14 @@
     "repo": "worker-indexer-py",
     "caller_path": "tests/test_index_python_repository_service.py",
     "caller_symbol": "test_index_repository_collects_symbols_and_emits_spans",
+    "callee": "isinstance",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_index_python_repository_service.py",
+    "caller_symbol": "test_index_repository_collects_symbols_and_emits_spans",
     "callee": "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
     "reason": "external_qualified_call",
     "actionable": false
@@ -2883,6 +2891,22 @@
     "repo": "worker-indexer-py",
     "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "setdefault",
+    "reason": "dynamic_attr_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "get",
+    "reason": "dynamic_attr_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
     "callee": "start_observation",
     "reason": "no_matching_symbol",
     "actionable": true
@@ -2923,6 +2947,14 @@
     "repo": "worker-indexer-py",
     "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "caller_symbol": "LangfuseObservabilityAdapter.end_span",
+    "callee": "get",
+    "reason": "dynamic_attr_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.end_span",
     "callee": "update",
     "reason": "dynamic_attr_call",
     "actionable": false
@@ -2950,6 +2982,14 @@
     "callee": "flush",
     "reason": "no_matching_symbol",
     "actionable": true
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.end_span",
+    "callee": "remove",
+    "reason": "dynamic_attr_call",
+    "actionable": false
   },
   {
     "repo": "worker-indexer-py",
@@ -4931,6 +4971,14 @@
     "repo": "worker-indexer-py",
     "caller_path": "src/ast_indexer/application/research_pipeline.py",
     "caller_symbol": "ResearchPipeline.run",
+    "callee": "start_span",
+    "reason": "no_matching_symbol",
+    "actionable": true
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
     "callee": "invoke",
     "reason": "no_matching_symbol",
     "actionable": true
@@ -4941,6 +4989,30 @@
     "caller_symbol": "ResearchPipeline.run",
     "callee": "get",
     "reason": "dynamic_attr_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "end_span",
+    "reason": "no_matching_symbol",
+    "actionable": true
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "list",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "len",
+    "reason": "builtin_call",
     "actionable": false
   },
   {
@@ -7563,7 +7635,23 @@
     "repo": "worker-indexer-py",
     "caller_path": "tests/test_langfuse_observability_adapter.py",
     "caller_symbol": "_FakeClient.start_observation",
+    "callee": "append",
+    "reason": "dynamic_attr_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "_FakeClient.start_observation",
     "callee": "RuntimeError",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "_FakeClient.start_observation",
+    "callee": "dict",
     "reason": "builtin_call",
     "actionable": false
   },
@@ -9411,6 +9499,54 @@
     "repo": "worker-indexer-py",
     "caller_path": "tests/test_webhook_index_jobs.py",
     "caller_symbol": "test_worker_requeues_job_until_max_attempts_then_dead_letters",
+    "callee": "len",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "_extract_live_observation_id",
+    "callee": "getattr",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "_extract_live_observation_id",
+    "callee": "isinstance",
+    "reason": "builtin_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "callee": "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+    "reason": "external_qualified_call",
+    "actionable": false
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "callee": "start_span",
+    "reason": "no_matching_symbol",
+    "actionable": true
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "callee": "end_span",
+    "reason": "no_matching_symbol",
+    "actionable": true
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
     "callee": "len",
     "reason": "builtin_call",
     "actionable": false

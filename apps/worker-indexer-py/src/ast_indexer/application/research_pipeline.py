@@ -112,6 +112,7 @@ class ResearchState(TypedDict, total=False):
     relevant_candidates: tuple[RelevancyCandidate, ...]
     enriched_context: tuple[EnrichedResearchContext, ...]
     reduced_context: tuple[ReducedResearchContext, ...]
+    _active_retrieval_span: object
 
 
 class ResearchPipeline:
@@ -151,6 +152,20 @@ class ResearchPipeline:
         reducer_max_contexts: int | None = None,
     ) -> ResearchPipelineResult:
         max_contexts = reducer_max_contexts if reducer_max_contexts is not None else top_k
+        run_span = self._observability.start_span(
+            'research_pipeline_run',
+            trace_id,
+            input_payload={
+                'prompt': prompt,
+                'repos_in_scope': list(repos_in_scope),
+                'top_k': top_k,
+                'candidate_pool_multiplier': candidate_pool_multiplier,
+                'relevancy_threshold': relevancy_threshold,
+                'relevancy_workers': relevancy_workers,
+                'reducer_token_budget': reducer_token_budget,
+                'reducer_max_contexts': max_contexts,
+            },
+        )
         final_state: ResearchState = self._app.invoke(
             {
                 'trace_id': trace_id,
@@ -168,6 +183,18 @@ class ResearchPipeline:
         objective = final_state.get('objective')
         if objective is None:
             objective = ResearchObjective(intent='', entities=(), repos_in_scope=repos_in_scope)
+
+        self._observability.end_span(
+            run_span,
+            output_payload={
+                'objective': _serialize_objective(objective),
+                'query_count': len(final_state.get('queries', ())),
+                'candidate_count': len(final_state.get('candidates', ())),
+                'relevant_count': len(final_state.get('relevant_candidates', ())),
+                'enriched_count': len(final_state.get('enriched_context', ())),
+                'reduced_count': len(final_state.get('reduced_context', ())),
+            },
+        )
 
         return ResearchPipelineResult(
             trace_id=trace_id,
@@ -359,25 +386,16 @@ class ResearchPipeline:
         )
 
         enriched_context = self._enrich_candidates(candidates)
-        self._observability.end_span(
-            span,
-            output_payload={
-                'enriched_count': len(enriched_context),
-                'enriched_context': [_serialize_enriched_context(row) for row in enriched_context],
-            },
-            metadata={
-                'avg_body_tokens': (
-                    sum(_token_estimate(row.body) for row in enriched_context) / len(enriched_context)
-                    if enriched_context
-                    else 0.0
-                ),
-            },
-        )
-        return {'enriched_context': enriched_context}
+        # Keep retrieval span open so reducer_engine can appear as its child in call-depth views.
+        return {
+            'enriched_context': enriched_context,
+            '_active_retrieval_span': span,
+        }
 
     def _reducer_node(self, state: ResearchState) -> ResearchState:
         trace_id = state['trace_id']
         enriched = state.get('enriched_context', ())
+        retrieval_span = state.get('_active_retrieval_span')
         token_budget = max(16, int(state.get('reducer_token_budget', 2500)))
         max_contexts = max(1, int(state.get('reducer_max_contexts', state.get('top_k', 8))))
 
@@ -409,7 +427,27 @@ class ResearchPipeline:
                 'reduced_body_truncations': sum(1 for row in reduced if row.body_was_truncated),
             },
         )
-        return {'reduced_context': reduced}
+
+        if retrieval_span is not None:
+            self._observability.end_span(
+                retrieval_span,
+                output_payload={
+                    'enriched_count': len(enriched),
+                    'enriched_context': [_serialize_enriched_context(row) for row in enriched],
+                },
+                metadata={
+                    'avg_body_tokens': (
+                        sum(_token_estimate(row.body) for row in enriched) / len(enriched)
+                        if enriched
+                        else 0.0
+                    ),
+                },
+            )
+
+        return {
+            'reduced_context': reduced,
+            '_active_retrieval_span': None,
+        }
 
     def _rank_candidates(
         self,

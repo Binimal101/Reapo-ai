@@ -1047,7 +1047,7 @@
     "kind": "method",
     "line": 9,
     "signature": "def IndexStorePort.upsert_symbols(self, symbols)",
-    "docstring": null,
+    "docstring": "Insert or update symbol records.",
     "callees": []
   },
   {
@@ -1057,7 +1057,7 @@
     "kind": "method",
     "line": 12,
     "signature": "def IndexStorePort.delete_symbols_for_paths(self, repo, paths)",
-    "docstring": null,
+    "docstring": "Delete symbols for repo-scoped file paths and return number removed.",
     "callees": []
   },
   {
@@ -1067,7 +1067,7 @@
     "kind": "method",
     "line": 15,
     "signature": "def IndexStorePort.list_symbols(self)",
-    "docstring": null,
+    "docstring": "Return currently stored symbols.",
     "callees": []
   },
   {
@@ -1177,7 +1177,7 @@
     "kind": "method",
     "line": 15,
     "signature": "def RepositoryReaderPort.list_python_files(self, repo)",
-    "docstring": null,
+    "docstring": "List python file paths for the given repository root.",
     "callees": []
   },
   {
@@ -1187,7 +1187,7 @@
     "kind": "method",
     "line": 18,
     "signature": "def RepositoryReaderPort.read_python_file(self, repo, path)",
-    "docstring": null,
+    "docstring": "Read a python file from repository root and return content.",
     "callees": []
   },
   {
@@ -1296,6 +1296,7 @@
       "list_vectors",
       "list_spans",
       "len",
+      "isinstance",
       "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
       "ast_indexer.adapters.embeddings.simple_hash_embedding_generator_adapter.SimpleHashEmbeddingGeneratorAdapter",
       "list_symbols"
@@ -1306,7 +1307,7 @@
     "path": "tests/test_index_python_repository_service.py",
     "symbol": "test_index_repository_subset_prunes_deleted_paths",
     "kind": "function",
-    "line": 57,
+    "line": 69,
     "signature": "def test_index_repository_subset_prunes_deleted_paths(tmp_path)",
     "docstring": null,
     "callees": [
@@ -1759,7 +1760,7 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter",
     "kind": "class",
-    "line": 11,
+    "line": 12,
     "signature": "class LangfuseObservabilityAdapter",
     "docstring": "Observability adapter that mirrors spans to Langfuse and in-memory state.",
     "callees": []
@@ -1769,7 +1770,7 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter.__init__",
     "kind": "method",
-    "line": 14,
+    "line": 15,
     "signature": "def LangfuseObservabilityAdapter.__init__(self, host, public_key, secret_key, strict, client)",
     "docstring": null,
     "callees": [
@@ -1782,7 +1783,7 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter._record_error",
     "kind": "method",
-    "line": 40,
+    "line": 43,
     "signature": "def LangfuseObservabilityAdapter._record_error(self, stage, exc)",
     "docstring": null,
     "callees": [
@@ -1795,13 +1796,16 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter.start_span",
     "kind": "method",
-    "line": 47,
+    "line": 50,
     "signature": "def LangfuseObservabilityAdapter.start_span(self, name, trace_id, input_payload, session_id, user_id)",
     "docstring": null,
     "callees": [
       "_normalize_trace_id",
       "ast_indexer.domain.models.TraceSpan",
       "append",
+      "setdefault",
+      "get",
+      "_extract_live_observation_id",
       "start_observation",
       "datetime.datetime.now",
       "LangfuseObservabilityAdapter._record_error",
@@ -1813,17 +1817,19 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter.end_span",
     "kind": "method",
-    "line": 89,
+    "line": 107,
     "signature": "def LangfuseObservabilityAdapter.end_span(self, span, output_payload, metadata)",
     "docstring": null,
     "callees": [
       "finish",
       "pop",
+      "get",
       "update",
       "end",
       "hasattr",
       "flush",
-      "LangfuseObservabilityAdapter._record_error"
+      "LangfuseObservabilityAdapter._record_error",
+      "remove"
     ]
   },
   {
@@ -1831,7 +1837,7 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter.list_spans",
     "kind": "method",
-    "line": 105,
+    "line": 134,
     "signature": "def LangfuseObservabilityAdapter.list_spans(self)",
     "docstring": null,
     "callees": [
@@ -1843,7 +1849,7 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "LangfuseObservabilityAdapter.check_health",
     "kind": "method",
-    "line": 108,
+    "line": 137,
     "signature": "def LangfuseObservabilityAdapter.check_health(self)",
     "docstring": null,
     "callees": [
@@ -1857,15 +1863,17 @@
     "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "symbol": "_normalize_trace_id",
     "kind": "function",
-    "line": 120,
+    "line": 159,
     "signature": "def _normalize_trace_id(trace_id)",
     "docstring": null,
     "callees": [
       "lower",
       "all",
+      "hexdigest",
       "replace",
       "len",
-      "uuid.uuid4"
+      "hashlib.md5",
+      "encode"
     ]
   },
   {
@@ -3200,10 +3208,15 @@
     "signature": "def ResearchPipeline.run(self)",
     "docstring": null,
     "callees": [
+      "start_span",
       "invoke",
       "get",
+      "end_span",
       "ResearchPipelineResult",
-      "ResearchObjective"
+      "ResearchObjective",
+      "list",
+      "_serialize_objective",
+      "len"
     ]
   },
   {
@@ -3211,7 +3224,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._build_graph",
     "kind": "method",
-    "line": 182,
+    "line": 208,
     "signature": "def ResearchPipeline._build_graph(self)",
     "docstring": null,
     "callees": [
@@ -3226,7 +3239,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._reasoning_node",
     "kind": "method",
-    "line": 199,
+    "line": 225,
     "signature": "def ResearchPipeline._reasoning_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3245,7 +3258,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._prodder_node",
     "kind": "method",
-    "line": 223,
+    "line": 249,
     "signature": "def ResearchPipeline._prodder_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3263,7 +3276,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._vector_search_node",
     "kind": "method",
-    "line": 247,
+    "line": 273,
     "signature": "def ResearchPipeline._vector_search_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3285,7 +3298,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._relevancy_node",
     "kind": "method",
-    "line": 287,
+    "line": 313,
     "signature": "def ResearchPipeline._relevancy_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3309,7 +3322,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._retrieval_node",
     "kind": "method",
-    "line": 334,
+    "line": 360,
     "signature": "def ResearchPipeline._retrieval_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3331,7 +3344,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._reducer_node",
     "kind": "method",
-    "line": 378,
+    "line": 404,
     "signature": "def ResearchPipeline._reducer_node(self, state)",
     "docstring": null,
     "callees": [
@@ -3352,7 +3365,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._rank_candidates",
     "kind": "method",
-    "line": 414,
+    "line": 440,
     "signature": "def ResearchPipeline._rank_candidates(self)",
     "docstring": null,
     "callees": [
@@ -3374,7 +3387,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._score_candidates_parallel",
     "kind": "method",
-    "line": 459,
+    "line": 485,
     "signature": "def ResearchPipeline._score_candidates_parallel(self)",
     "docstring": null,
     "callees": [
@@ -3390,7 +3403,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._score_candidate",
     "kind": "method",
-    "line": 474,
+    "line": 500,
     "signature": "def ResearchPipeline._score_candidate(self, objective, candidate)",
     "docstring": null,
     "callees": [
@@ -3411,7 +3424,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._reduce_context",
     "kind": "method",
-    "line": 515,
+    "line": 541,
     "signature": "def ResearchPipeline._reduce_context(self)",
     "docstring": null,
     "callees": [
@@ -3429,7 +3442,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "ResearchPipeline._enrich_candidates",
     "kind": "method",
-    "line": 553,
+    "line": 579,
     "signature": "def ResearchPipeline._enrich_candidates(self, candidates)",
     "docstring": null,
     "callees": [
@@ -3450,7 +3463,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_cosine_similarity",
     "kind": "function",
-    "line": 589,
+    "line": 615,
     "signature": "def _cosine_similarity(left, right)",
     "docstring": null,
     "callees": [
@@ -3466,7 +3479,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_module_name",
     "kind": "function",
-    "line": 602,
+    "line": 628,
     "signature": "def _module_name(path)",
     "docstring": null,
     "callees": [
@@ -3481,7 +3494,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_build_canonical_symbol_map",
     "kind": "function",
-    "line": 612,
+    "line": 638,
     "signature": "def _build_canonical_symbol_map(symbols)",
     "docstring": null,
     "callees": [
@@ -3494,7 +3507,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_extract_symbol_body",
     "kind": "function",
-    "line": 622,
+    "line": 648,
     "signature": "def _extract_symbol_body(source, symbol)",
     "docstring": null,
     "callees": [
@@ -3514,7 +3527,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_find_parent_class_name",
     "kind": "function",
-    "line": 648,
+    "line": 674,
     "signature": "def _find_parent_class_name(tree, target)",
     "docstring": null,
     "callees": [
@@ -3527,7 +3540,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_tokenize_terms",
     "kind": "function",
-    "line": 656,
+    "line": 682,
     "signature": "def _tokenize_terms(text)",
     "docstring": null,
     "callees": [
@@ -3539,7 +3552,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_token_estimate",
     "kind": "function",
-    "line": 660,
+    "line": 686,
     "signature": "def _token_estimate(text)",
     "docstring": null,
     "callees": [
@@ -3553,7 +3566,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_truncate_to_token_budget",
     "kind": "function",
-    "line": 666,
+    "line": 692,
     "signature": "def _truncate_to_token_budget(text, token_budget)",
     "docstring": null,
     "callees": [
@@ -3569,7 +3582,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_serialize_objective",
     "kind": "function",
-    "line": 691,
+    "line": 717,
     "signature": "def _serialize_objective(objective)",
     "docstring": null,
     "callees": [
@@ -3581,7 +3594,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_serialize_candidate",
     "kind": "function",
-    "line": 699,
+    "line": 725,
     "signature": "def _serialize_candidate(candidate)",
     "docstring": null,
     "callees": []
@@ -3591,7 +3604,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_serialize_relevancy_candidate",
     "kind": "function",
-    "line": 710,
+    "line": 736,
     "signature": "def _serialize_relevancy_candidate(candidate)",
     "docstring": null,
     "callees": [
@@ -3603,7 +3616,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_serialize_enriched_context",
     "kind": "function",
-    "line": 723,
+    "line": 749,
     "signature": "def _serialize_enriched_context(row)",
     "docstring": null,
     "callees": [
@@ -3616,7 +3629,7 @@
     "path": "src/ast_indexer/application/research_pipeline.py",
     "symbol": "_serialize_reduced_context",
     "kind": "function",
-    "line": 738,
+    "line": 764,
     "signature": "def _serialize_reduced_context(row)",
     "docstring": null,
     "callees": [
@@ -4502,7 +4515,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeLiveSpan",
     "kind": "class",
-    "line": 6,
+    "line": 9,
     "signature": "class _FakeLiveSpan",
     "docstring": null,
     "callees": []
@@ -4512,8 +4525,8 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeLiveSpan.__init__",
     "kind": "method",
-    "line": 7,
-    "signature": "def _FakeLiveSpan.__init__(self)",
+    "line": 10,
+    "signature": "def _FakeLiveSpan.__init__(self, observation_id)",
     "docstring": null,
     "callees": []
   },
@@ -4522,7 +4535,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeLiveSpan.update",
     "kind": "method",
-    "line": 12,
+    "line": 16,
     "signature": "def _FakeLiveSpan.update(self, output, metadata)",
     "docstring": null,
     "callees": []
@@ -4532,7 +4545,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeLiveSpan.end",
     "kind": "method",
-    "line": 16,
+    "line": 20,
     "signature": "def _FakeLiveSpan.end(self)",
     "docstring": null,
     "callees": []
@@ -4542,7 +4555,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeClient",
     "kind": "class",
-    "line": 20,
+    "line": 24,
     "signature": "class _FakeClient",
     "docstring": null,
     "callees": []
@@ -4552,7 +4565,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeClient.__init__",
     "kind": "method",
-    "line": 21,
+    "line": 25,
     "signature": "def _FakeClient.__init__(self)",
     "docstring": null,
     "callees": []
@@ -4562,12 +4575,14 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeClient.start_observation",
     "kind": "method",
-    "line": 28,
+    "line": 33,
     "signature": "def _FakeClient.start_observation(self)",
     "docstring": null,
     "callees": [
+      "append",
       "_FakeLiveSpan",
-      "RuntimeError"
+      "RuntimeError",
+      "dict"
     ]
   },
   {
@@ -4575,7 +4590,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "_FakeClient.flush",
     "kind": "method",
-    "line": 36,
+    "line": 42,
     "signature": "def _FakeClient.flush(self)",
     "docstring": null,
     "callees": []
@@ -4585,7 +4600,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "test_langfuse_adapter_creates_and_finishes_remote_span",
     "kind": "function",
-    "line": 40,
+    "line": 46,
     "signature": "def test_langfuse_adapter_creates_and_finishes_remote_span()",
     "docstring": null,
     "callees": [
@@ -4602,7 +4617,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "test_langfuse_adapter_health_check_uses_flush",
     "kind": "function",
-    "line": 72,
+    "line": 78,
     "signature": "def test_langfuse_adapter_health_check_uses_flush()",
     "docstring": null,
     "callees": [
@@ -4616,7 +4631,7 @@
     "path": "tests/test_langfuse_observability_adapter.py",
     "symbol": "test_langfuse_adapter_strict_mode_raises_on_start_failure",
     "kind": "function",
-    "line": 85,
+    "line": 110,
     "signature": "def test_langfuse_adapter_strict_mode_raises_on_start_failure()",
     "docstring": null,
     "callees": [
@@ -5510,6 +5525,48 @@
       "list_dead_letters",
       "ast_indexer.domain.index_jobs.IndexJob",
       "_AlwaysFailIndexService",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "symbol": "_extract_live_observation_id",
+    "kind": "function",
+    "line": 149,
+    "signature": "def _extract_live_observation_id(live_span)",
+    "docstring": null,
+    "callees": [
+      "getattr",
+      "isinstance"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "kind": "function",
+    "line": 91,
+    "signature": "def test_langfuse_adapter_links_child_spans_to_parent_observation()",
+    "docstring": null,
+    "callees": [
+      "_FakeClient",
+      "ast_indexer.adapters.observability.langfuse_observability_adapter.LangfuseObservabilityAdapter",
+      "start_span",
+      "end_span",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_langfuse_observability_adapter.py",
+    "symbol": "test_normalize_trace_id_is_deterministic_for_non_hex_inputs",
+    "kind": "function",
+    "line": 128,
+    "signature": "def test_normalize_trace_id_is_deterministic_for_non_hex_inputs()",
+    "docstring": null,
+    "callees": [
+      "ast_indexer.adapters.observability.langfuse_observability_adapter._normalize_trace_id",
       "len"
     ]
   }

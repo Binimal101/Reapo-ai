@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from hashlib import md5
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -35,6 +36,8 @@ class LangfuseObservabilityAdapter(ObservabilityPort):
         self._strict = strict
         self._spans: list[TraceSpan] = []
         self._live_spans: dict[str, object] = {}
+        self._span_trace_ids: dict[str, str] = {}
+        self._active_span_stack_by_trace: dict[str, list[str]] = {}
         self._last_error: str | None = None
 
     def _record_error(self, stage: str, exc: Exception) -> None:
@@ -63,23 +66,38 @@ class LangfuseObservabilityAdapter(ObservabilityPort):
             input_payload=input_payload,
         )
         self._spans.append(span)
+        self._span_trace_ids[span.span_id] = trace_id
+
+        parent_span_id: str | None = None
+        trace_stack = self._active_span_stack_by_trace.setdefault(trace_id, [])
+        if trace_stack:
+            parent_span_id = trace_stack[-1]
+            parent_live_span = self._live_spans.get(parent_span_id)
+            parent_span_id = _extract_live_observation_id(parent_live_span)
 
         try:
-            live_span = self._client.start_observation(
-                trace_context={
+            trace_context: dict[str, object] = {
                     'trace_id': normalized_trace_id,
                     'session_id': session_id,
                     'user_id': user_id,
-                },
-                name=name,
-                as_type='span',
-                input=input_payload,
-                metadata={
+            }
+            if parent_span_id is not None:
+                trace_context['parent_span_id'] = parent_span_id
+
+            observation_kwargs: dict[str, object] = {
+                'trace_context': trace_context,
+                'name': name,
+                'as_type': 'span',
+                'input': input_payload,
+                'metadata': {
                     'component': 'worker-indexer-py',
                     'original_trace_id': trace_id if trace_id_was_normalized else None,
                 },
-            )
+            }
+
+            live_span = self._client.start_observation(**observation_kwargs)
             self._live_spans[span.span_id] = live_span
+            trace_stack.append(span.span_id)
             self._last_error = None
         except Exception as exc:
             self._record_error('start_span', exc)
@@ -88,6 +106,17 @@ class LangfuseObservabilityAdapter(ObservabilityPort):
 
     def end_span(self, span: TraceSpan, output_payload: dict | None = None, metadata: dict | None = None) -> None:
         span.finish(output_payload=output_payload, metadata=metadata)
+
+        trace_id = self._span_trace_ids.pop(span.span_id, None)
+        if trace_id is not None:
+            trace_stack = self._active_span_stack_by_trace.get(trace_id)
+            if trace_stack:
+                if trace_stack and trace_stack[-1] == span.span_id:
+                    trace_stack.pop()
+                elif span.span_id in trace_stack:
+                    trace_stack.remove(span.span_id)
+                if not trace_stack:
+                    self._active_span_stack_by_trace.pop(trace_id, None)
 
         live_span = self._live_spans.pop(span.span_id, None)
         if live_span is None:
@@ -117,8 +146,19 @@ class LangfuseObservabilityAdapter(ObservabilityPort):
             return False
 
 
+def _extract_live_observation_id(live_span: object | None) -> str | None:
+    if live_span is None:
+        return None
+    for attribute in ('id', 'observation_id', 'span_id'):
+        candidate = getattr(live_span, attribute, None)
+        if isinstance(candidate, str) and candidate:
+            return candidate
+    return None
+
+
 def _normalize_trace_id(trace_id: str) -> tuple[str, bool]:
     cleaned = trace_id.replace('-', '').lower()
     if len(cleaned) == 32 and all(char in '0123456789abcdef' for char in cleaned):
         return cleaned, cleaned != trace_id
-    return uuid4().hex, True
+    # Keep grouping stable for non-hex trace ids by deriving a deterministic 32-hex surrogate.
+    return md5(trace_id.encode('utf-8')).hexdigest(), True

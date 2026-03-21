@@ -390,6 +390,15 @@
     "repo": "worker-indexer-py",
     "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "_extract_live_observation_id",
+    "resolved_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "_extract_live_observation_id",
+    "resolved_canonical": "_extract_live_observation_id"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
     "callee": "LangfuseObservabilityAdapter._record_error",
     "resolved_path": "src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
     "resolved_symbol": "LangfuseObservabilityAdapter._record_error",
@@ -691,6 +700,15 @@
     "resolved_path": "src/ast_indexer/application/research_pipeline.py",
     "resolved_symbol": "ResearchObjective",
     "resolved_canonical": "ResearchObjective"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "_serialize_objective",
+    "resolved_path": "src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
   },
   {
     "repo": "worker-indexer-py",
@@ -1375,5 +1393,14 @@
     "resolved_path": "tests/test_webhook_index_jobs.py",
     "resolved_symbol": "_AlwaysFailIndexService",
     "resolved_canonical": "_AlwaysFailIndexService"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "callee": "_FakeClient",
+    "resolved_path": "tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeClient",
+    "resolved_canonical": "_FakeClient"
   }
 ]
