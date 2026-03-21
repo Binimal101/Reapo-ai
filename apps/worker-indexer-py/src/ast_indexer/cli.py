@@ -121,6 +121,37 @@ def _build_parser() -> argparse.ArgumentParser:
     research.add_argument('--trace-id', type=str, required=False, help='Optional explicit trace id')
     research.add_argument('--top-k', type=int, default=8, help='Top K candidates to enrich')
     research.add_argument(
+        '--candidate-pool-multiplier',
+        type=int,
+        default=_env_int('AST_INDEXER_CANDIDATE_POOL_MULTIPLIER') or 6,
+        help='Multiplier for vector-search frontier size before relevancy filtering',
+    )
+    research.add_argument(
+        '--relevancy-threshold',
+        type=float,
+        default=float(os.getenv('AST_INDEXER_RELEVANCY_THRESHOLD', '0.35')),
+        help='Minimum confidence threshold for Phase 5 relevancy filtering',
+    )
+    research.add_argument(
+        '--relevancy-workers',
+        type=int,
+        default=_env_int('AST_INDEXER_RELEVANCY_WORKERS') or 6,
+        help='Parallel worker count for Phase 5 relevancy scoring',
+    )
+    research.add_argument(
+        '--reducer-token-budget',
+        type=int,
+        default=_env_int('AST_INDEXER_REDUCER_TOKEN_BUDGET') or 2500,
+        help='Token budget for reducer-style compacted context output',
+    )
+    research.add_argument(
+        '--reducer-max-contexts',
+        type=int,
+        required=False,
+        default=_env_int('AST_INDEXER_REDUCER_MAX_CONTEXTS'),
+        help='Optional maximum number of contexts retained by reducer output',
+    )
+    research.add_argument(
         '--research-model',
         type=str,
         default=os.getenv('AST_INDEXER_RESEARCH_MODEL', 'gpt-4o-mini'),
@@ -536,6 +567,11 @@ def main(argv: list[str] | None = None) -> int:
             prompt=args.prompt,
             repos_in_scope=tuple(args.repo),
             top_k=args.top_k,
+            candidate_pool_multiplier=args.candidate_pool_multiplier,
+            relevancy_threshold=args.relevancy_threshold,
+            relevancy_workers=args.relevancy_workers,
+            reducer_token_budget=args.reducer_token_budget,
+            reducer_max_contexts=args.reducer_max_contexts,
         )
         print(
             json.dumps(
@@ -550,7 +586,20 @@ def main(argv: list[str] | None = None) -> int:
                     'query_count': len(result.queries),
                     'queries': list(result.queries),
                     'candidate_count': len(result.candidates),
+                    'relevant_count': len(result.relevant_candidates),
                     'enriched_count': len(result.enriched_context),
+                    'reduced_count': len(result.reduced_context),
+                    'relevancy': [
+                        {
+                            'repo': row.repo,
+                            'path': row.path,
+                            'symbol': row.symbol,
+                            'score': row.score,
+                            'confidence': row.confidence,
+                            'matched_terms': list(row.matched_terms),
+                        }
+                        for row in result.relevant_candidates
+                    ],
                     'enriched_context': [
                         {
                             'repo': row.repo,
@@ -563,6 +612,21 @@ def main(argv: list[str] | None = None) -> int:
                             'resolved_callees': list(row.resolved_callees),
                         }
                         for row in result.enriched_context
+                    ],
+                    'reduced_context': [
+                        {
+                            'repo': row.repo,
+                            'path': row.path,
+                            'symbol': row.symbol,
+                            'kind': row.kind,
+                            'signature': row.signature,
+                            'docstring': row.docstring,
+                            'estimated_tokens': row.estimated_tokens,
+                            'body_was_truncated': row.body_was_truncated,
+                            'callees': list(row.callees),
+                            'resolved_callees': list(row.resolved_callees),
+                        }
+                        for row in result.reduced_context
                     ],
                 },
                 indent=2,

@@ -49,8 +49,20 @@ def test_index_repository_collects_symbols_and_emits_spans(tmp_path: Path) -> No
 
     spans = observability.list_spans()
     assert spans[0].name == 'index_repository'
+    assert spans[0].input_payload is not None
+    assert spans[0].output_payload is not None
+    assert spans[0].metadata is not None
+    assert spans[0].input_payload['file_count'] == 2
+    assert spans[0].output_payload['files_scanned'] == 2
+    assert len(spans[0].output_payload['blob_shas_by_file']) == 2
+    assert spans[0].metadata['avg_symbols_per_file'] == 1.0
     parse_spans = [span for span in spans if span.name == 'parse_python_file']
     assert len(parse_spans) == 2
+    for span in parse_spans:
+        assert span.output_payload is not None
+        assert span.output_payload['blob_sha'] != ''
+        assert span.output_payload['content_bytes'] > 0
+        assert isinstance(span.output_payload['symbols'], list)
     assert spans[0].finished_at is not None
 
 

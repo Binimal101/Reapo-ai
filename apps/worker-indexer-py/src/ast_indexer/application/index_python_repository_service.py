@@ -55,6 +55,8 @@ class IndexPythonRepositoryService:
                 'repo': repo,
                 'file_paths': file_paths,
                 'deleted_paths': deleted_paths,
+                'file_count': len(file_paths),
+                'deleted_count': len(deleted_paths),
             },
         )
 
@@ -72,17 +74,20 @@ class IndexPythonRepositoryService:
             file_span = self._observability.start_span(
                 name='parse_python_file',
                 trace_id=trace_id,
-                input_payload={'repo': repo, 'path': file_path},
+                input_payload={
+                    'repo': repo,
+                    'path': file_path,
+                },
             )
             repo_file = self._repository_reader.read_python_file(repo, file_path)
             extracted = self._extractor.extract(repo=repo_file.repo, path=repo_file.path, source=repo_file.content)
             total_symbols += len(extracted.symbols)
             self._index_store.upsert_symbols(extracted.symbols)
 
-            if self._vector_store is not None and self._embedding_generator is not None and extracted.symbols:
-                blob_sha = hashlib.sha256(repo_file.content.encode('utf-8')).hexdigest()
-                file_blob_shas[repo_file.path] = blob_sha
+            blob_sha = hashlib.sha256(repo_file.content.encode('utf-8')).hexdigest()
+            file_blob_shas[repo_file.path] = blob_sha
 
+            if self._vector_store is not None and self._embedding_generator is not None and extracted.symbols:
                 texts = [
                     f"{symbol.signature}\n\n{symbol.docstring or ''}".strip()
                     for symbol in extracted.symbols
@@ -110,6 +115,19 @@ class IndexPythonRepositoryService:
                     'repo': repo_file.repo,
                     'path': repo_file.path,
                     'symbols_indexed': len(extracted.symbols),
+                    'blob_sha': blob_sha,
+                    'content_bytes': len(repo_file.content.encode('utf-8')),
+                    'symbols': [
+                        {
+                            'symbol': symbol.symbol,
+                            'kind': symbol.kind,
+                            'line': symbol.line,
+                            'signature': symbol.signature,
+                            'docstring': symbol.docstring,
+                            'callees': list(symbol.callees),
+                        }
+                        for symbol in extracted.symbols
+                    ],
                 },
             )
 
@@ -152,8 +170,14 @@ class IndexPythonRepositoryService:
                 'deleted_symbols': removed_symbols,
                 'vectors_upserted': metrics.vectors_upserted,
                 'vectors_deleted': metrics.vectors_deleted,
+                'tree_sha': self._compute_tree_sha(file_blob_shas),
+                'indexed_files': sorted(file_blob_shas.keys()),
+                'blob_shas_by_file': file_blob_shas,
             },
-            metadata={'duration_ms': int((finished - started).total_seconds() * 1000)},
+            metadata={
+                'duration_ms': int((finished - started).total_seconds() * 1000),
+                'avg_symbols_per_file': (total_symbols / len(file_paths)) if file_paths else 0.0,
+            },
         )
         return metrics
 
