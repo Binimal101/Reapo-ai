@@ -67,6 +67,7 @@ class PythonAstSymbolExtractor:
             kind='function',
             line=node.lineno,
             signature=self._build_signature(node.name, node.args),
+            docstring=ast.get_docstring(node),
             callees=self._collect_callees(node, import_aliases),
         )
 
@@ -84,6 +85,7 @@ class PythonAstSymbolExtractor:
             kind='async_function',
             line=node.lineno,
             signature='async ' + self._build_signature(node.name, node.args),
+            docstring=ast.get_docstring(node),
             callees=self._collect_callees(node, import_aliases),
         )
 
@@ -95,6 +97,7 @@ class PythonAstSymbolExtractor:
             kind='class',
             line=node.lineno,
             signature=f'class {node.name}',
+            docstring=ast.get_docstring(node),
             callees=(),
         )
 
@@ -118,6 +121,7 @@ class PythonAstSymbolExtractor:
             kind=kind,
             line=node.lineno,
             signature=prefix + self._build_signature(method_name, node.args),
+            docstring=ast.get_docstring(node),
             callees=self._collect_callees(node, import_aliases, class_name=class_name),
         )
 

@@ -13,5 +13,18 @@ class InMemorySymbolIndexStoreAdapter(IndexStorePort):
             key = (symbol.repo, symbol.path, symbol.kind, symbol.symbol)
             self._rows[key] = symbol
 
+    def delete_symbols_for_paths(self, repo: str, paths: list[str]) -> int:
+        if not paths:
+            return 0
+
+        path_set = set(paths)
+        before = len(self._rows)
+        self._rows = {
+            key: value
+            for key, value in self._rows.items()
+            if not (value.repo == repo and value.path in path_set)
+        }
+        return before - len(self._rows)
+
     def list_symbols(self) -> list[SymbolRecord]:
         return list(self._rows.values())

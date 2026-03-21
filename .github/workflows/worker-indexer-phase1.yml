@@ -1,0 +1,53 @@
+name: worker-indexer-phase1
+
+on:
+  push:
+    paths:
+      - apps/worker-indexer-py/**
+      - infra/scripts/phase1_smoke.ps1
+      - infra/docker/docker-compose.phase1.yml
+      - .env.example
+      - .github/workflows/worker-indexer-phase1.yml
+  pull_request:
+    paths:
+      - apps/worker-indexer-py/**
+      - infra/scripts/phase1_smoke.ps1
+      - infra/docker/docker-compose.phase1.yml
+      - .env.example
+      - .github/workflows/worker-indexer-phase1.yml
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/worker-indexer-py
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m pip install -e .[observability]
+
+      - name: Run pytest
+        run: python -m pytest
+
+  smoke-script-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate smoke script exists
+        run: test -f infra/scripts/phase1_smoke.ps1
+
+      - name: Validate compose file exists
+        run: test -f infra/docker/docker-compose.phase1.yml

@@ -1,0 +1,1160 @@
+[
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter",
+    "kind": "class",
+    "line": 7,
+    "signature": "class InMemorySymbolIndexStoreAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.__init__",
+    "kind": "method",
+    "line": 8,
+    "signature": "def InMemorySymbolIndexStoreAdapter.__init__(self)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.upsert_symbols",
+    "kind": "method",
+    "line": 11,
+    "signature": "def InMemorySymbolIndexStoreAdapter.upsert_symbols(self, symbols)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 16,
+    "signature": "def InMemorySymbolIndexStoreAdapter.delete_symbols_for_paths(self, repo, paths)",
+    "callees": [
+      "set",
+      "len",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/in_memory_symbol_index_store_adapter.py",
+    "symbol": "InMemorySymbolIndexStoreAdapter.list_symbols",
+    "kind": "method",
+    "line": 29,
+    "signature": "def InMemorySymbolIndexStoreAdapter.list_symbols(self)",
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class JsonFileSymbolIndexStoreAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.__init__(self, file_path)",
+    "callees": [
+      "mkdir",
+      "JsonFileSymbolIndexStoreAdapter._load_existing"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.upsert_symbols",
+    "kind": "method",
+    "line": 17,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.upsert_symbols(self, symbols)",
+    "callees": [
+      "JsonFileSymbolIndexStoreAdapter._persist"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 24,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths(self, repo, paths)",
+    "callees": [
+      "set",
+      "len",
+      "JsonFileSymbolIndexStoreAdapter._persist",
+      "items"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter.list_symbols",
+    "kind": "method",
+    "line": 40,
+    "signature": "def JsonFileSymbolIndexStoreAdapter.list_symbols(self)",
+    "callees": [
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "kind": "method",
+    "line": 43,
+    "signature": "def JsonFileSymbolIndexStoreAdapter._load_existing(self)",
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text",
+      "ast_indexer.domain.models.SymbolRecord",
+      "tuple",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "kind": "method",
+    "line": 61,
+    "signature": "def JsonFileSymbolIndexStoreAdapter._persist(self)",
+    "callees": [
+      "write_text",
+      "json.dumps",
+      "list",
+      "values"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter",
+    "kind": "class",
+    "line": 6,
+    "signature": "class InMemoryOAuthTokenStoreAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.__init__",
+    "kind": "method",
+    "line": 7,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.__init__(self)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.save",
+    "kind": "method",
+    "line": 10,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.save(self, token)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/oauth/in_memory_oauth_token_store_adapter.py",
+    "symbol": "InMemoryOAuthTokenStoreAdapter.get",
+    "kind": "method",
+    "line": 13,
+    "signature": "def InMemoryOAuthTokenStoreAdapter.get(self, user_id)",
+    "callees": [
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter",
+    "kind": "class",
+    "line": 10,
+    "signature": "class InMemoryObservabilityAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.__init__",
+    "kind": "method",
+    "line": 11,
+    "signature": "def InMemoryObservabilityAdapter.__init__(self)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.start_span",
+    "kind": "method",
+    "line": 14,
+    "signature": "def InMemoryObservabilityAdapter.start_span(self, name, trace_id, input_payload)",
+    "callees": [
+      "ast_indexer.domain.models.TraceSpan",
+      "append",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.end_span",
+    "kind": "method",
+    "line": 25,
+    "signature": "def InMemoryObservabilityAdapter.end_span(self, span, output_payload, metadata)",
+    "callees": [
+      "finish"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/in_memory_observability_adapter.py",
+    "symbol": "InMemoryObservabilityAdapter.list_spans",
+    "kind": "method",
+    "line": 28,
+    "signature": "def InMemoryObservabilityAdapter.list_spans(self)",
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter",
+    "kind": "class",
+    "line": 12,
+    "signature": "class JsonlFileObservabilityAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.__init__",
+    "kind": "method",
+    "line": 13,
+    "signature": "def JsonlFileObservabilityAdapter.__init__(self, file_path)",
+    "callees": [
+      "mkdir"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.start_span",
+    "kind": "method",
+    "line": 18,
+    "signature": "def JsonlFileObservabilityAdapter.start_span(self, name, trace_id, input_payload)",
+    "callees": [
+      "ast_indexer.domain.models.TraceSpan",
+      "append",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.end_span",
+    "kind": "method",
+    "line": 29,
+    "signature": "def JsonlFileObservabilityAdapter.end_span(self, span, output_payload, metadata)",
+    "callees": [
+      "finish",
+      "isoformat",
+      "open",
+      "write",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/observability/jsonl_file_observability_adapter.py",
+    "symbol": "JsonlFileObservabilityAdapter.list_spans",
+    "kind": "method",
+    "line": 44,
+    "signature": "def JsonlFileObservabilityAdapter.list_spans(self)",
+    "callees": [
+      "list"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter",
+    "kind": "class",
+    "line": 8,
+    "signature": "class LocalFsRepositoryReaderAdapter",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.__init__",
+    "kind": "method",
+    "line": 9,
+    "signature": "def LocalFsRepositoryReaderAdapter.__init__(self, base_path)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.list_python_files",
+    "kind": "method",
+    "line": 12,
+    "signature": "def LocalFsRepositoryReaderAdapter.list_python_files(self, repo)",
+    "callees": [
+      "resolve",
+      "exists",
+      "replace",
+      "rglob",
+      "is_file",
+      "str",
+      "relative_to"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "symbol": "LocalFsRepositoryReaderAdapter.read_python_file",
+    "kind": "method",
+    "line": 23,
+    "signature": "def LocalFsRepositoryReaderAdapter.read_python_file(self, repo, path)",
+    "callees": [
+      "resolve",
+      "read_text",
+      "ast_indexer.ports.repository_reader.RepositoryFile"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker",
+    "kind": "class",
+    "line": 6,
+    "signature": "class CallGraphLinker",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker.link",
+    "kind": "method",
+    "line": 7,
+    "signature": "def CallGraphLinker.link(self, symbols)",
+    "callees": [
+      "sorted",
+      "CallGraphLinker._canonical_names",
+      "setdefault",
+      "get",
+      "append",
+      "ast_indexer.domain.models.CallEdge"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker._canonical_names",
+    "kind": "method",
+    "line": 34,
+    "signature": "def CallGraphLinker._canonical_names(self, symbol)",
+    "callees": [
+      "CallGraphLinker._module_name"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/call_graph_linker.py",
+    "symbol": "CallGraphLinker._module_name",
+    "kind": "method",
+    "line": 40,
+    "signature": "def CallGraphLinker._module_name(self, path)",
+    "callees": [
+      "strip",
+      "endswith",
+      "replace",
+      "len"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService",
+    "kind": "class",
+    "line": 12,
+    "signature": "class IndexPythonRepositoryService",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.__init__",
+    "kind": "method",
+    "line": 13,
+    "signature": "def IndexPythonRepositoryService.__init__(self, repository_reader, index_store, observability, extractor)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.index_repository",
+    "kind": "method",
+    "line": 25,
+    "signature": "def IndexPythonRepositoryService.index_repository(self, repo, trace_id)",
+    "callees": [
+      "list_python_files",
+      "IndexPythonRepositoryService.index_repository_subset"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/index_python_repository_service.py",
+    "symbol": "IndexPythonRepositoryService.index_repository_subset",
+    "kind": "method",
+    "line": 34,
+    "signature": "def IndexPythonRepositoryService.index_repository_subset(self, repo, trace_id, file_paths, deleted_paths)",
+    "callees": [
+      "datetime.datetime.now",
+      "start_span",
+      "delete_symbols_for_paths",
+      "ast_indexer.domain.models.IndexRunMetrics",
+      "end_span",
+      "read_python_file",
+      "extract",
+      "len",
+      "upsert_symbols",
+      "int",
+      "total_seconds"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService",
+    "kind": "class",
+    "line": 9,
+    "signature": "class OAuthSessionService",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.__init__",
+    "kind": "method",
+    "line": 10,
+    "signature": "def OAuthSessionService.__init__(self, token_store, observability)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.save_token",
+    "kind": "method",
+    "line": 14,
+    "signature": "def OAuthSessionService.save_token(self, trace_id, user_id, access_token, scopes, expires_in_seconds)",
+    "callees": [
+      "start_span",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "save",
+      "end_span",
+      "list",
+      "datetime.datetime.now",
+      "datetime.timedelta",
+      "isoformat"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/application/oauth_session_service.py",
+    "symbol": "OAuthSessionService.get_valid_token",
+    "kind": "method",
+    "line": 48,
+    "signature": "def OAuthSessionService.get_valid_token(self, trace_id, user_id)",
+    "callees": [
+      "start_span",
+      "get",
+      "datetime.datetime.now",
+      "end_span"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_build_parser",
+    "kind": "function",
+    "line": 16,
+    "signature": "def _build_parser()",
+    "callees": [
+      "argparse.ArgumentParser",
+      "add_subparsers",
+      "add_parser",
+      "add_argument"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "run_index_once",
+    "kind": "function",
+    "line": 29,
+    "signature": "def run_index_once(workspace_root, repo, state_root, trace_id)",
+    "callees": [
+      "ast_indexer.main.build_persistent_index_service",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "list_python_files",
+      "_read_manifest",
+      "set",
+      "sorted",
+      "index_repository_subset",
+      "_write_manifest",
+      "_read_symbols",
+      "link",
+      "mkdir",
+      "write_text",
+      "hexdigest",
+      "len",
+      "json.dumps",
+      "int",
+      "str",
+      "read_python_file",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker",
+      "strftime",
+      "hashlib.sha256",
+      "total_seconds",
+      "encode",
+      "get",
+      "datetime.datetime.now",
+      "uuid.uuid4"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_read_symbols",
+    "kind": "function",
+    "line": 101,
+    "signature": "def _read_symbols(index_file)",
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text",
+      "ast_indexer.domain.models.SymbolRecord",
+      "tuple",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_read_manifest",
+    "kind": "function",
+    "line": 120,
+    "signature": "def _read_manifest(manifest_file)",
+    "callees": [
+      "json.loads",
+      "exists",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "_write_manifest",
+    "kind": "function",
+    "line": 126,
+    "signature": "def _write_manifest(manifest_file, manifest)",
+    "callees": [
+      "mkdir",
+      "write_text",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/cli.py",
+    "symbol": "main",
+    "kind": "function",
+    "line": 131,
+    "signature": "def main(argv)",
+    "callees": [
+      "_build_parser",
+      "parse_args",
+      "error",
+      "run_index_once",
+      "print",
+      "json.dumps"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "SymbolRecord",
+    "kind": "class",
+    "line": 8,
+    "signature": "class SymbolRecord",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "CallEdge",
+    "kind": "class",
+    "line": 19,
+    "signature": "class CallEdge",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "IndexRunMetrics",
+    "kind": "class",
+    "line": 30,
+    "signature": "class IndexRunMetrics",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "TraceSpan",
+    "kind": "class",
+    "line": 38,
+    "signature": "class TraceSpan",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/domain/models.py",
+    "symbol": "TraceSpan.finish",
+    "kind": "method",
+    "line": 48,
+    "signature": "def TraceSpan.finish(self, output_payload, metadata)",
+    "callees": [
+      "datetime.datetime.now"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "build_index_service",
+    "kind": "function",
+    "line": 14,
+    "signature": "def build_index_service(workspace_root)",
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/main.py",
+    "symbol": "build_persistent_index_service",
+    "kind": "function",
+    "line": 27,
+    "signature": "def build_persistent_index_service(workspace_root, state_root)",
+    "callees": [
+      "ast_indexer.adapters.observability.jsonl_file_observability_adapter.JsonlFileObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "ExtractedFile",
+    "kind": "class",
+    "line": 10,
+    "signature": "class ExtractedFile",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "ImportAliases",
+    "kind": "class",
+    "line": 16,
+    "signature": "class ImportAliases",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor",
+    "kind": "class",
+    "line": 20,
+    "signature": "class PythonAstSymbolExtractor",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor.extract",
+    "kind": "method",
+    "line": 23,
+    "signature": "def PythonAstSymbolExtractor.extract(self, repo, path, source)",
+    "callees": [
+      "ast.parse",
+      "PythonAstSymbolExtractor._collect_import_aliases",
+      "ExtractedFile",
+      "isinstance",
+      "append",
+      "PythonAstSymbolExtractor._function_symbol",
+      "PythonAstSymbolExtractor._async_function_symbol",
+      "PythonAstSymbolExtractor._class_symbol",
+      "PythonAstSymbolExtractor._method_symbol"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._function_symbol",
+    "kind": "method",
+    "line": 62,
+    "signature": "def PythonAstSymbolExtractor._function_symbol(self, repo, path, node, import_aliases)",
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "PythonAstSymbolExtractor._build_signature",
+      "PythonAstSymbolExtractor._collect_callees"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "kind": "method",
+    "line": 73,
+    "signature": "def PythonAstSymbolExtractor._async_function_symbol(self, repo, path, node, import_aliases)",
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "PythonAstSymbolExtractor._collect_callees",
+      "PythonAstSymbolExtractor._build_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._class_symbol",
+    "kind": "method",
+    "line": 90,
+    "signature": "def PythonAstSymbolExtractor._class_symbol(self, repo, path, node)",
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._method_symbol",
+    "kind": "method",
+    "line": 101,
+    "signature": "def PythonAstSymbolExtractor._method_symbol(self, repo, path, class_name, node, is_async, import_aliases)",
+    "callees": [
+      "ast_indexer.domain.models.SymbolRecord",
+      "PythonAstSymbolExtractor._collect_callees",
+      "PythonAstSymbolExtractor._build_signature"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._build_signature",
+    "kind": "method",
+    "line": 124,
+    "signature": "def PythonAstSymbolExtractor._build_signature(self, name, args)",
+    "callees": [
+      "join"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "kind": "method",
+    "line": 128,
+    "signature": "def PythonAstSymbolExtractor._collect_import_aliases(self, tree)",
+    "callees": [
+      "ImportAliases",
+      "isinstance",
+      "split"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "symbol": "PythonAstSymbolExtractor._collect_callees",
+    "kind": "method",
+    "line": 145,
+    "signature": "def PythonAstSymbolExtractor._collect_callees(self, node, import_aliases, class_name)",
+    "callees": [
+      "ast.walk",
+      "tuple",
+      "isinstance",
+      "fromkeys",
+      "append",
+      "get"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class IndexStorePort",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.upsert_symbols",
+    "kind": "method",
+    "line": 9,
+    "signature": "def IndexStorePort.upsert_symbols(self, symbols)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.delete_symbols_for_paths",
+    "kind": "method",
+    "line": 12,
+    "signature": "def IndexStorePort.delete_symbols_for_paths(self, repo, paths)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/index_store.py",
+    "symbol": "IndexStorePort.list_symbols",
+    "kind": "method",
+    "line": 15,
+    "signature": "def IndexStorePort.list_symbols(self)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenRecord",
+    "kind": "class",
+    "line": 9,
+    "signature": "class OAuthTokenRecord",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort",
+    "kind": "class",
+    "line": 16,
+    "signature": "class OAuthTokenStorePort",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort.save",
+    "kind": "method",
+    "line": 17,
+    "signature": "def OAuthTokenStorePort.save(self, token)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/oauth.py",
+    "symbol": "OAuthTokenStorePort.get",
+    "kind": "method",
+    "line": 20,
+    "signature": "def OAuthTokenStorePort.get(self, user_id)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort",
+    "kind": "class",
+    "line": 8,
+    "signature": "class ObservabilityPort",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.start_span",
+    "kind": "method",
+    "line": 9,
+    "signature": "def ObservabilityPort.start_span(self, name, trace_id, input_payload)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.end_span",
+    "kind": "method",
+    "line": 12,
+    "signature": "def ObservabilityPort.end_span(self, span, output_payload, metadata)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/observability.py",
+    "symbol": "ObservabilityPort.list_spans",
+    "kind": "method",
+    "line": 15,
+    "signature": "def ObservabilityPort.list_spans(self)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryFile",
+    "kind": "class",
+    "line": 8,
+    "signature": "class RepositoryFile",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort",
+    "kind": "class",
+    "line": 14,
+    "signature": "class RepositoryReaderPort",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort.list_python_files",
+    "kind": "method",
+    "line": 15,
+    "signature": "def RepositoryReaderPort.list_python_files(self, repo)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "src/ast_indexer/ports/repository_reader.py",
+    "symbol": "RepositoryReaderPort.read_python_file",
+    "kind": "method",
+    "line": 18,
+    "signature": "def RepositoryReaderPort.read_python_file(self, repo, path)",
+    "callees": []
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_call_graph_linker.py",
+    "symbol": "test_links_cross_file_calls_using_module_qualified_callee",
+    "kind": "function",
+    "line": 5,
+    "signature": "def test_links_cross_file_calls_using_module_qualified_callee()",
+    "callees": [
+      "link",
+      "ast_indexer.domain.models.SymbolRecord",
+      "len",
+      "ast_indexer.application.call_graph_linker.CallGraphLinker"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_cli_mvp.py",
+    "symbol": "test_cli_index_command_creates_persistent_artifacts",
+    "kind": "function",
+    "line": 7,
+    "signature": "def test_cli_index_command_creates_persistent_artifacts(tmp_path, capsys)",
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.cli.main",
+      "readouterr",
+      "json.loads",
+      "exists",
+      "splitlines",
+      "read_text",
+      "len",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_cli_mvp.py",
+    "symbol": "test_cli_index_command_is_incremental_across_runs",
+    "kind": "function",
+    "line": 71,
+    "signature": "def test_cli_index_command_is_incremental_across_runs(tmp_path, capsys)",
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.cli.main",
+      "readouterr",
+      "unlink",
+      "json.loads",
+      "read_text",
+      "len",
+      "str"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_index_python_repository_service.py",
+    "symbol": "test_index_repository_collects_symbols_and_emits_spans",
+    "kind": "function",
+    "line": 10,
+    "signature": "def test_index_repository_collects_symbols_and_emits_spans(tmp_path)",
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService",
+      "index_repository",
+      "list_spans",
+      "len",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "list_symbols"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_index_python_repository_service.py",
+    "symbol": "test_index_repository_subset_prunes_deleted_paths",
+    "kind": "function",
+    "line": 45,
+    "signature": "def test_index_repository_subset_prunes_deleted_paths(tmp_path)",
+    "callees": [
+      "mkdir",
+      "write_text",
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.repository.local_fs_repository_reader_adapter.LocalFsRepositoryReaderAdapter",
+      "ast_indexer.adapters.index_store.in_memory_symbol_index_store_adapter.InMemorySymbolIndexStoreAdapter",
+      "ast_indexer.application.index_python_repository_service.IndexPythonRepositoryService",
+      "index_repository",
+      "index_repository_subset",
+      "list_symbols",
+      "len",
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_oauth_session_service.py",
+    "symbol": "test_save_and_get_valid_token",
+    "kind": "function",
+    "line": 9,
+    "signature": "def test_save_and_get_valid_token()",
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "save_token",
+      "get_valid_token"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_oauth_session_service.py",
+    "symbol": "test_expired_token_returns_none",
+    "kind": "function",
+    "line": 26,
+    "signature": "def test_expired_token_returns_none()",
+    "callees": [
+      "ast_indexer.adapters.observability.in_memory_observability_adapter.InMemoryObservabilityAdapter",
+      "ast_indexer.adapters.oauth.in_memory_oauth_token_store_adapter.InMemoryOAuthTokenStoreAdapter",
+      "ast_indexer.ports.oauth.OAuthTokenRecord",
+      "save",
+      "ast_indexer.application.oauth_session_service.OAuthSessionService",
+      "get_valid_token",
+      "datetime.datetime"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_symbol_store_persists_and_reloads",
+    "kind": "function",
+    "line": 8,
+    "signature": "def test_json_file_symbol_store_persists_and_reloads(tmp_path)",
+    "callees": [
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "upsert_symbols",
+      "exists",
+      "list_symbols",
+      "len",
+      "ast_indexer.domain.models.SymbolRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_jsonl_observability_writes_completed_span",
+    "kind": "function",
+    "line": 35,
+    "signature": "def test_jsonl_observability_writes_completed_span(tmp_path)",
+    "callees": [
+      "ast_indexer.adapters.observability.jsonl_file_observability_adapter.JsonlFileObservabilityAdapter",
+      "start_span",
+      "end_span",
+      "exists",
+      "splitlines",
+      "len",
+      "read_text"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_persistent_adapters.py",
+    "symbol": "test_json_file_symbol_store_deletes_paths_and_persists",
+    "kind": "function",
+    "line": 49,
+    "signature": "def test_json_file_symbol_store_deletes_paths_and_persists(tmp_path)",
+    "callees": [
+      "ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter.JsonFileSymbolIndexStoreAdapter",
+      "upsert_symbols",
+      "delete_symbols_for_paths",
+      "list_symbols",
+      "len",
+      "ast_indexer.domain.models.SymbolRecord"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_python_ast_symbol_extractor.py",
+    "symbol": "test_extracts_functions_classes_methods_and_callees",
+    "kind": "function",
+    "line": 4,
+    "signature": "def test_extracts_functions_classes_methods_and_callees()",
+    "callees": [
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "extract",
+      "next"
+    ]
+  },
+  {
+    "repo": "worker-indexer-py",
+    "path": "tests/test_python_ast_symbol_extractor.py",
+    "symbol": "test_resolves_import_aliases_and_self_method_calls",
+    "kind": "function",
+    "line": 31,
+    "signature": "def test_resolves_import_aliases_and_self_method_calls()",
+    "callees": [
+      "ast_indexer.parsing.python_ast_symbol_extractor.PythonAstSymbolExtractor",
+      "extract",
+      "next"
+    ]
+  }
+]

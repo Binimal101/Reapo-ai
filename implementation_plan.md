@@ -13,6 +13,11 @@ This plan is split into:
 - Agent execution steps (what to code and in what order)
 - Human intervention checkpoints (tokens, accounts, infrastructure approvals)
 
+The plan explicitly includes a frontend-facing middleware API for:
+- account creation and identity linking
+- GitHub sync and installation onboarding
+- user-defined "systems" composed of multiple repositories
+
 ---
 
 ## 2) Delivery Strategy
@@ -29,16 +34,17 @@ Major services/modules to implement:
 1. frontend/ (optional thin UI for auth, run trigger, run status)
 2. api-gateway/ (auth/session, run orchestration API)
 3. github-access/ (OAuth, token refresh, webhook handling)
-4. indexer/ (incremental symbol extraction + embeddings)
-5. vector-store/ adapters (pgvector or managed provider)
-6. research-pipeline/ (semantic prodding + live repo reader)
-7. relevancy-engine/ (parallel scoring workers)
-8. reducer-engine/ (tiered context compression)
-9. orchestrator/ (state machine + tool routing)
-10. writer-agent/ (branch, commit, PR flow)
-11. memory-agent/ (rolling summary policy)
-12. observability/ (Langfuse integration + alerting)
-13. infra/ (docker compose, env templates, deployment)
+4. middleware-api/ (frontend BFF for accounts, systems, memberships, repo linking)
+5. indexer/ (incremental symbol extraction + embeddings)
+6. vector-store/ adapters (pgvector or managed provider)
+7. research-pipeline/ (semantic prodding + live repo reader)
+8. relevancy-engine/ (parallel scoring workers)
+9. reducer-engine/ (tiered context compression)
+10. orchestrator/ (state machine + tool routing)
+11. writer-agent/ (branch, commit, PR flow)
+12. memory-agent/ (rolling summary policy)
+13. observability/ (Langfuse integration + alerting)
+14. infra/ (docker compose, env templates, deployment)
 
 ---
 
@@ -115,6 +121,54 @@ Deliverables:
 - User can connect repos
 - System can verify read/write access per repo
 - push webhook events are received and authenticated
+
+---
+
+### Phase 2.5 - Frontend Middleware API (Accounts, Systems, Multi-Tenant Auth)
+Goal: Provide a frontend-ready API where users create accounts, sync GitHub, and define multi-repo systems with safe tenant isolation.
+
+Steps:
+1. Define multi-tenant data model and contracts:
+   - User
+   - TenantAccount
+   - System (logical workspace)
+   - SystemRepo (many repos per system)
+   - Membership/role
+   - GithubIdentity/GithubInstallationLink
+2. Build account/session endpoints for frontend:
+   - sign-up/sign-in/session status
+   - connect/disconnect GitHub identity
+   - account profile and org membership views
+3. Build systems API:
+   - create/update/archive system
+   - attach/detach repositories to a system
+   - list systems and repos by tenant/membership
+4. Implement multi-tenant authorization middleware:
+   - enforce tenant boundary on every request
+   - enforce role checks (owner/admin/member/viewer)
+   - enforce per-repo capability checks (read/write/admin)
+5. Implement token broker endpoints for orchestrator/writer:
+   - resolve installation by owner/repo or installation_id
+   - mint short-lived installation tokens on demand
+   - return clear install-required responses instead of generic failures
+6. Add installation onboarding flow endpoints:
+   - generate install URL for missing installation
+   - callback/confirmation endpoint after install
+   - retry token mint after installation is completed
+7. Add audit and abuse controls:
+   - audit log for permission and token events
+   - request rate limits per account/system
+   - suspicious activity flags (token churn, repeated denied writes)
+8. Add integration tests for tenant isolation and cross-repo systems:
+   - user A cannot access user B systems
+   - system with 2+ repos can read/query both
+   - write request blocked when repo permission is read-only
+
+Deliverables:
+- Frontend can create accounts and sync GitHub identity
+- Frontend can create systems spanning multiple repositories
+- Middleware returns tenant-safe, permission-aware token responses for r/w operations
+- Missing installation state is a guided onboarding response, not an opaque error
 
 ---
 
@@ -366,6 +420,27 @@ These cannot be fully automated and require owner action.
 1. Validate generated PR quality on pilot repos.
 2. Sign off on alert thresholds and on-call ownership.
 3. Approve production rollout and rollback criteria.
+
+### F) Human Workflow Outside Code Scope
+1. Define customer onboarding flow and ownership:
+   - who assists first-time GitHub App installation for users/org admins
+   - expected response times and escalation path for install failures
+2. Define support runbooks for access incidents:
+   - repo not visible in system
+   - installation exists but token mint fails
+   - write permission denied after role change
+3. Define trust and consent language:
+   - explain what repository metadata/code is read
+   - explain where data is stored and retention period
+   - publish revocation and data deletion process
+4. Define account lifecycle operations:
+   - member invite/approval policy for shared systems
+   - offboarding and immediate access revocation checklist
+   - duplicate account merge and ownership transfer procedure
+5. Define governance for manual overrides:
+   - when support can temporarily unblock access
+   - approval chain for emergency write enablement
+   - post-incident review requirement for every manual override
 
 ---
 

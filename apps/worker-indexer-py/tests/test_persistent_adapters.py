@@ -2,7 +2,8 @@ from pathlib import Path
 
 from ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter import JsonFileSymbolIndexStoreAdapter
 from ast_indexer.adapters.observability.jsonl_file_observability_adapter import JsonlFileObservabilityAdapter
-from ast_indexer.domain.models import SymbolRecord
+from ast_indexer.adapters.vector_store.json_file_vector_store_adapter import JsonFileVectorStoreAdapter
+from ast_indexer.domain.models import SymbolRecord, VectorRecord
 
 
 def test_json_file_symbol_store_persists_and_reloads(tmp_path: Path) -> None:
@@ -44,3 +45,111 @@ def test_jsonl_observability_writes_completed_span(tmp_path: Path) -> None:
     assert len(lines) == 1
     assert 'trace-55' in lines[0]
     assert 'index_repository' in lines[0]
+
+
+def test_json_file_symbol_store_deletes_paths_and_persists(tmp_path: Path) -> None:
+    target = tmp_path / 'index' / 'symbols.json'
+    store = JsonFileSymbolIndexStoreAdapter(target)
+
+    store.upsert_symbols(
+        [
+            SymbolRecord(
+                repo='checkout-service',
+                path='src/orders.py',
+                symbol='process',
+                kind='function',
+                line=1,
+                signature='def process(order_id)',
+                callees=(),
+            ),
+            SymbolRecord(
+                repo='checkout-service',
+                path='src/pricing.py',
+                symbol='apply_discount',
+                kind='function',
+                line=1,
+                signature='def apply_discount(total)',
+                callees=(),
+            ),
+        ]
+    )
+
+    removed = store.delete_symbols_for_paths('checkout-service', ['src/pricing.py'])
+    assert removed == 1
+
+    reloaded = JsonFileSymbolIndexStoreAdapter(target)
+    symbols = reloaded.list_symbols()
+    assert len(symbols) == 1
+    assert symbols[0].symbol == 'process'
+
+
+def test_json_file_vector_store_persists_and_reloads(tmp_path: Path) -> None:
+    target = tmp_path / 'index' / 'vectors.json'
+    store = JsonFileVectorStoreAdapter(target)
+
+    store.upsert_vectors(
+        [
+            VectorRecord(
+                repo='checkout-service',
+                path='src/orders.py',
+                symbol='process',
+                kind='function',
+                signature='def process(order_id)',
+                docstring='Process an order.',
+                embedding=(0.1, -0.2, 0.3),
+                tree_sha='tree-1',
+                blob_sha='blob-1',
+                access_level='read',
+            )
+        ]
+    )
+
+    assert target.exists()
+
+    reloaded = JsonFileVectorStoreAdapter(target)
+    vectors = reloaded.list_vectors()
+    assert len(vectors) == 1
+    assert vectors[0].symbol == 'process'
+    assert vectors[0].docstring == 'Process an order.'
+
+
+def test_json_file_vector_store_deletes_paths_and_persists(tmp_path: Path) -> None:
+    target = tmp_path / 'index' / 'vectors.json'
+    store = JsonFileVectorStoreAdapter(target)
+
+    store.upsert_vectors(
+        [
+            VectorRecord(
+                repo='checkout-service',
+                path='src/orders.py',
+                symbol='process',
+                kind='function',
+                signature='def process(order_id)',
+                docstring=None,
+                embedding=(0.1, -0.2, 0.3),
+                tree_sha='tree-1',
+                blob_sha='blob-1',
+                access_level='read',
+            ),
+            VectorRecord(
+                repo='checkout-service',
+                path='src/pricing.py',
+                symbol='apply_discount',
+                kind='function',
+                signature='def apply_discount(total)',
+                docstring=None,
+                embedding=(0.0, 0.5, -0.1),
+                tree_sha='tree-1',
+                blob_sha='blob-2',
+                access_level='read',
+            ),
+        ]
+    )
+
+    removed = store.delete_vectors_for_paths('checkout-service', ['src/pricing.py'])
+    assert removed == 1
+
+    reloaded = JsonFileVectorStoreAdapter(target)
+    vectors = reloaded.list_vectors()
+    assert len(vectors) == 1
+    assert vectors[0].symbol == 'process'

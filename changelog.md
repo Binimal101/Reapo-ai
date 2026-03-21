@@ -6,6 +6,78 @@ Reapo-ai
 ## Last Updated
 2026-03-20
 
+## Session Milestone (2026-03-20)
+
+### MVP shipped
+- Added runnable module entrypoint for indexing with persistent outputs
+- Added CLI command surface for indexing a target repo from a workspace root
+- Added integration test that verifies CLI run, summary output, and artifact creation
+- Executed a live MVP run against apps/worker-indexer-py and verified artifacts
+- Added cross-file call graph linker and persisted linked edges artifact
+- Extended CLI summary with linked_edges and call_edges_file
+- Added tests validating cross-file call linkage and edge persistence
+- Added manifest-based incremental indexing with changed/deleted/skipped file detection
+- Added stale symbol pruning for deleted files in index store adapters
+- Extended CLI summary with changed_files, deleted_files, skipped_files, and manifest_file
+- Added unresolved call edge reporting and persisted unresolved_call_edges.json
+- Added resolution diagnostics to CLI output: unresolved_edges, resolution_rate, linkage_quality
+- Added actionable unresolved-edge classification (builtin, dynamic attr, external qualified, missing symbol)
+- Added actionable_unresolved_edges and actionable_resolution_rate to better reflect internal linkage quality
+- Added GitHub push payload resolver for changed/deleted Python files
+- Added queue contract and in-memory queue adapter for index jobs
+- Added dispatch service to enqueue index jobs from push payloads with observability
+- Added worker service to consume queued jobs and execute subset indexing
+- Added GitHub webhook HTTP handler module (framework-agnostic) for event routing
+- Added HMAC SHA256 signature verification adapter for X-Hub-Signature-256
+- Added webhook handler tests for valid push, invalid signature, and ignored events
+- Added runnable local webhook server endpoint at /webhooks/github via CLI command serve-webhook
+- Added durable Redis queue adapter for webhook index jobs
+- Added webhook runtime queue backend selection (memory or redis) with Redis URL/key options
+- Added queue backend wiring tests and Redis adapter round-trip tests
+- Added retry-aware index job model fields (attempt, max_attempts)
+- Added dead-letter queue support in both in-memory and Redis queue adapters
+- Added worker retry logic: failed jobs are requeued until max_attempts, then dead-lettered
+- Added server/CLI options for max attempts and Redis dead-letter key
+- Added explicit worker outcome telemetry in webhook responses: processed, retried, dead_lettered
+- Added webhook worker processing span emission with outcome metrics in observability logs
+- Added worker outcome object to remove ambiguity between retry, dead-letter, and no-job states
+- Added embedding generator port and vector store port for indexing pipeline
+- Added deterministic local embedding adapter and persistent JSON vector store adapter
+- Added vector record metadata upsert: repo, path, kind, symbol, tree_sha, blob_sha, access_level
+- Added vector delete synchronization for removed file paths
+- Added docstring extraction and persistence for symbol records
+- Added vector metrics to CLI/index run summary: vectors_upserted, vectors_deleted, vectors_file
+
+### New MVP command
+- python -m ast_indexer index --workspace-root <path> --repo <repo-name> --state-root <path> [--trace-id <id>]
+
+### Live validation result
+- status: ok
+- first run files_scanned: 25, changed_files: 25, skipped_files: 0
+- second run files_scanned: 0, changed_files: 0, skipped_files: 25
+- symbols_indexed (second run): 0
+- linked_edges (second run): 24
+- diagnostics run unresolved_edges: 242, resolution_rate: 0.097, linkage_quality: low
+- quality run actionable_unresolved_edges: 96, actionable_resolution_rate: 0.2258
+- webhook queue slice tests: passed (17 total tests, 95.02% coverage)
+- webhook HTTP slice tests: passed (21 total tests, 95.20% coverage)
+- live webhook smoke test: signed push accepted, queued and processed (files_scanned=1, symbols_indexed=6)
+- durable queue slice tests: passed (27 total tests, 89.18% coverage)
+- retry/dead-letter slice tests: passed (30 total tests, 89.30% coverage)
+- worker outcome telemetry slice tests: passed (32 total tests, 89.52% coverage)
+- Phase 3 vector/indexing completion tests: passed (34 total tests, 90.71% coverage)
+- phase3 production smoke run: files_scanned=45, symbols_indexed=204, vectors_upserted=204
+- vector metadata smoke validation: tree_sha/blob_sha/access_level present in persisted vectors.json
+
+### Phase 3 completion status
+- Completed for production baseline in Python worker-indexer slice
+- Phase 3 required capabilities now present:
+  - webhook ingestion and changed-file resolver
+  - incremental AST symbol extraction with docstrings
+  - embedding generation and vector upsert with required metadata
+  - symbol/vector deletion path for removed files
+  - observability spans and indexing metrics
+
 ## Purpose of this changelog
 This document captures:
 - what has been completed so far

@@ -1,0 +1,254 @@
+[
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.__init__",
+    "callee": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "resolved_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._load_existing"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.upsert_symbols",
+    "callee": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._persist"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "callee": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_path": "src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._persist"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link",
+    "callee": "CallGraphLinker.link_report",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker.link_report",
+    "resolved_canonical": "CallGraphLinker.link_report"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinkReport",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinkReport",
+    "resolved_canonical": "CallGraphLinkReport"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._canonical_names",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._canonical_names",
+    "resolved_canonical": "CallGraphLinker._canonical_names"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._module_name",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._module_name",
+    "resolved_canonical": "CallGraphLinker._module_name"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._classify_unresolved",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._classify_unresolved",
+    "resolved_canonical": "CallGraphLinker._classify_unresolved"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker._canonical_names",
+    "callee": "CallGraphLinker._module_name",
+    "resolved_path": "src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._module_name",
+    "resolved_canonical": "CallGraphLinker._module_name"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/application/index_python_repository_service.py",
+    "caller_symbol": "IndexPythonRepositoryService.index_repository",
+    "callee": "IndexPythonRepositoryService.index_repository_subset",
+    "resolved_path": "src/ast_indexer/application/index_python_repository_service.py",
+    "resolved_symbol": "IndexPythonRepositoryService.index_repository_subset",
+    "resolved_canonical": "IndexPythonRepositoryService.index_repository_subset"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_read_manifest",
+    "resolved_path": "src/ast_indexer/cli.py",
+    "resolved_symbol": "_read_manifest",
+    "resolved_canonical": "_read_manifest"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_write_manifest",
+    "resolved_path": "src/ast_indexer/cli.py",
+    "resolved_symbol": "_write_manifest",
+    "resolved_canonical": "_write_manifest"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_read_symbols",
+    "resolved_path": "src/ast_indexer/cli.py",
+    "resolved_symbol": "_read_symbols",
+    "resolved_canonical": "_read_symbols"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/cli.py",
+    "caller_symbol": "main",
+    "callee": "_build_parser",
+    "resolved_path": "src/ast_indexer/cli.py",
+    "resolved_symbol": "_build_parser",
+    "resolved_canonical": "_build_parser"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/cli.py",
+    "caller_symbol": "main",
+    "callee": "run_index_once",
+    "resolved_path": "src/ast_indexer/cli.py",
+    "resolved_symbol": "run_index_once",
+    "resolved_canonical": "run_index_once"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._collect_import_aliases",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_import_aliases"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "ExtractedFile",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "ExtractedFile",
+    "resolved_canonical": "ExtractedFile"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._function_symbol",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._function_symbol"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._async_function_symbol",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._async_function_symbol"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._class_symbol",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._class_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._class_symbol"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._method_symbol",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._method_symbol"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": "worker-indexer-py",
+    "caller_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "callee": "ImportAliases",
+    "resolved_path": "src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "ImportAliases",
+    "resolved_canonical": "ImportAliases"
+  }
+]
