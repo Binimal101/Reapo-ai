@@ -52,6 +52,7 @@ class CrossFileLinker:
                     kind=sym.kind,
                     line=sym.line,
                     signature=sym.signature,
+                    docstring=sym.docstring,
                     callees=sym.callees,
                     linked_callees=tuple(dict.fromkeys(linked)),
                 )

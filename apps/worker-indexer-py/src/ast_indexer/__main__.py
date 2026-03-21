@@ -22,12 +22,13 @@ def main() -> None:
     metrics = service.index_repository(repo=args.repo, trace_id=trace_id)
 
     duration_ms = int((metrics.finished_at - metrics.started_at).total_seconds() * 1000)
-    print(f'Repo:            {args.repo}')
-    print(f'Files scanned:   {metrics.files_scanned}')
-    print(f'Symbols indexed: {metrics.symbols_indexed}')
-    print(f'Linked edges:    {metrics.linked_edges}')
-    print(f'Duration:        {duration_ms}ms')
-    print(f'Trace ID:        {trace_id}')
+    print(f'Repo:                {args.repo}')
+    print(f'Files scanned:       {metrics.files_scanned}')
+    print(f'Symbols indexed:     {metrics.symbols_indexed}')
+    print(f'Linked edges:        {metrics.linked_edges}')
+    print(f'Embeddings generated:{metrics.embeddings_generated}')
+    print(f'Duration:            {duration_ms}ms')
+    print(f'Trace ID:            {trace_id}')
 
 
 if __name__ == '__main__':

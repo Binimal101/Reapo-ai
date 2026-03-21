@@ -41,6 +41,7 @@ def test_index_repository_collects_symbols_and_emits_spans(tmp_path: Path) -> No
     assert metrics.files_scanned == 2
     assert metrics.symbols_indexed == 2
     assert metrics.linked_edges == 0  # no cross-file calls in these fixtures
+    assert metrics.embeddings_generated == 0  # no embedding port configured
     assert len(index_store.list_symbols()) == 2
 
     spans = observability.list_spans()
