@@ -7,6 +7,7 @@ import pytest
 
 from ast_indexer.adapters.queue.in_memory_index_job_queue_adapter import InMemoryIndexJobQueueAdapter
 from ast_indexer.application.index_job_worker_service import IndexJobProcessOutcome
+from ast_indexer.application.writer_pr_service import WriterFileChange
 from ast_indexer.domain.index_jobs import IndexJob
 from ast_indexer.server import GithubWebhookServerApp
 
@@ -349,3 +350,75 @@ def test_chat_session_access_is_scoped_to_authenticated_user(tmp_path: Path) -> 
     intruder_code, intruder_payload = app.chat_get_session(session_id, requesting_user_id='intruder')
     assert intruder_code == 403
     assert intruder_payload['reason'] == 'session_access_denied'
+
+
+def test_server_app_writer_open_pr_uses_writer_service(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    class _FakeWriterService:
+        def open_pull_request(self, **kwargs: object) -> dict:
+            return {
+                'status': 'ok',
+                'mode': 'dry_run' if bool(kwargs.get('dry_run')) else 'applied',
+                'owner': kwargs.get('owner'),
+                'repo': kwargs.get('repo'),
+                'files_changed': 1,
+                'pull_request': {'number': 9, 'html_url': 'https://example/pull/9', 'reused': False},
+            }
+
+    app._writer_service = _FakeWriterService()  # type: ignore[assignment]
+    code, payload = app.writer_open_pr(
+        requesting_user_id='alice',
+        owner='acme',
+        repo='checkout',
+        base_branch='main',
+        title='Fix checkout',
+        body='Body',
+        files=[WriterFileChange(path='src/checkout.py', content='print(1)')],
+        branch_name='reapo-ai/fix-checkout',
+        commit_message='fix: checkout',
+        draft=False,
+        dry_run=True,
+    )
+
+    assert code == 200
+    assert payload['status'] == 'ok'
+    assert payload['mode'] == 'dry_run'
+
+
+def test_server_app_writer_open_pr_handles_permission_error(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    class _DenyWriterService:
+        def open_pull_request(self, **kwargs: object) -> dict:  # noqa: ARG002
+            raise PermissionError('insufficient_repo_permission')
+
+    app._writer_service = _DenyWriterService()  # type: ignore[assignment]
+    code, payload = app.writer_open_pr(
+        requesting_user_id='alice',
+        owner='acme',
+        repo='checkout',
+        base_branch='main',
+        title='Fix checkout',
+        body='Body',
+        files=[WriterFileChange(path='src/checkout.py', content='print(1)')],
+        branch_name='reapo-ai/fix-checkout',
+        commit_message='fix: checkout',
+        draft=False,
+        dry_run=False,
+    )
+
+    assert code == 403
+    assert payload['status'] == 'error'

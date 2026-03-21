@@ -368,6 +368,27 @@ Deliverables:
 - Successful PR creation in write-enabled repo
 - blocked-write behavior in read-only repo
 
+### Phase 8 Implementation Status (Current Slice)
+Implemented in the active Python runtime (`apps/worker-indexer-py`) with frontend-callable API and tests:
+
+1. Writer service added:
+   - `WriterPrService` in `ast_indexer.application.writer_pr_service`
+   - branch create/reuse logic
+   - file write commits via GitHub contents API
+   - open PR reuse (idempotency) when same branch/base already has an open PR
+   - dry-run mode for safe planning
+2. API integration:
+   - authenticated endpoint `POST /writer/pr`
+   - bearer-token middleware enforcement
+   - repo accessibility checks against tenant mapping when available
+3. Error and permission handling:
+   - clear `403` on insufficient repo permission
+   - clear `400` for validation errors
+   - `502` for upstream GitHub API runtime failures
+4. Test coverage:
+   - writer service unit tests for dry-run and PR reuse
+   - server runtime tests for writer endpoint behavior and permission error mapping
+
 ---
 
 ### Phase 9 - Memory Agent and Context-Rot Prevention

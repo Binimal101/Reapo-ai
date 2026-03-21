@@ -33,6 +33,7 @@ from ast_indexer.application.index_job_dispatch_service import IndexJobDispatchS
 from ast_indexer.application.index_job_worker_service import IndexJobWorkerService
 from ast_indexer.application.orchestrator_loop_service import GrepRepoMatch, GrepRepoResult, OrchestratorLoopService
 from ast_indexer.application.oauth_session_service import OAuthSessionService
+from ast_indexer.application.writer_pr_service import WriterFileChange, WriterPrService
 from ast_indexer.main import (
     build_persistent_index_service,
     build_persistent_observability_adapter,
@@ -145,6 +146,7 @@ class GithubWebhookServerApp:
             observability_strict=observability_strict,
         )
         self._github_app_auth = github_app_auth_service or self._build_github_app_auth_service()
+        self._writer_service = WriterPrService(github_auth=self._github_app_auth) if self._github_app_auth else None
         self._chat_orchestrator = chat_orchestrator_service or self._build_chat_orchestrator_service(state_root)
 
     def _build_chat_orchestrator_service(self, state_root: Path) -> ChatOrchestratorService:
@@ -640,6 +642,76 @@ class GithubWebhookServerApp:
             )
         return (200, {'status': 'ok', 'record': record})
 
+    def writer_open_pr(
+        self,
+        *,
+        requesting_user_id: str,
+        owner: str,
+        repo: str,
+        base_branch: str,
+        title: str,
+        body: str,
+        files: list[WriterFileChange],
+        branch_name: str | None,
+        commit_message: str,
+        draft: bool,
+        dry_run: bool,
+    ) -> tuple[int, dict]:
+        if self._writer_service is None:
+            _, status = self.github_auth_status()
+            return (
+                503,
+                {
+                    'status': 'error',
+                    'reason': 'github_app_not_configured',
+                    'missing_fields': status['missing_fields'],
+                },
+            )
+
+        list_accessible = getattr(self._oauth_token_store, 'list_user_accessible_repositories', None)
+        if callable(list_accessible):
+            rows = list_accessible(user_id=requesting_user_id)
+            accessible_rows = rows if isinstance(rows, list) else []
+            accessible = {
+                str(row.get('full_name', '')).lower()
+                for row in accessible_rows
+                if isinstance(row, dict) and isinstance(row.get('full_name'), str)
+            }
+            if accessible and f'{owner}/{repo}'.lower() not in accessible:
+                return (
+                    403,
+                    {
+                        'status': 'error',
+                        'reason': 'repo_not_accessible_for_user',
+                        'owner': owner,
+                        'repo': repo,
+                    },
+                )
+
+        try:
+            payload = self._writer_service.open_pull_request(
+                trace_id=uuid4().hex,
+                owner=owner,
+                repo=repo,
+                base_branch=base_branch,
+                title=title,
+                body=body,
+                files=files,
+                branch_name=branch_name,
+                commit_message=commit_message,
+                draft=draft,
+                dry_run=dry_run,
+            )
+        except PermissionError as exc:
+            return (403, {'status': 'error', 'reason': str(exc)})
+        except ValueError as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+        except RuntimeError as exc:
+            return (502, {'status': 'error', 'reason': str(exc)})
+        except Exception as exc:  # noqa: BLE001
+            return (500, {'status': 'error', 'reason': str(exc)})
+        return (200, payload)
+
     def github_register_webhook(self, owner: str, repo: str, webhook_url: str) -> tuple[int, dict]:
         if self._github_app_auth is None:
             _, status = self.github_auth_status()
@@ -835,6 +907,71 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 if user_id is None:
                     return
                 self._send_json(200, {'status': 'ok', 'user_id': user_id})
+                return
+
+            if parsed.path == '/writer/pr':
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+
+                owner = body.get('owner') if isinstance(body.get('owner'), str) else None
+                repo = body.get('repo') if isinstance(body.get('repo'), str) else None
+                title = body.get('title') if isinstance(body.get('title'), str) else None
+                if not owner or not repo or not title:
+                    self._send_json(400, {'status': 'error', 'reason': 'owner, repo, and title are required'})
+                    return
+
+                files_raw = body.get('files')
+                if not isinstance(files_raw, list) or not files_raw:
+                    self._send_json(400, {'status': 'error', 'reason': 'files must be a non-empty list'})
+                    return
+
+                files: list[WriterFileChange] = []
+                for item in files_raw:
+                    if not isinstance(item, dict):
+                        self._send_json(400, {'status': 'error', 'reason': 'each file entry must be an object'})
+                        return
+                    path = item.get('path')
+                    content = item.get('content')
+                    if not isinstance(path, str) or not path.strip() or not isinstance(content, str):
+                        self._send_json(400, {'status': 'error', 'reason': 'file path and content are required'})
+                        return
+                    files.append(WriterFileChange(path=path, content=content))
+
+                base_branch_raw = body.get('base_branch')
+                base_branch = base_branch_raw if isinstance(base_branch_raw, str) and base_branch_raw else 'main'
+                body_raw = body.get('body')
+                pr_body = body_raw if isinstance(body_raw, str) else ''
+                branch_name_raw = body.get('branch_name')
+                branch_name = branch_name_raw if isinstance(branch_name_raw, str) and branch_name_raw else None
+                commit_message_raw = body.get('commit_message')
+                commit_message = (
+                    commit_message_raw
+                    if isinstance(commit_message_raw, str) and commit_message_raw
+                    else 'chore: apply automated code changes'
+                )
+
+                code, payload = app.writer_open_pr(
+                    requesting_user_id=user_id,
+                    owner=owner,
+                    repo=repo,
+                    base_branch=base_branch,
+                    title=title,
+                    body=pr_body,
+                    files=files,
+                    branch_name=branch_name,
+                    commit_message=commit_message,
+                    draft=bool(body.get('draft', False)),
+                    dry_run=bool(body.get('dry_run', False)),
+                )
+                self._send_json(code, payload)
                 return
 
             if parsed.path == '/chat/sessions':
