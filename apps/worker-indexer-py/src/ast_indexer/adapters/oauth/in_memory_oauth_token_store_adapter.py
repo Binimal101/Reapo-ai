@@ -12,3 +12,6 @@ class InMemoryOAuthTokenStoreAdapter(OAuthTokenStorePort):
 
     def get(self, user_id: str) -> OAuthTokenRecord | None:
         return self._records.get(user_id)
+
+    def list_user_ids(self) -> list[str]:
+        return sorted(self._records.keys())

@@ -7,7 +7,23 @@ name = "ast-indexer"
 version = "0.1.0"
 description = "Python repository AST indexer with ports and adapters"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+	"python-dotenv>=1.0",
+	"redis>=5.0",
+	"langgraph>=0.2",
+]
+
+[project.optional-dependencies]
+embeddings = [
+	"openai>=1.40",
+	"sentence-transformers>=3.0",
+]
+observability = [
+	"langfuse>=2.0",
+]
+auth = [
+	"PyJWT[crypto]>=2.8",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

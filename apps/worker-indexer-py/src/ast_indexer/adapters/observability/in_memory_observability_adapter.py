@@ -11,11 +11,20 @@ class InMemoryObservabilityAdapter(ObservabilityPort):
     def __init__(self) -> None:
         self._spans: list[TraceSpan] = []
 
-    def start_span(self, name: str, trace_id: str, input_payload: dict | None = None) -> TraceSpan:
+    def start_span(
+        self,
+        name: str,
+        trace_id: str,
+        input_payload: dict | None = None,
+        session_id: str | None = None,
+        user_id: str | None = None,
+    ) -> TraceSpan:
         span = TraceSpan(
             name=name,
             trace_id=trace_id,
             span_id=uuid4().hex,
+            session_id=session_id,
+            user_id=user_id,
             started_at=datetime.now(timezone.utc),
             input_payload=input_payload,
         )

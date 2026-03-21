@@ -13,6 +13,11 @@ This plan is split into:
 - Agent execution steps (what to code and in what order)
 - Human intervention checkpoints (tokens, accounts, infrastructure approvals)
 
+The plan explicitly includes a frontend-facing middleware API for:
+- account creation and identity linking
+- GitHub sync and installation onboarding
+- user-defined "systems" composed of multiple repositories
+
 ---
 
 ## 2) Delivery Strategy
@@ -22,6 +27,18 @@ Use an iterative vertical-slice approach:
 3. Scale to multi-repo + write path only after core loop is stable.
 4. Harden for production (security, rate limits, retries, runbooks).
 
+### 2.1) Reality Check Notes (Do Not Regress)
+These notes capture implementation-time learnings and must remain true unless intentionally changed:
+1. Phase 4 is a bounded LangGraph read-only retrieval slice. It is not expected to produce very large context sets.
+2. Candidate breadth in Phase 4 is constrained by:
+   - explicit repo scope provided at runtime
+   - semantic query count produced by the prodder node
+   - top-k cap (CLI default is 8 unless overridden)
+3. "Large" cross-repo breadth is a Phase 5 expectation and depends on iterative expansion/reducer behavior, not the Phase 4 single-pass graph.
+4. In Langfuse mode, non-hex trace IDs (for example, `research-*`) are normalized to provider-compatible 32-hex trace IDs.
+5. When trace normalization occurs, the original caller trace ID must be retained in metadata (for example, `original_trace_id`) for debugging.
+6. `parse_python_file` span floods indicate indexing activity, not necessarily research-graph node expansion.
+
 ---
 
 ## 3) System Decomposition
@@ -29,16 +46,17 @@ Major services/modules to implement:
 1. frontend/ (optional thin UI for auth, run trigger, run status)
 2. api-gateway/ (auth/session, run orchestration API)
 3. github-access/ (OAuth, token refresh, webhook handling)
-4. indexer/ (incremental symbol extraction + embeddings)
-5. vector-store/ adapters (pgvector or managed provider)
-6. research-pipeline/ (semantic prodding + live repo reader)
-7. relevancy-engine/ (parallel scoring workers)
-8. reducer-engine/ (tiered context compression)
-9. orchestrator/ (state machine + tool routing)
-10. writer-agent/ (branch, commit, PR flow)
-11. memory-agent/ (rolling summary policy)
-12. observability/ (Langfuse integration + alerting)
-13. infra/ (docker compose, env templates, deployment)
+4. middleware-api/ (frontend BFF for accounts, systems, memberships, repo linking)
+5. indexer/ (incremental symbol extraction + embeddings)
+6. vector-store/ adapters (pgvector or managed provider)
+7. research-pipeline/ (semantic prodding + live repo reader)
+8. relevancy-engine/ (parallel scoring workers)
+9. reducer-engine/ (tiered context compression)
+10. orchestrator/ (state machine + tool routing)
+11. writer-agent/ (branch, commit, PR flow)
+12. memory-agent/ (rolling summary policy)
+13. observability/ (Langfuse integration + alerting)
+14. infra/ (docker compose, env templates, deployment)
 
 ---
 
@@ -51,7 +69,6 @@ Steps:
 1. Create monorepo structure:
    - apps/api
    - apps/worker-indexer
-   - apps/worker-orchestrator
    - apps/worker-writer
    - apps/web (optional)
    - packages/common
@@ -118,6 +135,54 @@ Deliverables:
 
 ---
 
+### Phase 2.5 - Frontend Middleware API (Accounts, Systems, Multi-Tenant Auth)
+Goal: Provide a frontend-ready API where users create accounts, sync GitHub, and define multi-repo systems with safe tenant isolation.
+
+Steps:
+1. Define multi-tenant data model and contracts:
+   - User
+   - TenantAccount
+   - System (logical workspace)
+   - SystemRepo (many repos per system)
+   - Membership/role
+   - GithubIdentity/GithubInstallationLink
+2. Build account/session endpoints for frontend:
+   - sign-up/sign-in/session status
+   - connect/disconnect GitHub identity
+   - account profile and org membership views
+3. Build systems API:
+   - create/update/archive system
+   - attach/detach repositories to a system
+   - list systems and repos by tenant/membership
+4. Implement multi-tenant authorization middleware:
+   - enforce tenant boundary on every request
+   - enforce role checks (owner/admin/member/viewer)
+   - enforce per-repo capability checks (read/write/admin)
+5. Implement token broker endpoints for orchestrator/writer:
+   - resolve installation by owner/repo or installation_id
+   - mint short-lived installation tokens on demand
+   - return clear install-required responses instead of generic failures
+6. Add installation onboarding flow endpoints:
+   - generate install URL for missing installation
+   - callback/confirmation endpoint after install
+   - retry token mint after installation is completed
+7. Add audit and abuse controls:
+   - audit log for permission and token events
+   - request rate limits per account/system
+   - suspicious activity flags (token churn, repeated denied writes)
+8. Add integration tests for tenant isolation and cross-repo systems:
+   - user A cannot access user B systems
+   - system with 2+ repos can read/query both
+   - write request blocked when repo permission is read-only
+
+Deliverables:
+- Frontend can create accounts and sync GitHub identity
+- Frontend can create systems spanning multiple repositories
+- Middleware returns tenant-safe, permission-aware token responses for r/w operations
+- Missing installation state is a guided onboarding response, not an opaque error
+
+---
+
 ### Phase 3 - Indexing Pipeline (Incremental)
 Goal: Build and maintain symbol index from push events.
 
@@ -139,28 +204,65 @@ Deliverables:
 
 ---
 
-### Phase 4 - Research Pipeline (Read-Only MVP)
-Goal: Convert prompt into relevant live code context.
+### Phase 4 - Research Pipeline (LangGraph Read-Only MVP)
+Goal: Convert a raw prompt into a structured research objective, generate semantic queries, and perform live codebase retrieval via a bounded LangGraph state machine.
 
-Steps:
-1. Implement Reasoning Agent output schema (ResearchObjective).
-2. Implement Semantic Prodder multi-query generation.
-3. Add vector search and dedupe logic.
-4. Build Live Repo Reader:
-   - fetch blobs by sha/path
-   - ETag caching
-   - AST call-graph expansion with depth cap
-5. Return enriched candidate bundles for relevancy stage.
-6. Instrument each stage with spans and metrics.
+Scope guardrail for this phase:
+- This phase is intentionally single-pass and bounded by top-k.
+- Do not treat low candidate counts here as Phase 5 regressions.
 
-Deliverables:
-- Single-run endpoint returns enriched context candidates
-- cache hit and blob fetch stats visible in Langfuse
+**Iterative Development Steps:**
+1. **LangGraph State Definition & Initialization:**
+   - Define the `ResearchState` graph state typed schema (e.g., `raw_prompt`, `research_objective`, `search_queries`, `candidate_snippets`, `enriched_context`).
+   - Scaffold the LangGraph runner class and its core edges (`reasoning_node` -> `prodder_node` -> `retrieval_node`).
+2. **Implement Reasoning Agent Node:**
+   - Write prompt templates to instruct the LLM to parse `raw_prompt` into a structured `ResearchObjective` (intent, explicit entities, repos in scope).
+   - Hook up Langchain/OpenAI wrapper and emit `reasoning_agent` trace span.
+3. **Implement Semantic Prodder Node:**
+   - Translate the `ResearchObjective` into an array of context-rich query strings designed for vector retrieval.
+4. **Vector Search & Deduplication Logic:**
+   - Integrate vector store API to fetch top-K indexed symbols matching the generated query strings.
+   - Combine and deduplicate returned signature records.
+5. **Build Live Repo Reader Node:**
+   - Receive candidate `sig_ids` and fetch raw Python blobs using the GitHub API adapter.
+   - Implement ETag cache wraping to avoid re-fetching unchanged blobs.
+   - Parse AST of downloaded blobs to extract the symbol body and its immediate `callees` (up to depth 2 or 3).
+6. **Graph Compilation & Observability Wiring:**
+   - Connect nodes into the compiled LangGraph execution graph.
+   - Ensure each node emits distinct spans and metrics (e.g., cache hits, blob fetches, token usage) into Langfuse via the LangGraph native callbacks or custom middleware.
+
+**Testing Strategy:**
+- **Unit Tests:** Validate specific Node boundaries (e.g., ensure Reasoning Agent returns a valid Pydantic/JSON schema for `ResearchObjective`).
+- **Mocked Integration:** Run the compiled LangGraph with a mocked Vector DB and GitHub API to assert state transitions happen correctly (prompt -> objective -> queries -> fetched blobs).
+- **Evaluation:** Inject 3 distinct prompt styles ("Where is XYZ defined?", "How does auth work?", "Fix the bug in the order processor") and assert the generated search queries are logically sound.
+
+**Usage Example:**
+```python
+from research_pipeline.graph import ResearchGraph
+
+# Initialize the LangGraph-based research pipeline
+graph = ResearchGraph(vector_store=pgvector_adapter, github_api=gh_client)
+
+# Execute the graph synchronously for a user request
+final_state = graph.invoke({
+    "raw_prompt": "How does the webhook signature verification actually work in the python worker?",
+    "repos_in_scope": ["worker-indexer-py"]
+})
+
+# Access the resulting enriched call-graphs from the terminal state
+print(f"Objective parsed: {final_state['research_objective'].intent}")
+for candidate in final_state['enriched_context']:
+    print(f"Found {candidate.symbol} in {candidate.path}, body length: {len(candidate.body)}")
+```
 
 ---
 
 ### Phase 5 - Parallel Relevancy System
-Goal: Filter and rank context with confidence-based scoring.
+Goal: Filter and rank context with confidence-based scoring and support larger cross-repo candidate frontiers.
+
+Expected behavior shift from Phase 4:
+- This phase is where breadth should increase meaningfully via broader candidate sets and parallel scoring.
+- If breadth remains small, validate repo scope, expansion policy, and threshold settings before blaming reducers.
 
 Steps:
 1. Implement worker pool and load balancer.
@@ -180,20 +282,46 @@ Deliverables:
 Goal: Fit selected context into token budget while preserving key symbols.
 
 Steps:
-1. Implement reducer batch planner and tier scheduler.
-2. Define reducer input/output contracts.
-3. Build token budget calculator and stop condition.
-4. Preserve mandatory entities:
+1. Implement deterministic reducer planner:
+   - stable candidate ordering
+   - bounded context selection (`max_contexts`)
+   - greedy per-item budget allocation with hard budget cap
+2. Define explicit reducer contracts:
+   - input schema: enriched context, token budget, max contexts
+   - output schema: reduced context, truncation flags, token estimates
+   - metadata schema: consumed tokens, utilization, dropped contexts, overrun flag
+3. Add production safeguards:
+   - enforce minimum/maximum per-item token budget
+   - stop processing when token budget reaches zero
+   - guarantee `consumed_tokens <= token_budget`
+4. Preserve mandatory entities in reduced output:
    - symbol IDs
    - repo names
    - file paths
    - open questions
-5. Add overrun safeguards and tier max limits.
-6. Emit reducer tier spans and compression metrics.
+5. Add retry-safe behavior and failure boundaries:
+   - reducer failures must not corrupt upstream retrieval state
+   - reducer span must always close with success/error metadata
+6. Build out observability for every reducer run:
+   - `reducer_engine` span input: enriched_count, token_budget, max_contexts
+   - `reducer_engine` span output: reduced_count, reduced_context
+   - `reducer_engine` span metadata: planner, consumed_tokens, token_utilization, truncation_ratio, dropped_contexts, overrun
+   - child/parent linkage validated in Langfuse call-depth view
+7. Add Phase 6 test matrix:
+   - normal budget (no truncation)
+   - tight budget (truncation expected)
+   - over-constrained contexts (drop path exercised)
+   - observability assertions for span presence and metadata completeness
+8. Add operational alerting for reducer quality:
+   - overrun should always remain false (pager if true)
+   - truncation ratio threshold alerts
+   - high dropped-context count alerts
 
 Deliverables:
 - Final context block under target token budget
 - reducer overrun alert configured
+- Langfuse reducer spans include full production metadata
+- reducer test matrix passing in CI
 
 ---
 
@@ -239,6 +367,27 @@ Steps:
 Deliverables:
 - Successful PR creation in write-enabled repo
 - blocked-write behavior in read-only repo
+
+### Phase 8 Implementation Status (Current Slice)
+Implemented in the active Python runtime (`apps/worker-indexer-py`) with frontend-callable API and tests:
+
+1. Writer service added:
+   - `WriterPrService` in `ast_indexer.application.writer_pr_service`
+   - branch create/reuse logic
+   - file write commits via GitHub contents API
+   - open PR reuse (idempotency) when same branch/base already has an open PR
+   - dry-run mode for safe planning
+2. API integration:
+   - authenticated endpoint `POST /writer/pr`
+   - bearer-token middleware enforcement
+   - repo accessibility checks against tenant mapping when available
+3. Error and permission handling:
+   - clear `403` on insufficient repo permission
+   - clear `400` for validation errors
+   - `502` for upstream GitHub API runtime failures
+4. Test coverage:
+   - writer service unit tests for dry-run and PR reuse
+   - server runtime tests for writer endpoint behavior and permission error mapping
 
 ---
 
@@ -366,6 +515,27 @@ These cannot be fully automated and require owner action.
 1. Validate generated PR quality on pilot repos.
 2. Sign off on alert thresholds and on-call ownership.
 3. Approve production rollout and rollback criteria.
+
+### F) Human Workflow Outside Code Scope
+1. Define customer onboarding flow and ownership:
+   - who assists first-time GitHub App installation for users/org admins
+   - expected response times and escalation path for install failures
+2. Define support runbooks for access incidents:
+   - repo not visible in system
+   - installation exists but token mint fails
+   - write permission denied after role change
+3. Define trust and consent language:
+   - explain what repository metadata/code is read
+   - explain where data is stored and retention period
+   - publish revocation and data deletion process
+4. Define account lifecycle operations:
+   - member invite/approval policy for shared systems
+   - offboarding and immediate access revocation checklist
+   - duplicate account merge and ownership transfer procedure
+5. Define governance for manual overrides:
+   - when support can temporarily unblock access
+   - approval chain for emergency write enablement
+   - post-incident review requirement for every manual override
 
 ---
 

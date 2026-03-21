@@ -3,6 +3,8 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+reapo-ai.2026-03-20.private-key.pem
+
 # C extensions
 *.so
 
