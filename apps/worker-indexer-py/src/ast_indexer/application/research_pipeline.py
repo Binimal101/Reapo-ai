@@ -128,6 +128,8 @@ class ResearchPipeline:
         repository_reader: RepositoryReaderPort,
         extractor: PythonAstSymbolExtractor,
         observability: ObservabilityPort,
+        reducer_use_inference: bool = True,
+        reducer_batch_inference: bool = True,
     ) -> None:
         self._reasoning_agent = reasoning_agent
         self._query_prodder = query_prodder
@@ -137,6 +139,8 @@ class ResearchPipeline:
         self._repository_reader = repository_reader
         self._extractor = extractor
         self._observability = observability
+        self._reducer_use_inference = reducer_use_inference
+        self._reducer_batch_inference = reducer_batch_inference
         self._app = self._build_graph()
 
     def run(
@@ -580,6 +584,10 @@ class ResearchPipeline:
         reduced: list[ReducedResearchContext] = []
         remaining_tokens = max(0, token_budget)
         remaining_items = len(selected)
+        batch_summaries = self._invoke_reducer_batch_inference(
+            selected,
+            token_budget=max(64, token_budget),
+        )
 
         for row in selected:
             if remaining_tokens <= 0:
@@ -590,6 +598,7 @@ class ResearchPipeline:
             summarized_body, body_tokens, truncated = self._summarize_context_for_agent(
                 row=row,
                 token_budget=per_item_budget,
+                precomputed_summary=batch_summaries.get(_context_key(row)),
             )
 
             # Enforce hard budget guard for production safety.
@@ -629,6 +638,7 @@ class ResearchPipeline:
         *,
         row: EnrichedResearchContext,
         token_budget: int,
+        precomputed_summary: str | None = None,
     ) -> tuple[str, int, bool]:
         original_tokens = _token_estimate(row.body)
         evidence = _extract_evidence_snippets(row.body)
@@ -642,15 +652,98 @@ class ResearchPipeline:
             resolved_callees=row.resolved_callees,
         )
 
-        inference_result = self._invoke_reducer_inference(
-            row=row,
-            token_budget=token_budget,
-            evidence_snippets=evidence,
-        )
-        candidate = inference_result or fallback
+        candidate = precomputed_summary or fallback
+        if candidate is fallback:
+            inference_result = self._invoke_reducer_inference(
+                row=row,
+                token_budget=token_budget,
+                evidence_snippets=evidence,
+            )
+            candidate = inference_result or fallback
         reduced_body, body_tokens, truncated_by_budget = _truncate_to_token_budget(candidate, token_budget)
         truncated = truncated_by_budget or body_tokens < original_tokens
         return reduced_body, body_tokens, truncated
+
+    def _invoke_reducer_batch_inference(
+        self,
+        rows: list[EnrichedResearchContext],
+        *,
+        token_budget: int,
+    ) -> dict[str, str]:
+        if not self._reducer_use_inference or not self._reducer_batch_inference or not rows:
+            return {}
+
+        summarize_batch = getattr(self._reasoning_agent, 'summarize_reducer_context_batch', None)
+        if not callable(summarize_batch):
+            return {}
+
+        payload_rows = [
+            {
+                'symbol': row.symbol,
+                'signature': row.signature,
+                'path': row.path,
+                'repo': row.repo,
+                'kind': row.kind,
+                'docstring': row.docstring,
+                'body': row.body,
+                'resolved_callees': row.resolved_callees,
+            }
+            for row in rows
+        ]
+
+        try:
+            payload = summarize_batch(
+                contexts=payload_rows,
+                token_budget=token_budget,
+            )
+        except Exception:  # noqa: BLE001
+            return {}
+
+        if not isinstance(payload, dict):
+            return {}
+
+        summaries_raw = payload.get('summaries', [])
+        if not isinstance(summaries_raw, list):
+            return {}
+
+        by_key: dict[str, str] = {}
+        rows_by_key = {_context_key(row): row for row in rows}
+        for item in summaries_raw:
+            if not isinstance(item, dict):
+                continue
+            key = _context_key_parts(
+                repo=str(item.get('repo') or ''),
+                path=str(item.get('path') or ''),
+                symbol=str(item.get('symbol') or ''),
+            )
+            row = rows_by_key.get(key)
+            if row is None:
+                continue
+            abstract = str(item.get('abstract') or '').strip()
+            if not abstract:
+                continue
+
+            evidence = tuple(
+                str(entry).strip()
+                for entry in item.get('evidence_snippets', [])
+                if str(entry).strip()
+            ) or _extract_evidence_snippets(row.body)
+            open_questions = tuple(
+                str(entry).strip()
+                for entry in item.get('open_questions', [])
+                if str(entry).strip()
+            )
+            by_key[key] = _format_reducer_brief(
+                symbol=row.symbol,
+                signature=row.signature,
+                path=row.path,
+                abstract=abstract,
+                evidence_snippets=evidence,
+                open_questions=open_questions,
+                resolved_callees=row.resolved_callees,
+            )
+
+        return by_key
 
     def _invoke_reducer_inference(
         self,
@@ -659,6 +752,9 @@ class ResearchPipeline:
         token_budget: int,
         evidence_snippets: tuple[str, ...],
     ) -> str | None:
+        if not self._reducer_use_inference:
+            return None
+
         summarize = getattr(self._reasoning_agent, 'summarize_reducer_context', None)
         if not callable(summarize):
             return None
@@ -936,6 +1032,14 @@ def _truncate_to_token_budget(text: str, token_budget: int) -> tuple[str, int, b
         candidate = candidate[:-1].rstrip()
 
     return candidate, _token_estimate(candidate), True
+
+
+def _context_key(row: EnrichedResearchContext) -> str:
+    return _context_key_parts(repo=row.repo, path=row.path, symbol=row.symbol)
+
+
+def _context_key_parts(*, repo: str, path: str, symbol: str) -> str:
+    return f'{repo}:{path}:{symbol}'
 
 
 def _extract_evidence_snippets(text: str, *, max_snippets: int = 2, max_lines: int = 5) -> tuple[str, ...]:

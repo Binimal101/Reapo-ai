@@ -110,6 +110,37 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
         payload = json.loads(response.choices[0].message.content or '{}')
         return payload if isinstance(payload, dict) else {}
 
+    def summarize_reducer_context_batch(
+        self,
+        *,
+        contexts: list[dict],
+        token_budget: int,
+    ) -> dict:
+        if not contexts:
+            return {'summaries': []}
+
+        system_prompt = (
+            'You are a code reducer for orchestration agents. '
+            'Return strict JSON with field summaries (array). '
+            'Each item must include repo, path, symbol, abstract, evidence_snippets (array), open_questions (array). '
+            'Preserve function names and produce factual, concise summaries only. '
+            'Do not invent symbols, paths, or behavior. '
+            f'Total output should roughly fit in {max(64, token_budget)} tokens.'
+        )
+        user_prompt = json.dumps({'contexts': contexts})
+
+        response = self._client.chat.completions.create(
+            model=self._model,
+            response_format={'type': 'json_object'},
+            temperature=0,
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt},
+            ],
+        )
+        payload = json.loads(response.choices[0].message.content or '{}')
+        return payload if isinstance(payload, dict) else {'summaries': []}
+
 
 class OpenAIQueryProdder(QueryProdderPort):
     def __init__(

@@ -19,10 +19,23 @@ from ast_indexer.adapters.vector_store.in_memory_vector_store_adapter import InM
 from ast_indexer.adapters.vector_store.json_file_vector_store_adapter import JsonFileVectorStoreAdapter
 from ast_indexer.application.index_python_repository_service import IndexPythonRepositoryService
 from ast_indexer.application.research_openai_agents import OpenAIQueryProdder, OpenAIReasoningAgent
-from ast_indexer.application.research_pipeline import ResearchPipeline
+from ast_indexer.application.research_pipeline import QueryProdderPort, ResearchObjective, ReasoningAgentPort, ResearchPipeline
 from ast_indexer.parsing.python_ast_symbol_extractor import PythonAstSymbolExtractor
 from ast_indexer.ports.embedding_generator import EmbeddingGeneratorPort
 from ast_indexer.ports.observability import ObservabilityPort
+
+
+class DeterministicReasoningAgent(ReasoningAgentPort):
+    def build_objective(self, prompt: str, repos_in_scope: tuple[str, ...]) -> ResearchObjective:
+        entities = tuple(token for token in prompt.split() if token.isidentifier())
+        return ResearchObjective(intent=prompt, entities=entities, repos_in_scope=repos_in_scope)
+
+
+class DeterministicQueryProdder(QueryProdderPort):
+    def build_queries(self, objective: ResearchObjective) -> tuple[str, ...]:
+        queries: list[str] = [objective.intent]
+        queries.extend(objective.entities[:4])
+        return tuple(dict.fromkeys(item for item in queries if item.strip()))
 
 
 def _build_embedding_generator(
@@ -176,6 +189,7 @@ def build_persistent_research_pipeline(
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
     research_model: str = 'gpt-4o-mini',
+    research_latency_mode: Literal['quality', 'fast'] = 'fast',
 ) -> ResearchPipeline:
     observability = build_persistent_observability_adapter(
         state_root=state_root,
@@ -198,16 +212,23 @@ def build_persistent_research_pipeline(
         openai_dimensions=openai_dimensions,
     )
     extractor = PythonAstSymbolExtractor()
-    reasoning_agent = OpenAIReasoningAgent(
-        model=research_model,
-        api_key=openai_api_key,
-        base_url=openai_base_url,
-    )
-    query_prodder = OpenAIQueryProdder(
-        model=research_model,
-        api_key=openai_api_key,
-        base_url=openai_base_url,
-    )
+    if research_latency_mode == 'fast':
+        reasoning_agent = DeterministicReasoningAgent()
+        query_prodder = DeterministicQueryProdder()
+        reducer_use_inference = False
+    else:
+        reasoning_agent = OpenAIReasoningAgent(
+            model=research_model,
+            api_key=openai_api_key,
+            base_url=openai_base_url,
+        )
+        query_prodder = OpenAIQueryProdder(
+            model=research_model,
+            api_key=openai_api_key,
+            base_url=openai_base_url,
+        )
+        reducer_use_inference = True
+
     return ResearchPipeline(
         reasoning_agent=reasoning_agent,
         query_prodder=query_prodder,
@@ -217,4 +238,6 @@ def build_persistent_research_pipeline(
         repository_reader=reader,
         extractor=extractor,
         observability=observability,
+        reducer_use_inference=reducer_use_inference,
+        reducer_batch_inference=True,
     )
