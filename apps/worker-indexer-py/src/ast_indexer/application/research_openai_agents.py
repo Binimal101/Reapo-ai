@@ -26,7 +26,12 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
             raise RuntimeError('OPENAI_API_KEY is required for OpenAI reasoning agent')
 
         resolved_base_url = base_url.strip() if isinstance(base_url, str) else None
-        self._client = OpenAI(api_key=resolved_api_key, base_url=resolved_base_url or None)
+        self._client = OpenAI(
+            api_key=resolved_api_key,
+            base_url=resolved_base_url or None,
+            max_retries=0,
+            timeout=6.0,
+        )
         self._model = model
 
     def build_objective(self, prompt: str, repos_in_scope: tuple[str, ...]) -> ResearchObjective:
@@ -46,6 +51,8 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
             model=self._model,
             response_format={'type': 'json_object'},
             temperature=0,
+            max_tokens=120,
+            timeout=3.0,
             messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': user_prompt},
@@ -102,6 +109,8 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
             model=self._model,
             response_format={'type': 'json_object'},
             temperature=0,
+            max_tokens=max(90, min(260, token_budget)),
+            timeout=3.0,
             messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': user_prompt},
@@ -133,6 +142,8 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
             model=self._model,
             response_format={'type': 'json_object'},
             temperature=0,
+            max_tokens=max(140, min(320, token_budget)),
+            timeout=3.0,
             messages=[
                 {'role': 'system', 'content': system_prompt},
                 {'role': 'user', 'content': user_prompt},
@@ -140,6 +151,78 @@ class OpenAIReasoningAgent(ReasoningAgentPort):
         )
         payload = json.loads(response.choices[0].message.content or '{}')
         return payload if isinstance(payload, dict) else {'summaries': []}
+
+    def score_relevancy_batch(
+        self,
+        *,
+        objective: dict,
+        candidates: list[dict],
+    ) -> dict:
+        if not candidates:
+            return {'scores': []}
+
+        system_prompt = (
+            'You are a code relevancy judge. '
+            'Return strict JSON with one field: scores (array). '
+            'Each score item must include repo, path, symbol, confidence (0..1), matched_terms (array). '
+            'Be terse, low-latency, and factual. '
+            'Use candidate signature/path/symbol against objective intent/entities only.'
+        )
+        user_prompt = json.dumps({'objective': objective, 'candidates': candidates})
+
+        response = self._client.chat.completions.create(
+            model=self._model,
+            response_format={'type': 'json_object'},
+            temperature=0,
+            max_tokens=max(140, min(360, len(candidates) * 12)),
+            timeout=3.0,
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt},
+            ],
+        )
+        payload = json.loads(response.choices[0].message.content or '{}')
+        return payload if isinstance(payload, dict) else {'scores': []}
+
+    def cleanup_reducer_corpus(
+        self,
+        *,
+        objective: dict,
+        relation_corpus: str,
+        token_budget: int,
+    ) -> dict:
+        if not relation_corpus.strip():
+            return {'cleaned_corpus': ''}
+
+        system_prompt = (
+            'You rewrite function relation lines while preserving symbol/signature references exactly. '
+            'Return strict JSON with one field: cleaned_corpus (string). '
+            'Input format per line is: FUNCTION <symbol+signature> DOES <text>, IS USED IN <refs>, USES <refs>. '
+            'Keep one line per function and keep FUNCTION/DOES/IS USED IN/USES sections. '
+            'Remove business-logic prose in DOES and keep plain, retrieval-safe wording. '
+            'Do not add extra sections or commentary.'
+        )
+        user_prompt = json.dumps(
+            {
+                'objective': objective,
+                'token_budget': max(64, token_budget),
+                'relation_corpus': relation_corpus,
+            }
+        )
+
+        response = self._client.chat.completions.create(
+            model=self._model,
+            response_format={'type': 'json_object'},
+            temperature=0,
+            max_tokens=max(160, min(420, token_budget)),
+            timeout=3.0,
+            messages=[
+                {'role': 'system', 'content': system_prompt},
+                {'role': 'user', 'content': user_prompt},
+            ],
+        )
+        payload = json.loads(response.choices[0].message.content or '{}')
+        return payload if isinstance(payload, dict) else {'cleaned_corpus': relation_corpus}
 
 
 class OpenAIQueryProdder(QueryProdderPort):
@@ -162,7 +245,12 @@ class OpenAIQueryProdder(QueryProdderPort):
             raise RuntimeError('OPENAI_API_KEY is required for OpenAI query prodder')
 
         resolved_base_url = base_url.strip() if isinstance(base_url, str) else None
-        self._client = OpenAI(api_key=resolved_api_key, base_url=resolved_base_url or None)
+        self._client = OpenAI(
+            api_key=resolved_api_key,
+            base_url=resolved_base_url or None,
+            max_retries=0,
+            timeout=6.0,
+        )
         self._model = model
 
     def build_queries(self, objective: ResearchObjective) -> tuple[str, ...]:
@@ -170,6 +258,8 @@ class OpenAIQueryProdder(QueryProdderPort):
             model=self._model,
             response_format={'type': 'json_object'},
             temperature=0.1,
+            max_tokens=120,
+            timeout=3.0,
             messages=[
                 {
                     'role': 'system',

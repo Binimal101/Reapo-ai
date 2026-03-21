@@ -158,13 +158,6 @@ def _build_parser() -> argparse.ArgumentParser:
         help='OpenAI model for reasoning + query generation',
     )
     research.add_argument(
-        '--research-latency-mode',
-        type=str,
-        choices=['quality', 'fast'],
-        default=os.getenv('AST_INDEXER_RESEARCH_LATENCY_MODE', 'fast'),
-        help='Latency profile: fast uses deterministic planning/reduction; quality uses inference-heavy planning/reduction.',
-    )
-    research.add_argument(
         '--embedding-backend',
         type=str,
         choices=['hash', 'sentence-transformers', 'openai'],
@@ -568,7 +561,6 @@ def main(argv: list[str] | None = None) -> int:
             langfuse_secret_key=args.langfuse_secret_key,
             observability_strict=args.observability_strict,
             research_model=args.research_model,
-            research_latency_mode=args.research_latency_mode,
         )
         result = pipeline.run(
             trace_id=run_trace_id,

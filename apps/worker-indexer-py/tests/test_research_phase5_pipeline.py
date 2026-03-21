@@ -23,6 +23,25 @@ class DeterministicReasoningAgent(ReasoningAgentPort):
         return ResearchObjective(intent=prompt, entities=entities, repos_in_scope=repos_in_scope)
 
 
+class LlmScoredReasoningAgent(DeterministicReasoningAgent):
+    def score_relevancy_batch(self, *, objective: dict, candidates: list[dict]) -> dict:  # noqa: ANN001
+        _ = objective
+        scores = []
+        for row in candidates:
+            symbol = str(row.get('symbol', ''))
+            confidence = 0.95 if 'alpha_feature_11' in symbol else 0.1
+            scores.append(
+                {
+                    'repo': row.get('repo'),
+                    'path': row.get('path'),
+                    'symbol': row.get('symbol'),
+                    'confidence': confidence,
+                    'matched_terms': ['alpha'],
+                }
+            )
+        return {'scores': scores}
+
+
 class DeterministicQueryProdder(QueryProdderPort):
     def build_queries(self, objective: ResearchObjective) -> tuple[str, ...]:
         queries = [objective.intent]
@@ -181,7 +200,53 @@ def test_phase5_emits_all_research_spans_and_reducer_metrics(tmp_path: Path) -> 
 
     reducer_span = next(row for row in spans if row.name == 'reducer_engine')
     assert reducer_span.metadata is not None
-    assert reducer_span.metadata['planner'] == 'greedy_budgeted'
+    assert reducer_span.metadata['planner'] == 'relation_line_planner'
     assert reducer_span.metadata['token_budget'] == 64
     assert reducer_span.metadata['overrun'] is False
     assert reducer_span.metadata['consumed_tokens'] <= 64
+
+
+def test_phase5_uses_llm_batch_relevancy_when_available(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    repo_root = workspace_root / 'catalog-service' / 'src'
+    repo_root.mkdir(parents=True)
+
+    body = []
+    for idx in range(12):
+        body.append(f'def alpha_feature_{idx}():\n    return {idx}\n')
+    (repo_root / 'catalog.py').write_text('\n'.join(body), encoding='utf-8')
+
+    state_root = tmp_path / 'state'
+    index_service = build_persistent_index_service(
+        workspace_root=workspace_root,
+        state_root=state_root,
+        embedding_backend='hash',
+        observability_backend='jsonl',
+    )
+    index_service.index_repository(repo='catalog-service', trace_id='index-phase5-llm-rel')
+
+    pipeline = ResearchPipeline(
+        reasoning_agent=LlmScoredReasoningAgent(),
+        query_prodder=DeterministicQueryProdder(),
+        embedding_generator=SimpleHashEmbeddingGeneratorAdapter(),
+        vector_store=JsonFileVectorStoreAdapter(state_root / 'index' / 'vectors.json'),
+        index_store=JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json'),
+        repository_reader=LocalFsRepositoryReaderAdapter(workspace_root),
+        extractor=PythonAstSymbolExtractor(),
+        observability=InMemoryObservabilityAdapter(),
+        reducer_use_inference=False,
+        relevancy_use_inference=True,
+    )
+
+    result = pipeline.run(
+        trace_id='research-phase5-llm-rel',
+        prompt='alpha feature ranking',
+        repos_in_scope=('catalog-service',),
+        top_k=1,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.9,
+        reducer_token_budget=300,
+    )
+
+    assert len(result.relevant_candidates) == 1
+    assert result.relevant_candidates[0].symbol == 'alpha_feature_11'

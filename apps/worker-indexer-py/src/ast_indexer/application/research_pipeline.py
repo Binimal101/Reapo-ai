@@ -128,8 +128,10 @@ class ResearchPipeline:
         repository_reader: RepositoryReaderPort,
         extractor: PythonAstSymbolExtractor,
         observability: ObservabilityPort,
+        query_use_inference: bool = False,
         reducer_use_inference: bool = True,
         reducer_batch_inference: bool = True,
+        relevancy_use_inference: bool = True,
     ) -> None:
         self._reasoning_agent = reasoning_agent
         self._query_prodder = query_prodder
@@ -139,8 +141,10 @@ class ResearchPipeline:
         self._repository_reader = repository_reader
         self._extractor = extractor
         self._observability = observability
+        self._query_use_inference = query_use_inference
         self._reducer_use_inference = reducer_use_inference
         self._reducer_batch_inference = reducer_batch_inference
+        self._relevancy_use_inference = relevancy_use_inference
         self._app = self._build_graph()
 
     def run(
@@ -241,13 +245,14 @@ class ResearchPipeline:
                 'prompt_token_estimate': _token_estimate(prompt),
             },
         )
-        objective = self._reasoning_agent.build_objective(prompt, repos)
+        objective = _deterministic_objective(prompt, repos)
         self._observability.end_span(
             span,
             output_payload={'objective': _serialize_objective(objective)},
             metadata={
                 'entity_count': len(objective.entities),
                 'repo_scope_count': len(objective.repos_in_scope),
+                'planner': 'deterministic',
             },
         )
         return {'objective': objective}
@@ -262,7 +267,7 @@ class ResearchPipeline:
                 'objective': _serialize_objective(objective),
             },
         )
-        queries = self._query_prodder.build_queries(objective)
+        queries, escalated = self._build_queries_with_escalation(objective)
         self._observability.end_span(
             span,
             output_payload={
@@ -272,9 +277,40 @@ class ResearchPipeline:
             metadata={
                 'query_count': len(queries),
                 'objective_intent': objective.intent,
+                'llm_escalated': escalated,
             },
         )
         return {'queries': queries}
+
+    def _build_queries_with_escalation(self, objective: ResearchObjective) -> tuple[tuple[str, ...], bool]:
+        baseline = _deterministic_queries(objective)
+        if not self._query_use_inference:
+            return baseline, False
+
+        if not self._should_escalate_query_generation(objective, baseline):
+            return baseline, False
+
+        try:
+            llm_queries = self._query_prodder.build_queries(objective)
+        except Exception:  # noqa: BLE001
+            return baseline, False
+
+        merged = tuple(dict.fromkeys(item for item in (*llm_queries, *baseline) if item.strip()))
+        if not merged:
+            return baseline, False
+        return merged, True
+
+    def _should_escalate_query_generation(
+        self,
+        objective: ResearchObjective,
+        baseline_queries: tuple[str, ...],
+    ) -> bool:
+        # Escalate only on weak deterministic signals to protect throughput.
+        if len(objective.entities) >= 2:
+            return False
+        if len(baseline_queries) >= 3:
+            return False
+        return _token_estimate(objective.intent) > 24
 
     def _vector_search_node(self, state: ResearchState) -> ResearchState:
         trace_id = state['trace_id']
@@ -337,11 +373,15 @@ class ResearchPipeline:
             },
         )
 
-        scored = self._score_candidates_parallel(
-            objective=objective,
-            candidates=candidates,
-            workers=workers,
-        )
+        llm_shortlist_size = min(len(candidates), max(top_k * 4, 24))
+        llm_candidates = candidates[:llm_shortlist_size]
+        scored = self._score_candidates_with_llm_batch(objective=objective, candidates=llm_candidates)
+        if not scored:
+            scored = self._score_candidates_parallel(
+                objective=objective,
+                candidates=candidates,
+                workers=workers,
+            )
         filtered = [row for row in scored if row.confidence >= threshold]
         if not filtered:
             filtered = scored[:top_k]
@@ -359,9 +399,96 @@ class ResearchPipeline:
                 'threshold': threshold,
                 'max_confidence': max((row.confidence for row in scored), default=0.0),
                 'min_confidence': min((row.confidence for row in scored), default=0.0),
+                'llm_shortlist_size': llm_shortlist_size,
+                'llm_shortlist_used': bool(scored),
             },
         )
         return {'relevant_candidates': relevant}
+
+    def _score_candidates_with_llm_batch(
+        self,
+        *,
+        objective: ResearchObjective,
+        candidates: tuple[ResearchCandidate, ...],
+    ) -> list[RelevancyCandidate]:
+        if not self._relevancy_use_inference or not candidates:
+            return []
+
+        judge_batch = getattr(self._reasoning_agent, 'score_relevancy_batch', None)
+        if not callable(judge_batch):
+            return []
+
+        payload_candidates = [
+            {
+                'repo': row.repo,
+                'path': row.path,
+                'symbol': row.symbol,
+                'kind': row.kind,
+                'signature': row.signature,
+                'score': row.score,
+            }
+            for row in candidates
+        ]
+
+        try:
+            payload = judge_batch(
+                objective={
+                    'intent': objective.intent,
+                    'entities': list(objective.entities),
+                    'repos_in_scope': list(objective.repos_in_scope),
+                },
+                candidates=payload_candidates,
+            )
+        except Exception:  # noqa: BLE001
+            return []
+
+        if not isinstance(payload, dict):
+            return []
+        scored_raw = payload.get('scores', [])
+        if not isinstance(scored_raw, list):
+            return []
+
+        lookup = {(row.repo, row.path, row.symbol): row for row in candidates}
+        scored: list[RelevancyCandidate] = []
+        for item in scored_raw:
+            if not isinstance(item, dict):
+                continue
+            key = (
+                str(item.get('repo') or ''),
+                str(item.get('path') or ''),
+                str(item.get('symbol') or ''),
+            )
+            candidate = lookup.get(key)
+            if candidate is None:
+                continue
+
+            confidence_raw = item.get('confidence', 0.0)
+            try:
+                confidence = max(0.0, min(1.0, float(confidence_raw)))
+            except (TypeError, ValueError):
+                confidence = 0.0
+
+            matched_terms = tuple(
+                str(entry).strip()
+                for entry in item.get('matched_terms', [])
+                if str(entry).strip()
+            )
+
+            scored.append(
+                RelevancyCandidate(
+                    repo=candidate.repo,
+                    path=candidate.path,
+                    symbol=candidate.symbol,
+                    kind=candidate.kind,
+                    signature=candidate.signature,
+                    score=candidate.score,
+                    confidence=confidence,
+                    matched_terms=matched_terms,
+                )
+            )
+
+        scored.sort(key=lambda row: row.confidence, reverse=True)
+        return scored
 
     def _retrieval_node(self, state: ResearchState) -> ResearchState:
         trace_id = state['trace_id']
@@ -399,6 +526,7 @@ class ResearchPipeline:
 
     def _reducer_node(self, state: ResearchState) -> ResearchState:
         trace_id = state['trace_id']
+        objective = state['objective']
         enriched = state.get('enriched_context', ())
         retrieval_span = state.get('_active_retrieval_span')
         token_budget = max(16, int(state.get('reducer_token_budget', 2500)))
@@ -419,6 +547,7 @@ class ResearchPipeline:
         )
 
         reduced = self._reduce_context(
+            objective=objective,
             enriched_context=enriched,
             token_budget=token_budget,
             max_contexts=max_contexts,
@@ -432,7 +561,7 @@ class ResearchPipeline:
                 'reduced_context': [_serialize_reduced_context(row) for row in reduced],
             },
             metadata={
-                'planner': 'greedy_budgeted',
+                'planner': 'relation_line_planner',
                 'token_budget': token_budget,
                 'consumed_tokens': consumed_tokens,
                 'token_utilization': _safe_ratio(consumed_tokens, token_budget),
@@ -442,6 +571,7 @@ class ResearchPipeline:
                 'reduced_body_truncations': reduced_truncations,
                 'truncation_ratio': _safe_ratio(reduced_truncations, len(reduced)),
                 'overrun': consumed_tokens > token_budget,
+                'global_cleanup_inference': self._reducer_use_inference,
             },
         )
 
@@ -573,6 +703,7 @@ class ResearchPipeline:
     def _reduce_context(
         self,
         *,
+        objective: ResearchObjective,
         enriched_context: tuple[EnrichedResearchContext, ...],
         token_budget: int,
         max_contexts: int,
@@ -580,35 +711,39 @@ class ResearchPipeline:
         selected = list(enriched_context[:max_contexts])
         if not selected:
             return ()
+        relation_lines = self._build_relation_lines(selected)
+        raw_corpus = '\n'.join(line for _, line in relation_lines if line)
+
+        cleaned_corpus = raw_corpus
+        cleanup = getattr(self._reasoning_agent, 'cleanup_reducer_corpus', None)
+        if self._reducer_use_inference and callable(cleanup) and raw_corpus.strip():
+            try:
+                payload = cleanup(
+                    objective={
+                        'intent': objective.intent,
+                        'entities': list(objective.entities),
+                        'repos_in_scope': list(objective.repos_in_scope),
+                    },
+                    relation_corpus=raw_corpus,
+                    token_budget=max(64, token_budget),
+                )
+                if isinstance(payload, dict):
+                    candidate = str(payload.get('cleaned_corpus') or '').strip()
+                    if candidate:
+                        cleaned_corpus = candidate
+            except Exception:  # noqa: BLE001
+                cleaned_corpus = raw_corpus
+
+        bounded_corpus, _, _ = _truncate_to_token_budget(cleaned_corpus, max(16, token_budget))
+        parsed = _parse_relation_corpus(bounded_corpus)
 
         reduced: list[ReducedResearchContext] = []
         remaining_tokens = max(0, token_budget)
-        remaining_items = len(selected)
-        batch_summaries = self._invoke_reducer_batch_inference(
-            selected,
-            token_budget=max(64, token_budget),
-        )
-
-        for row in selected:
+        for row, fallback_line in relation_lines:
             if remaining_tokens <= 0:
                 break
-
-            # Greedy allocator: spread remaining budget across remaining rows while preserving at least 32 tokens.
-            per_item_budget = max(32, remaining_tokens // max(1, remaining_items))
-            summarized_body, body_tokens, truncated = self._summarize_context_for_agent(
-                row=row,
-                token_budget=per_item_budget,
-                precomputed_summary=batch_summaries.get(_context_key(row)),
-            )
-
-            # Enforce hard budget guard for production safety.
-            if body_tokens > remaining_tokens:
-                summarized_body, body_tokens, truncated_guard = _truncate_to_token_budget(
-                    summarized_body,
-                    remaining_tokens,
-                )
-                truncated = truncated or truncated_guard
-
+            line = parsed.get(row.symbol, fallback_line)
+            body, tokens, truncated = _truncate_to_token_budget(line, remaining_tokens)
             reduced.append(
                 ReducedResearchContext(
                     repo=row.repo,
@@ -617,21 +752,50 @@ class ResearchPipeline:
                     kind=row.kind,
                     signature=row.signature,
                     docstring=row.docstring,
-                    reduced_body=summarized_body,
-                    estimated_tokens=body_tokens,
+                    reduced_body=body,
+                    estimated_tokens=tokens,
                     body_was_truncated=truncated,
                     callees=row.callees,
                     resolved_callees=row.resolved_callees,
                 )
             )
-            remaining_tokens = max(0, remaining_tokens - body_tokens)
-            remaining_items -= 1
+            remaining_tokens = max(0, remaining_tokens - tokens)
 
-        return self._recursive_reduce_groups(
-            reduced,
-            token_budget=max(16, token_budget),
-            max_contexts=max(1, max_contexts),
-        )
+        return tuple(reduced)
+
+    def _build_relation_lines(
+        self,
+        rows: list[EnrichedResearchContext],
+    ) -> list[tuple[EnrichedResearchContext, str]]:
+        key_to_symbol = {_context_key(row): row.symbol for row in rows}
+        used_in_by_symbol: dict[str, list[str]] = {row.symbol: [] for row in rows}
+        for row in rows:
+            source_ref = _symbol_signature_ref(row.symbol, row.signature)
+            for callee in row.resolved_callees:
+                target_symbol = key_to_symbol.get(callee)
+                if target_symbol is None:
+                    continue
+                used_in_by_symbol.setdefault(target_symbol, []).append(source_ref)
+
+        lines: list[tuple[EnrichedResearchContext, str]] = []
+        for row in rows:
+            does = _build_relation_does_clause(row)
+            used_in_values = tuple(dict.fromkeys(used_in_by_symbol.get(row.symbol, [])))
+            uses_values = tuple(
+                dict.fromkeys(
+                    _normalize_resolved_reference(callee)
+                    for callee in row.resolved_callees
+                    if _normalize_resolved_reference(callee)
+                )
+            )
+            used_in_text = ', '.join(used_in_values[:6]) if used_in_values else 'NONE'
+            uses_text = ', '.join(uses_values[:6]) if uses_values else 'NONE'
+            line = (
+                f'FUNCTION {_symbol_signature_ref(row.symbol, row.signature)} '
+                f'DOES {does}, IS USED IN {used_in_text}, USES {uses_text}'
+            )
+            lines.append((row, line))
+        return lines
 
     def _summarize_context_for_agent(
         self,
@@ -924,6 +1088,53 @@ class ResearchPipeline:
             )
 
         return tuple(enriched)
+
+
+def _deterministic_objective(prompt: str, repos_in_scope: tuple[str, ...]) -> ResearchObjective:
+    entities = tuple(token for token in _tokenize_terms(prompt) if token.isidentifier())
+    return ResearchObjective(intent=prompt, entities=entities, repos_in_scope=repos_in_scope)
+
+
+def _deterministic_queries(objective: ResearchObjective) -> tuple[str, ...]:
+    queries: list[str] = [objective.intent]
+    queries.extend(objective.entities[:4])
+    return tuple(dict.fromkeys(item for item in queries if item.strip()))
+
+
+def _build_relation_does_clause(row: EnrichedResearchContext) -> str:
+    if row.docstring and row.docstring.strip():
+        doc = re.sub(r'\s+', ' ', row.docstring.strip())
+        return doc.rstrip('.')
+    return f'implements {row.kind} {row.symbol} with signature {row.signature}'.rstrip('.')
+
+
+def _normalize_resolved_reference(reference: str) -> str:
+    parts = reference.split(':', 2)
+    if len(parts) == 3 and parts[2].strip():
+        return parts[2].strip()
+    return reference.strip()
+
+
+def _symbol_signature_ref(symbol: str, signature: str) -> str:
+    signature_value = signature.strip()
+    if signature_value:
+        return f'{symbol}{signature_value}'
+    return symbol
+
+
+def _parse_relation_corpus(corpus: str) -> dict[str, str]:
+    parsed: dict[str, str] = {}
+    for raw_line in corpus.splitlines():
+        line = raw_line.strip()
+        if not line.startswith('FUNCTION '):
+            continue
+        prefix = line[len('FUNCTION ') :]
+        head = prefix.split(' DOES ', 1)[0].strip()
+        symbol = head.split('(', 1)[0].strip()
+        if not symbol:
+            continue
+        parsed[symbol] = line
+    return parsed
 
 
 def _safe_ratio(numerator: int | float, denominator: int | float) -> float:

@@ -189,7 +189,6 @@ def build_persistent_research_pipeline(
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
     research_model: str = 'gpt-4o-mini',
-    research_latency_mode: Literal['quality', 'fast'] = 'fast',
 ) -> ResearchPipeline:
     observability = build_persistent_observability_adapter(
         state_root=state_root,
@@ -212,11 +211,12 @@ def build_persistent_research_pipeline(
         openai_dimensions=openai_dimensions,
     )
     extractor = PythonAstSymbolExtractor()
-    if research_latency_mode == 'fast':
-        reasoning_agent = DeterministicReasoningAgent()
-        query_prodder = DeterministicQueryProdder()
-        reducer_use_inference = False
-    else:
+    reasoning_agent: ReasoningAgentPort = DeterministicReasoningAgent()
+    query_prodder: QueryProdderPort = DeterministicQueryProdder()
+    reducer_use_inference = False
+    relevancy_use_inference = False
+
+    if openai_api_key or os.getenv('OPENAI_API_KEY'):
         reasoning_agent = OpenAIReasoningAgent(
             model=research_model,
             api_key=openai_api_key,
@@ -228,6 +228,7 @@ def build_persistent_research_pipeline(
             base_url=openai_base_url,
         )
         reducer_use_inference = True
+        relevancy_use_inference = True
 
     return ResearchPipeline(
         reasoning_agent=reasoning_agent,
@@ -238,6 +239,8 @@ def build_persistent_research_pipeline(
         repository_reader=reader,
         extractor=extractor,
         observability=observability,
+        query_use_inference=False,
         reducer_use_inference=reducer_use_inference,
         reducer_batch_inference=True,
+        relevancy_use_inference=relevancy_use_inference,
     )
