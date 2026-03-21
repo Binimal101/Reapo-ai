@@ -129,7 +129,7 @@ class FakeGitHubClient:
 
 def main():
     print("=" * 70)
-    print(" Integration Test: GitHub API → Index → Search → Live Call-Graph")
+    print(" Integration Test: GitHub API -> Index -> Search -> Live Call-Graph")
     print("=" * 70)
 
     # Setup
@@ -179,10 +179,14 @@ def main():
     print(f"    tree_sha:     {meta['tree_sha']}")
     print(f"    blob_sha:     {meta['blob_sha']}")
     print(f"    access_level: {meta['access_level']}")
+    print(f"    call_graph_id:{meta['call_graph_id']}")
+    print(f"    qualified:    {meta['qualified_name']}")
     assert meta["tree_sha"] == "fake_tree_sha"
     assert meta["blob_sha"] != ""
     assert meta["access_level"] == "write"
     assert meta["owner"] == "org"
+    assert meta["call_graph_id"].startswith("cg:checkout-service:")
+    assert meta["qualified_name"]
 
     # ── 3. Search ────────────────────────────────────────────────────
     print("\n[3] Multi-query prodding search...")
@@ -198,7 +202,7 @@ def main():
 
     print(f"  Hits: {len(results)}")
     for r in results[:5]:
-        print(f"    [{r['score']:.3f}] {r['sig_id']} — {r['metadata']['signature'][:60]}")
+        print(f"    [{r['score']:.3f}] {r['sig_id']} - {r['metadata']['signature'][:60]}")
     assert len(results) > 0, "Should find at least one hit"
 
     # ── 4. Live Repo Reader → call-graph resolution ──────────────────
@@ -228,7 +232,7 @@ def main():
             if xrefs:
                 print(f"      cross-repo: {xrefs}")
         else:
-            print(f"    {ec.sig_id} — no call-graph (class or parse error)")
+            print(f"    {ec.sig_id} - no call-graph (class or parse error)")
 
     # Verify live resolution actually found callees
     process_order_cg = next(
@@ -295,7 +299,7 @@ def main():
     print(f"  Files processed: {incr_result.files_processed}")
     print(f"  Symbols deleted: {incr_result.symbols_deleted}")
     print(f"  Symbols upserted:{incr_result.symbols_upserted}")
-    print(f"  Vector store:    {old_count} → {len(vector_store)} records")
+    print(f"  Vector store:    {old_count} -> {len(vector_store)} records")
 
     # Verify the new function is in the index
     new_results = search_index(
@@ -326,7 +330,7 @@ def main():
 
     # Test MCP-style queries
     reader_spans = tracer.get_spans(name="live_repo_reader")
-    print(f"\n  MCP query — live_repo_reader spans: {len(reader_spans)}")
+    print(f"\n  MCP query - live_repo_reader spans: {len(reader_spans)}")
     if reader_spans:
         print(f"    metadata: {reader_spans[0]['metadata']}")
 
@@ -335,7 +339,7 @@ def main():
     import index_builder
     source = open(index_builder.__file__).read()
     assert "CallGraphStore" not in source, "CallGraphStore should not exist in updated code"
-    print("  ✓ No CallGraphStore anywhere — call-graphs resolved live")
+    print("  OK: No CallGraphStore anywhere - call-graphs resolved live")
 
     # ── Done ─────────────────────────────────────────────────────────
     print("\n" + "=" * 70)

@@ -8,23 +8,19 @@ Two modes:
 Key design changes from the old local-git approach:
   - NO call-graph store.  Call-graphs resolved live by LiveRepoReader.
   - All blob content fetched via GitHub API (ETag cached).
-  - Every index record carries tree_sha, blob_sha, access_level.
+  - Every index record carries tree_sha, blob_sha, access_level, call_graph_id.
   - Incremental path driven by webhook payloads, not `git diff-tree`.
 """
 
 from __future__ import annotations
 
 import logging
+import os
 import time
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Protocol, Sequence
+from dataclasses import dataclass
+from typing import Any, Protocol
 
-from github_access import (
-    CachedBlobFetcher,
-    WebhookPushEvent,
-    TreeEntry,
-)
+from github_access import CachedBlobFetcher, WebhookPushEvent
 from ast_extraction import Signature, extract_symbols
 
 logger = logging.getLogger(__name__)
@@ -44,6 +40,14 @@ class VectorStore(Protocol):
     def upsert(self, records: list[dict[str, Any]]) -> None: ...
     def delete(self, ids: list[str]) -> None: ...
     def search(self, vector: list[float], top_k: int = 20, filter: dict | None = None) -> list[dict]: ...
+    def list_ids_for_repo_path(self, repo: str, path: str) -> list[str]:
+        """
+        Return record ids for symbols in this repo file.
+
+        In-memory: linear scan. Production (Qdrant, Pinecone): metadata filter
+        on repo + path. Required for incremental webhook updates.
+        """
+        ...
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +99,14 @@ class InMemoryVectorStore:
     def __len__(self) -> int:
         return len(self._records)
 
+    def list_ids_for_repo_path(self, repo: str, path: str) -> list[str]:
+        ids: list[str] = []
+        for rec in self._records:
+            meta = rec.get("metadata", {})
+            if meta.get("repo") == repo and meta.get("path") == path:
+                ids.append(rec["id"])
+        return ids
+
 
 class DummyEmbeddingModel:
     """Deterministic hash-based fake embeddings for testing."""
@@ -122,6 +134,12 @@ class DummyEmbeddingModel:
 # Index record builder — Section 6 schema
 # ---------------------------------------------------------------------------
 
+def _call_graph_id(sig: Signature) -> str:
+    """Stable id for Section 6 call-graph nodes (live-resolved, not persisted in CG store)."""
+    path_slug = sig.path.replace(os.sep, "/")
+    return f"cg:{sig.repo}:{path_slug}:{sig.qualified_name}"
+
+
 def _make_index_record(
     sig: Signature,
     vector: list[float],
@@ -129,7 +147,7 @@ def _make_index_record(
     tree_sha: str,
     access_level: str = "read",
 ) -> dict[str, Any]:
-    """Build a Vector DB record matching the updated Section 6 schema."""
+    """Build a Vector DB record matching plan.md Section 6 (+ hybrid RAG extensions)."""
     return {
         "id": sig.composite_key,
         "vector": vector,
@@ -139,8 +157,10 @@ def _make_index_record(
             "path": sig.path,
             "kind": sig.kind,
             "name": sig.name,
+            "qualified_name": sig.qualified_name,
             "signature": sig.signature_text,
             "docstring": sig.docstring or "",
+            "call_graph_id": _call_graph_id(sig),
             "tree_sha": tree_sha,          # staleness detection
             "blob_sha": sig.blob_sha or "", # ETag cache key
             "access_level": access_level,   # from GitHub App scope
@@ -161,6 +181,7 @@ class IndexBuildResult:
     symbols_extracted: int = 0
     symbols_upserted: int = 0
     elapsed_ms: int = 0
+    truncated_tree: bool = False
 
 
 PYTHON_EXTENSIONS = frozenset({".py"})
@@ -197,6 +218,13 @@ def full_build(
 
     # Walk tree
     tree_resp = blob_fetcher.fetch_tree(owner, repo, tree_sha)
+    if tree_resp.truncated:
+        result.truncated_tree = True
+        logger.warning(
+            "GitHub tree truncated for %s/%s@%s — index may be incomplete. "
+            "Use non-recursive tree walks or sparse paths for large repos.",
+            owner, repo, tree_sha[:7],
+        )
     blob_entries = [
         e for e in tree_resp.entries
         if e.type == "blob" and _has_extension(e.path, extensions)
@@ -224,6 +252,13 @@ def full_build(
     for i in range(0, len(embedding_inputs), embed_batch_size):
         batch = embedding_inputs[i : i + embed_batch_size]
         all_vectors.extend(embedding_model.embed(batch))
+
+    dim = embedding_model.dimension
+    for vec in all_vectors:
+        if len(vec) != dim:
+            raise ValueError(
+                f"Embedding dimension mismatch: expected {dim}, got {len(vec)}"
+            )
 
     # Upsert
     records = [
@@ -282,21 +317,63 @@ def incremental_update(
     new_sigs: list[Signature] = []
 
     for cf in event.changed_files:
-        if not _has_extension(cf.path, extensions):
+        primary_path = cf.path
+        if not _has_extension(primary_path, extensions):
+            # Still clear index for renamed-away non-Python paths if old path was Python
+            if cf.status == "renamed" and cf.previous_path and _has_extension(
+                cf.previous_path, extensions
+            ):
+                ids_to_delete.extend(
+                    vector_store.list_ids_for_repo_path(event.repo, cf.previous_path)
+                )
             continue
+
         result.files_processed += 1
 
         if cf.status == "removed":
-            # We need to find which sig_ids were in this file.
-            # Query the vector store for records matching this repo + path.
-            # In production, the vector store supports metadata filtering.
             ids_to_delete.extend(
-                _find_ids_by_path(vector_store, event.repo, cf.path)
+                vector_store.list_ids_for_repo_path(event.repo, cf.path)
             )
+        elif cf.status == "renamed":
+            if cf.previous_path:
+                ids_to_delete.extend(
+                    vector_store.list_ids_for_repo_path(event.repo, cf.previous_path)
+                )
+            ids_to_delete.extend(
+                vector_store.list_ids_for_repo_path(event.repo, cf.path)
+            )
+            if cf.blob_sha:
+                content = blob_fetcher.fetch_blob(event.owner, event.repo, cf.blob_sha)
+                sigs, _ = extract_symbols(
+                    content,
+                    repo=event.repo,
+                    owner=event.owner,
+                    path=cf.path,
+                    blob_sha=cf.blob_sha,
+                )
+                new_sigs.extend(sigs)
+            else:
+                tree_resp = blob_fetcher.fetch_tree(
+                    event.owner, event.repo, event.new_tree_sha
+                )
+                entry = next((e for e in tree_resp.entries if e.path == cf.path), None)
+                if entry is not None:
+                    blob_sha = entry.sha
+                    content = blob_fetcher.fetch_blob(
+                        event.owner, event.repo, blob_sha
+                    )
+                    sigs, _ = extract_symbols(
+                        content,
+                        repo=event.repo,
+                        owner=event.owner,
+                        path=cf.path,
+                        blob_sha=blob_sha,
+                    )
+                    new_sigs.extend(sigs)
         elif cf.status in ("added", "modified"):
             # Delete old entries for this path first
             ids_to_delete.extend(
-                _find_ids_by_path(vector_store, event.repo, cf.path)
+                vector_store.list_ids_for_repo_path(event.repo, cf.path)
             )
             # Fetch new blob content and parse
             if cf.blob_sha:
@@ -319,15 +396,22 @@ def incremental_update(
             )
             new_sigs.extend(sigs)
 
-    # Delete old
+    # Delete old (dedupe — renames / modified may list the same id twice)
     if ids_to_delete:
-        vector_store.delete(ids_to_delete)
-        result.symbols_deleted = len(ids_to_delete)
+        unique_ids = list(dict.fromkeys(ids_to_delete))
+        vector_store.delete(unique_ids)
+        result.symbols_deleted = len(unique_ids)
 
     # Embed and upsert new
     if new_sigs:
         texts = [sig.embedding_input for sig in new_sigs]
         vectors = embedding_model.embed(texts)
+        dim = embedding_model.dimension
+        for vec in vectors:
+            if len(vec) != dim:
+                raise ValueError(
+                    f"Embedding dimension mismatch: expected {dim}, got {len(vec)}"
+                )
         records = [
             _make_index_record(
                 sig, vec,
@@ -359,6 +443,7 @@ def search_index(
     *,
     top_k: int = 20,
     repo_filter: str | None = None,
+    owner_filter: str | None = None,
 ) -> list[dict[str, Any]]:
     """
     Multi-query prodding search (Section 3.2 / 3.3).
@@ -369,7 +454,13 @@ def search_index(
     seen_ids: set[str] = set()
     results: list[dict[str, Any]] = []
 
-    filt = {"repo": repo_filter} if repo_filter else None
+    filt: dict[str, str] | None = None
+    if repo_filter is not None or owner_filter is not None:
+        filt = {}
+        if repo_filter is not None:
+            filt["repo"] = repo_filter
+        if owner_filter is not None:
+            filt["owner"] = owner_filter
 
     for text in query_texts:
         vec = embedding_model.embed([text])[0]
@@ -394,17 +485,5 @@ def search_index(
 # ---------------------------------------------------------------------------
 
 def _has_extension(path: str, extensions: frozenset[str]) -> bool:
-    import os
     _, ext = os.path.splitext(path)
     return ext in extensions
-
-
-def _find_ids_by_path(store: VectorStore, repo: str, path: str) -> list[str]:
-    """Find all sig_ids in the store for a given repo + path."""
-    ids: list[str] = []
-    # In-memory store — linear scan.  Production store uses metadata filter.
-    for rec in getattr(store, "_records", []):
-        meta = rec.get("metadata", {})
-        if meta.get("repo") == repo and meta.get("path") == path:
-            ids.append(rec["id"])
-    return ids
