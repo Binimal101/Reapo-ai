@@ -69,7 +69,6 @@ Steps:
 1. Create monorepo structure:
    - apps/api
    - apps/worker-indexer
-   - apps/worker-orchestrator
    - apps/worker-writer
    - apps/web (optional)
    - packages/common

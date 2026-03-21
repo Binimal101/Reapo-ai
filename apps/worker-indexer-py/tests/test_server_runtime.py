@@ -282,3 +282,70 @@ def test_server_app_readiness_reports_not_ready_when_redis_ping_fails(tmp_path: 
     assert status_code == 503
     assert payload['status'] == 'not_ready'
     assert payload['checks']['queue'] is False
+
+
+def test_server_app_issues_and_validates_session_bearer_token(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    token = app._issue_session_token(user_id='alice', provider='github')
+    status_code, payload = app.authenticate_bearer_token(token)
+
+    assert status_code == 200
+    assert payload['status'] == 'ok'
+    assert payload['user_id'] == 'alice'
+    assert payload['provider'] == 'github'
+
+
+def test_server_app_rejects_invalid_session_bearer_token(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    status_code, payload = app.authenticate_bearer_token('invalid.token')
+    assert status_code == 401
+    assert payload['reason'] == 'invalid_or_expired_token'
+
+
+def test_server_app_oauth_signup_start_rejects_unknown_provider(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    status_code, payload = app.oauth_signup_start(provider='google', state='state-1', redirect_uri=None)
+    assert status_code == 400
+    assert payload['reason'] == 'unsupported_provider'
+
+
+def test_chat_session_access_is_scoped_to_authenticated_user(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    create_code, create_payload = app.chat_create_session(user_id='owner')
+    assert create_code == 200
+    session_id = str(create_payload['session']['session_id'])
+
+    owner_code, _ = app.chat_get_session(session_id, requesting_user_id='owner')
+    assert owner_code == 200
+
+    intruder_code, intruder_payload = app.chat_get_session(session_id, requesting_user_id='intruder')
+    assert intruder_code == 403
+    assert intruder_payload['reason'] == 'session_access_denied'
