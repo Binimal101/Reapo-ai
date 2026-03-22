@@ -16,9 +16,9 @@ from ast_indexer.application.research_pipeline import (
 )
 
 
-def _conversational_agent_tool(*, message: str, memory_summary: str, message_history: list[dict]) -> str:
-    tail = f' | memory={memory_summary}' if memory_summary else ''
-    return f'conversation:{message.strip()}{tail} | history={len(message_history)}'
+def _conversational_agent_tool(*, message: str, context: str | None = None) -> str:
+    tail = f' | ctx={len(context)}' if context else ''
+    return f'conversation:{message.strip()}{tail}'
 
 
 def _build_service(tmp_path: Path) -> ChatOrchestratorService:

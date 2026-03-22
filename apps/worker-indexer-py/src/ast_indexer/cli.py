@@ -6,7 +6,7 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Literal
+from typing import Iterable, Literal
 from uuid import uuid4
 
 from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
@@ -27,14 +27,32 @@ def _env_int(name: str) -> int | None:
         raise ValueError(f'Invalid integer value for {name}: {raw}') from exc
 
 
+def _walk_directories_up(start: Path) -> Iterable[Path]:
+    if start.is_file():
+        start = start.parent
+    yield from [start, *start.parents]
+
+
+def _repo_root_for_dotenv() -> Path | None:
+    """Directory that holds the canonical `.env.example` (repository root only, never a parent folder)."""
+    for anchor in (Path(__file__).resolve(), Path.cwd()):
+        for directory in _walk_directories_up(anchor):
+            if (directory / '.env.example').is_file():
+                return directory
+    return None
+
+
 def _load_environment() -> None:
     try:
-        from dotenv import find_dotenv, load_dotenv
+        from dotenv import load_dotenv
     except ImportError:
         return
 
-    dotenv_path = find_dotenv(usecwd=True)
-    if dotenv_path:
+    root = _repo_root_for_dotenv()
+    if root is None:
+        return
+    dotenv_path = root / '.env'
+    if dotenv_path.is_file():
         load_dotenv(dotenv_path, override=False)
 
 

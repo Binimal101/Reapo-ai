@@ -291,23 +291,13 @@ class OpenAIConversationalAgent:
         self,
         *,
         message: str,
-        memory_summary: str,
-        message_history: list[dict],
+        context: str | None = None,
     ) -> str:
         system_prompt = openai_prompt_catalog.conversational_system_prompt()
-        compact_history = [
-            {
-                'role': str(item.get('role', 'unknown')),
-                'content': str(item.get('content', '')),
-            }
-            for item in message_history[-10:]
-        ]
-        user_payload = {
-            'latest_user_message': message,
-            'memory_summary': memory_summary,
-            'recent_history': compact_history,
-            'mode': 'conversational_planning',
-        }
+        if context and context.strip():
+            user_content = f'Context (may be empty sections):\n{context.strip()}\n\nUser message:\n{message.strip()}'
+        else:
+            user_content = message.strip()
 
         response = self._client.chat.completions.create(
             model=self._model,
@@ -316,7 +306,7 @@ class OpenAIConversationalAgent:
             timeout=4.0,
             messages=[
                 {'role': 'system', 'content': system_prompt},
-                {'role': 'user', 'content': json.dumps(user_payload)},
+                {'role': 'user', 'content': user_content},
             ],
         )
         return str(response.choices[0].message.content or '').strip()

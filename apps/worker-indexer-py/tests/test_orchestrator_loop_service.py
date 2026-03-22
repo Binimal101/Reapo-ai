@@ -8,9 +8,9 @@ from ast_indexer.application.research_pipeline import (
 )
 
 
-def _conversational_agent_tool(*, message: str, memory_summary: str, message_history: list[dict]) -> str:
-    tail = f' | memory={memory_summary}' if memory_summary else ''
-    return f'conversation:{message.strip()}{tail} | history={len(message_history)}'
+def _conversational_agent_tool(*, message: str, context: str | None = None) -> str:
+    ctx = f' | ctx={len(context)}' if context else ''
+    return f'conversation:{message.strip()}{ctx}'
 
 
 def _result_with_context() -> ResearchPipelineResult:
@@ -274,6 +274,5 @@ def test_orchestrator_loop_routes_conversational_messages_before_research() -> N
     assert search_calls['count'] == 0
 
     step_names = [step['name'] for step in execution['steps']]
-    assert 'route' in step_names
     assert 'execute_step.conversation' in step_names
     assert 'execute_step.search' not in step_names

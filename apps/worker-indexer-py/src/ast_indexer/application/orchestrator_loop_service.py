@@ -82,14 +82,23 @@ class ConversationalAgentTool(Protocol):
         self,
         *,
         message: str,
-        memory_summary: str,
-        message_history: list[dict],
+        context: str | None = None,
     ) -> str:
-        """Generate a conversational assistant response for non-coding turns."""
+        """Generate a reply for the current user message.
+
+        `context` is optional background assembled by the orchestrator (memory, prior
+        turns, retrieval notes). Callers must not pass routing labels or graph names.
+        """
         ...
 
 
 class OrchestratorLoopService:
+    """LangGraph orchestrator: one full graph run per user message (no persisted graph state).
+
+    Routing runs on every turn; the conversational model only receives `message` plus optional
+    orchestrator-built `context` (memory and recent transcript), never routing metadata.
+    """
+
     def __init__(
         self,
         *,
@@ -181,16 +190,14 @@ class OrchestratorLoopService:
         graph = StateGraph(OrchestratorState)
         graph.add_node('plan', self._plan_node)
         graph.add_node('memory_check', self._memory_node)
-        graph.add_node('route', self._route_node)
         graph.add_node('conversational_mode', self._conversational_node)
         graph.add_node('coding_mode', self._coding_node)
         graph.add_node('compose_response', self._compose_node)
 
         graph.add_edge(START, 'plan')
         graph.add_edge('plan', 'memory_check')
-        graph.add_edge('memory_check', 'route')
         graph.add_conditional_edges(
-            'route',
+            'memory_check',
             self._route_next_node,
             {
                 'conversational_mode': 'conversational_mode',
@@ -232,14 +239,6 @@ class OrchestratorLoopService:
         self._record_step_success(steps, 'memory_check', {'summary': memory_summary})
         return {'memory_summary': memory_summary}
 
-    def _route_node(self, state: OrchestratorState) -> OrchestratorState:
-        steps = state['steps']
-        plan = state.get('plan', {'route': 'coding_mode', 'intent': 'search_and_answer', 'use_memory': False})
-        route = plan['route']
-        self._record_step_start(steps, 'route', {'intent': plan['intent']})
-        self._record_step_success(steps, 'route', {'route': route})
-        return {'plan': plan}
-
     def _route_next_node(self, state: OrchestratorState) -> str:
         plan = state.get('plan', {'route': 'coding_mode', 'intent': 'search_and_answer', 'use_memory': False})
         route = plan['route']
@@ -253,7 +252,7 @@ class OrchestratorLoopService:
         memory_summary = state.get('memory_summary', '')
         history = state.get('message_history', [])
 
-        self._record_step_start(steps, 'execute_step.conversation', {'mode': 'conversational'})
+        self._record_step_start(steps, 'execute_step.conversation', {})
         assistant_response = self._compose_conversational_response(
             message=message,
             memory_summary=memory_summary,
@@ -379,20 +378,13 @@ class OrchestratorLoopService:
             if search_result is None:
                 raise RuntimeError('compose step missing research result')
             message = state.get('message', '')
-            if not search_result.reduced_context and self._is_conversational_message(message):
-                assistant_response = self._compose_conversational_response(
-                    message=message,
-                    memory_summary=state.get('memory_summary', ''),
-                    message_history=state.get('message_history', []),
-                )
-            else:
-                assistant_response = self._compose_response(
-                    search_result,
-                    message,
-                    state.get('memory_summary', ''),
-                    state.get('grep_samples', []),
-                    state.get('message_history', []),
-                )
+            assistant_response = self._compose_response(
+                search_result,
+                message,
+                state.get('memory_summary', ''),
+                state.get('grep_samples', []),
+                state.get('message_history', []),
+            )
 
         self._record_step_success(
             steps,
@@ -439,6 +431,10 @@ class OrchestratorLoopService:
                 message=message,
                 memory_summary=memory_summary,
                 message_history=message_history,
+                extra_context=(
+                    'No code excerpts were retrieved for this query. '
+                    'Reply helpfully; you may suggest how to narrow or rephrase if needed.'
+                ),
             )
             if grep_samples:
                 grep_lines = ['Possible signature hits from grep_repo:']
@@ -463,6 +459,7 @@ class OrchestratorLoopService:
         return response
 
     def _needs_research(self, message: str) -> bool:
+        """Heuristic: user message likely needs repository / code retrieval."""
         text = message.strip().lower()
         if not text:
             return False
@@ -482,20 +479,44 @@ class OrchestratorLoopService:
             'traceback',
             'stack trace',
             'call graph',
+            'branch',
+            'commit',
+            'pull request',
+            'pr ',
+            'merge',
+            'bug',
+            'regression',
+            'endpoint',
+            'api',
+            'docker',
+            'kubernetes',
+            'k8s',
+            'deploy',
+            'build',
+            'test',
+            'tests',
+            'pytest',
+            'jest',
+            'typescript',
+            'python',
             '.py',
             '.ts',
             '.tsx',
             '.js',
             '.jsx',
+            '.go',
+            '.rs',
         )
         return any(token in text for token in code_tokens)
 
     def _route_intent(self, message: str, *, repos_in_scope: tuple[str, ...]) -> str:
+        """Classify the next graph branch. Runs once per user message (invoke is stateless)."""
         if self._is_conversational_message(message):
             return 'conversational_mode'
         return 'coding_mode'
 
     def _is_conversational_message(self, message: str) -> bool:
+        """True when the turn should skip retrieval and use the conversational model only."""
         text = message.strip().lower()
         if not text:
             return True
@@ -519,20 +540,52 @@ class OrchestratorLoopService:
 
         return not self._needs_research(text)
 
+    def _build_router_context_for_conversational(
+        self,
+        *,
+        memory_summary: str,
+        message_history: list[dict],
+        extra_context: str | None,
+    ) -> str | None:
+        """Background for the conversational model; assembled only by the orchestrator."""
+        parts: list[str] = []
+        if memory_summary.strip():
+            parts.append(f'Session memory summary:\n{memory_summary.strip()}')
+        if message_history:
+            tail = message_history[-6:]
+            lines: list[str] = []
+            for item in tail:
+                role = str(item.get('role', 'unknown'))
+                content = str(item.get('content', ''))
+                if len(content) > 600:
+                    content = content[:600] + '…'
+                lines.append(f'{role}: {content}')
+            parts.append('Recent messages:\n' + '\n'.join(lines))
+        if extra_context and extra_context.strip():
+            parts.append(extra_context.strip())
+        if not parts:
+            return None
+        return '\n\n'.join(parts)
+
     def _compose_conversational_response(
         self,
         *,
         message: str,
         memory_summary: str,
         message_history: list[dict],
+        extra_context: str | None = None,
     ) -> str:
         if self._conversational_agent_tool is None:
             raise RuntimeError('conversational agent tool is not configured')
 
-        response = self._conversational_agent_tool(
-            message=message,
+        context = self._build_router_context_for_conversational(
             memory_summary=memory_summary,
             message_history=message_history,
+            extra_context=extra_context,
+        )
+        response = self._conversational_agent_tool(
+            message=message,
+            context=context,
         )
         text = str(response).strip()
         if not text:
