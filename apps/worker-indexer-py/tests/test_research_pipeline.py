@@ -120,3 +120,57 @@ def test_research_pipeline_respects_repo_scope_filter(tmp_path: Path) -> None:
 
     assert all(row.repo == 'repo-a' for row in result.candidates)
     assert all(row.repo == 'repo-a' for row in result.enriched_context)
+
+
+def test_research_pipeline_logs_langgraph_transitions(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    repo_root = workspace_root / 'checkout-service' / 'src'
+    repo_root.mkdir(parents=True)
+    (repo_root / 'util.py').write_text(
+        'def helper(order_id):\n    return order_id\n',
+        encoding='utf-8',
+    )
+    (repo_root / 'orders.py').write_text(
+        'from src.util import helper\n\ndef process(order_id):\n    return helper(order_id)\n',
+        encoding='utf-8',
+    )
+
+    state_root = tmp_path / 'state'
+    index_service = build_persistent_index_service(
+        workspace_root=workspace_root,
+        state_root=state_root,
+        embedding_backend='hash',
+        observability_backend='jsonl',
+    )
+    index_service.index_repository(repo='checkout-service', trace_id='index-transition')
+
+    observability = InMemoryObservabilityAdapter()
+    pipeline = ResearchPipeline(
+        reasoning_agent=DeterministicReasoningAgent(),
+        query_prodder=DeterministicQueryProdder(),
+        embedding_generator=SimpleHashEmbeddingGeneratorAdapter(),
+        vector_store=JsonFileVectorStoreAdapter(state_root / 'index' / 'vectors.json'),
+        index_store=JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json'),
+        repository_reader=LocalFsRepositoryReaderAdapter(workspace_root),
+        extractor=PythonAstSymbolExtractor(),
+        observability=observability,
+    )
+
+    pipeline.run(
+        trace_id='research-transition',
+        prompt='process order helper',
+        repos_in_scope=('checkout-service',),
+        top_k=4,
+    )
+
+    transitions = [
+        span for span in observability.list_spans() if span.name == 'langgraph.transition' and span.metadata
+    ]
+    transition_pairs = {(str(span.metadata['from_node']), str(span.metadata['to_node'])) for span in transitions}
+    assert ('START', 'reasoning_node') in transition_pairs
+    assert ('reasoning_node', 'prodder_node') in transition_pairs
+    assert ('prodder_node', 'vector_search_node') in transition_pairs
+    assert ('vector_search_node', 'relevancy_node') in transition_pairs
+    assert ('relevancy_node', 'retrieval_node') in transition_pairs
+    assert ('retrieval_node', 'reducer_node') in transition_pairs
+    assert ('reducer_node', 'END') in transition_pairs

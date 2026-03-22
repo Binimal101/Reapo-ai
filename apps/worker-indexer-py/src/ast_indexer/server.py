@@ -257,6 +257,7 @@ class GithubWebhookServerApp:
             conversational_agent_tool=conversational_agent_tool,
             memory_threshold_messages=20,
             max_tool_iterations=5,
+            observability=self._observability,
         )
         return ChatOrchestratorService(state_store=store, orchestrator=orchestrator)
 

@@ -1,3 +1,4 @@
+from ast_indexer.adapters.observability.in_memory_observability_adapter import InMemoryObservabilityAdapter
 from ast_indexer.application.orchestrator_loop_service import GrepRepoResult, OrchestratorLoopService
 from ast_indexer.application.research_pipeline import (
     ReducedResearchContext,
@@ -276,3 +277,117 @@ def test_orchestrator_loop_routes_conversational_messages_before_research() -> N
     step_names = [step['name'] for step in execution['steps']]
     assert 'execute_step.conversation' in step_names
     assert 'execute_step.search' not in step_names
+
+
+def test_orchestrator_loop_emits_observability_hierarchy() -> None:
+    observability = InMemoryObservabilityAdapter()
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 1,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        observability=observability,
+    )
+    execution = service.execute(
+        run_id='run-observability',
+        session_id='session-observability',
+        user_id='user-observability',
+        trace_id='trace-observability',
+        message='find auth function flow in the repository',
+        repos_in_scope=('repo-b',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=None,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    spans = observability.list_spans()
+    names = [span.name for span in spans]
+    assert 'orchestrator_loop_run' in names
+    assert 'orchestrator.plan' in names
+    assert 'orchestrator.coding_mode' in names
+    assert 'orchestrator.compose_response' in names
+    assert 'langgraph.transition' in names
+    assert all(span.finished_at is not None for span in spans)
+
+    transitions = [span for span in spans if span.name == 'langgraph.transition']
+    transition_pairs = {(str(span.metadata.get('from_node')), str(span.metadata.get('to_node'))) for span in transitions if span.metadata}
+    assert ('START', 'plan') in transition_pairs
+    assert ('plan', 'memory_check') in transition_pairs
+    assert ('memory_check', 'coding_mode') in transition_pairs
+    assert ('coding_mode', 'compose_response') in transition_pairs
+    assert ('compose_response', 'END') in transition_pairs
+
+
+def test_orchestrator_loop_logs_conversational_transitions() -> None:
+    observability = InMemoryObservabilityAdapter()
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        raise AssertionError('search should not run for conversational flow')
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        raise AssertionError('grep should not run for conversational flow')
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        observability=observability,
+    )
+    execution = service.execute(
+        run_id='run-conv-observability',
+        session_id='session-conv-observability',
+        user_id='user-conv-observability',
+        trace_id='trace-conv-observability',
+        message='Hey can you help me think through this?',
+        repos_in_scope=('repo-b',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=None,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    transitions = [
+        span for span in observability.list_spans() if span.name == 'langgraph.transition' and span.metadata
+    ]
+    transition_pairs = {(str(span.metadata['from_node']), str(span.metadata['to_node'])) for span in transitions}
+    assert ('START', 'plan') in transition_pairs
+    assert ('plan', 'memory_check') in transition_pairs
+    assert ('memory_check', 'conversational_mode') in transition_pairs
+    assert ('conversational_mode', 'compose_response') in transition_pairs
+    assert ('compose_response', 'END') in transition_pairs

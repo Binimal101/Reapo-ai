@@ -5,7 +5,9 @@ from typing import Callable, Protocol, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from ast_indexer.domain.models import TraceSpan
 from ast_indexer.application.research_pipeline import ResearchPipelineResult
+from ast_indexer.ports.observability import ObservabilityPort
 
 
 SearchTool = Callable[..., ResearchPipelineResult]
@@ -107,12 +109,14 @@ class OrchestratorLoopService:
         conversational_agent_tool: ConversationalAgentTool | None = None,
         memory_threshold_messages: int = 20,
         max_tool_iterations: int = 5,
+        observability: ObservabilityPort | None = None,
     ) -> None:
         self._search_tool = search_tool
         self._grep_repo_tool = grep_repo_tool
         self._conversational_agent_tool = conversational_agent_tool
         self._memory_threshold_messages = max(4, memory_threshold_messages)
         self._max_tool_iterations = max(1, min(20, max_tool_iterations))
+        self._observability = observability
         self._app = self._build_graph()
 
     def execute(
@@ -134,6 +138,28 @@ class OrchestratorLoopService:
     ) -> dict:
         now = datetime.now(timezone.utc).isoformat()
         steps: list[dict] = []
+        run_span = self._start_span(
+            name='orchestrator_loop_run',
+            trace_id=trace_id,
+            input_payload={
+                'message': message,
+                'repos_in_scope': list(repos_in_scope),
+                'top_k': top_k,
+                'candidate_pool_multiplier': candidate_pool_multiplier,
+                'relevancy_threshold': relevancy_threshold,
+                'relevancy_workers': relevancy_workers,
+                'reducer_token_budget': reducer_token_budget,
+                'reducer_max_contexts': reducer_max_contexts,
+                'history_size': len(message_history),
+            },
+            session_id=session_id,
+            user_id=user_id,
+        )
+        self._record_transition(
+            trace_id=trace_id,
+            source='START',
+            target='plan',
+        )
         try:
             final_state: OrchestratorState = self._app.invoke(
                 {
@@ -172,6 +198,17 @@ class OrchestratorLoopService:
                 'final_response': assistant_response,
                 'error': None,
             }
+            self._end_span(
+                run_span,
+                output_payload={
+                    'status': 'completed',
+                    'response_length': len(assistant_response),
+                    'step_count': len(steps),
+                },
+                metadata={
+                    'route': final_state.get('plan', {}).get('route'),
+                },
+            )
             return result
         except Exception as exc:  # noqa: BLE001
             finished_at = datetime.now(timezone.utc).isoformat()
@@ -184,6 +221,15 @@ class OrchestratorLoopService:
                 'final_response': None,
                 'error': str(exc),
             }
+            self._end_span(
+                run_span,
+                output_payload={
+                    'status': 'failed',
+                    'step_count': len(steps),
+                    'error': str(exc),
+                },
+                metadata={'error_type': type(exc).__name__},
+            )
             return failed
 
     def _build_graph(self):
@@ -210,22 +256,51 @@ class OrchestratorLoopService:
         return graph.compile()
 
     def _plan_node(self, state: OrchestratorState) -> OrchestratorState:
+        trace_id = state.get('trace_id', '')
         message = state.get('message', '')
         repos = state.get('repos_in_scope', ())
         history = state.get('message_history', [])
         steps = state['steps']
+        span = self._start_span(
+            name='orchestrator.plan',
+            trace_id=trace_id,
+            input_payload={
+                'message': message,
+                'repos_in_scope': list(repos),
+                'history_size': len(history),
+            },
+        )
 
-        self._record_step_start(steps, 'plan', {'message': message})
-        route = self._route_intent(message, repos_in_scope=repos)
-        plan: OrchestratorPlan = {
-            'intent': 'conversational' if route == 'conversational_mode' else 'search_and_answer',
-            'route': route,
-            'use_memory': len(history) >= self._memory_threshold_messages,
-        }
-        self._record_step_success(steps, 'plan', {'plan': plan})
-        return {'plan': plan}
+        try:
+            self._record_step_start(steps, 'plan', {'message': message})
+            route = self._route_intent(message, repos_in_scope=repos)
+            plan: OrchestratorPlan = {
+                'intent': 'conversational' if route == 'conversational_mode' else 'search_and_answer',
+                'route': route,
+                'use_memory': len(history) >= self._memory_threshold_messages,
+            }
+            self._record_step_success(steps, 'plan', {'plan': plan})
+            self._end_span(
+                span,
+                output_payload={'plan': plan},
+                metadata={'route': route},
+            )
+            self._record_transition(
+                trace_id=trace_id,
+                source='plan',
+                target='memory_check',
+            )
+            return {'plan': plan}
+        except Exception as exc:
+            self._end_span(
+                span,
+                output_payload={'error': str(exc)},
+                metadata={'error_type': type(exc).__name__},
+            )
+            raise
 
     def _memory_node(self, state: OrchestratorState) -> OrchestratorState:
+        trace_id = state.get('trace_id', '')
         plan = state.get('plan', {'use_memory': False, 'intent': 'search_and_answer', 'route': 'coding_mode'})
         history = state.get('message_history', [])
         steps = state['steps']
@@ -233,37 +308,77 @@ class OrchestratorLoopService:
         if not plan['use_memory']:
             return {'memory_summary': ''}
 
+        span = self._start_span(
+            name='orchestrator.memory_check',
+            trace_id=trace_id,
+            input_payload={'history_size': len(history)},
+        )
         self._record_step_start(steps, 'memory_check', {'history_size': len(history)})
         # CAG mode: memory is derived directly from in-session history instead of an external tool call.
         memory_summary = self._build_cag_memory_context(history)
         self._record_step_success(steps, 'memory_check', {'summary': memory_summary})
+        self._end_span(
+            span,
+            output_payload={'memory_summary': memory_summary},
+            metadata={'summary_length': len(memory_summary)},
+        )
         return {'memory_summary': memory_summary}
 
     def _route_next_node(self, state: OrchestratorState) -> str:
         plan = state.get('plan', {'route': 'coding_mode', 'intent': 'search_and_answer', 'use_memory': False})
         route = plan['route']
+        self._record_transition(
+            trace_id=state.get('trace_id', ''),
+            source='memory_check',
+            target=route,
+            reason='route_decision',
+        )
         if route == 'conversational_mode':
             return 'conversational_mode'
         return 'coding_mode'
 
     def _conversational_node(self, state: OrchestratorState) -> OrchestratorState:
+        trace_id = state.get('trace_id', '')
         steps = state['steps']
         message = state.get('message', '')
         memory_summary = state.get('memory_summary', '')
         history = state.get('message_history', [])
+        span = self._start_span(
+            name='orchestrator.conversational_mode',
+            trace_id=trace_id,
+            input_payload={'message': message, 'history_size': len(history)},
+        )
 
-        self._record_step_start(steps, 'execute_step.conversation', {})
-        assistant_response = self._compose_conversational_response(
-            message=message,
-            memory_summary=memory_summary,
-            message_history=history,
-        )
-        self._record_step_success(
-            steps,
-            'execute_step.conversation',
-            {'response_length': len(assistant_response)},
-        )
-        return {'assistant_response': assistant_response}
+        try:
+            self._record_step_start(steps, 'execute_step.conversation', {})
+            assistant_response = self._compose_conversational_response(
+                message=message,
+                memory_summary=memory_summary,
+                message_history=history,
+            )
+            self._record_step_success(
+                steps,
+                'execute_step.conversation',
+                {'response_length': len(assistant_response)},
+            )
+            self._end_span(
+                span,
+                output_payload={'response_length': len(assistant_response)},
+                metadata={'mode': 'conversational'},
+            )
+            self._record_transition(
+                trace_id=trace_id,
+                source='conversational_mode',
+                target='compose_response',
+            )
+            return {'assistant_response': assistant_response}
+        except Exception as exc:
+            self._end_span(
+                span,
+                output_payload={'error': str(exc)},
+                metadata={'error_type': type(exc).__name__},
+            )
+            raise
 
     def _coding_node(self, state: OrchestratorState) -> OrchestratorState:
         steps = state['steps']
@@ -276,6 +391,18 @@ class OrchestratorLoopService:
         reducer_token_budget = int(state.get('reducer_token_budget', 2500))
         reducer_max_contexts = state.get('reducer_max_contexts')
         trace_id = state.get('trace_id', '')
+        span = self._start_span(
+            name='orchestrator.coding_mode',
+            trace_id=trace_id,
+            input_payload={
+                'message': message,
+                'repos_in_scope': list(repos_in_scope),
+                'top_k': top_k,
+                'candidate_pool_multiplier': candidate_pool_multiplier,
+                'relevancy_threshold': relevancy_threshold,
+                'reducer_token_budget': reducer_token_budget,
+            },
+        )
 
         grep_samples: list[GrepRepoMatch] = []
         grep_page = 1
@@ -284,114 +411,216 @@ class OrchestratorLoopService:
         needs_research = self._needs_research(message)
         tool_iteration = 0
 
-        while tool_iteration < self._max_tool_iterations:
-            tool_iteration += 1
+        try:
+            while tool_iteration < self._max_tool_iterations:
+                tool_iteration += 1
 
-            should_grep = needs_research and grep_has_more and len(grep_samples) < 6
-            if should_grep:
-                self._record_step_start(
-                    steps,
-                    'execute_step.grep_repo',
-                    {
-                        'query': message,
-                        'page': grep_page,
-                        'page_size': 8,
-                        'signature_max_chars': 120,
-                        'tool_iteration': tool_iteration,
-                    },
-                )
-                grep_result = self._grep_repo_tool(
-                    query=message,
-                    repos_in_scope=repos_in_scope,
-                    page=grep_page,
-                    page_size=8,
-                    signature_max_chars=120,
-                )
-                grep_samples.extend(grep_result.get('matches', []))
-                grep_has_more = bool(grep_result.get('has_more'))
-                self._record_step_success(
-                    steps,
-                    'execute_step.grep_repo',
-                    {
-                        'page': grep_page,
-                        'returned': len(grep_result.get('matches', [])),
-                        'total_matches': int(grep_result.get('total_matches', 0)),
-                        'has_more': grep_has_more,
-                        'aggregated_matches': len(grep_samples),
-                    },
-                )
-                if grep_has_more and len(grep_samples) < 6 and tool_iteration < self._max_tool_iterations:
-                    grep_page += 1
-                    continue
+                should_grep = needs_research and grep_has_more and len(grep_samples) < 6
+                if should_grep:
+                    self._record_step_start(
+                        steps,
+                        'execute_step.grep_repo',
+                        {
+                            'query': message,
+                            'page': grep_page,
+                            'page_size': 8,
+                            'signature_max_chars': 120,
+                            'tool_iteration': tool_iteration,
+                        },
+                    )
+                    grep_result = self._grep_repo_tool(
+                        query=message,
+                        repos_in_scope=repos_in_scope,
+                        page=grep_page,
+                        page_size=8,
+                        signature_max_chars=120,
+                    )
+                    grep_samples.extend(grep_result.get('matches', []))
+                    grep_has_more = bool(grep_result.get('has_more'))
+                    self._record_step_success(
+                        steps,
+                        'execute_step.grep_repo',
+                        {
+                            'page': grep_page,
+                            'returned': len(grep_result.get('matches', [])),
+                            'total_matches': int(grep_result.get('total_matches', 0)),
+                            'has_more': grep_has_more,
+                            'aggregated_matches': len(grep_samples),
+                        },
+                    )
+                    if grep_has_more and len(grep_samples) < 6 and tool_iteration < self._max_tool_iterations:
+                        grep_page += 1
+                        continue
+
+                if search_result is None:
+                    self._record_step_start(
+                        steps,
+                        'execute_step.search',
+                        {
+                            'top_k': top_k,
+                            'candidate_pool_multiplier': candidate_pool_multiplier,
+                            'relevancy_threshold': relevancy_threshold,
+                            'reducer_token_budget': reducer_token_budget,
+                            'tool_iteration': tool_iteration,
+                        },
+                    )
+                    search_result = self._search_tool(
+                        trace_id=trace_id,
+                        prompt=message,
+                        repos_in_scope=repos_in_scope,
+                        top_k=top_k,
+                        candidate_pool_multiplier=candidate_pool_multiplier,
+                        relevancy_threshold=relevancy_threshold,
+                        relevancy_workers=relevancy_workers,
+                        reducer_token_budget=reducer_token_budget,
+                        reducer_max_contexts=reducer_max_contexts,
+                    )
+                    self._record_step_success(
+                        steps,
+                        'execute_step.search',
+                        {
+                            'candidate_count': len(search_result.candidates),
+                            'relevant_count': len(search_result.relevant_candidates),
+                            'reduced_count': len(search_result.reduced_context),
+                        },
+                    )
+                    break
 
             if search_result is None:
-                self._record_step_start(
-                    steps,
-                    'execute_step.search',
-                    {
-                        'top_k': top_k,
-                        'candidate_pool_multiplier': candidate_pool_multiplier,
-                        'relevancy_threshold': relevancy_threshold,
-                        'reducer_token_budget': reducer_token_budget,
-                        'tool_iteration': tool_iteration,
-                    },
-                )
-                search_result = self._search_tool(
-                    trace_id=trace_id,
-                    prompt=message,
-                    repos_in_scope=repos_in_scope,
-                    top_k=top_k,
-                    candidate_pool_multiplier=candidate_pool_multiplier,
-                    relevancy_threshold=relevancy_threshold,
-                    relevancy_workers=relevancy_workers,
-                    reducer_token_budget=reducer_token_budget,
-                    reducer_max_contexts=reducer_max_contexts,
-                )
-                self._record_step_success(
-                    steps,
-                    'execute_step.search',
-                    {
-                        'candidate_count': len(search_result.candidates),
-                        'relevant_count': len(search_result.relevant_candidates),
-                        'reduced_count': len(search_result.reduced_context),
-                    },
-                )
-                break
+                raise RuntimeError('search tool did not execute before iteration limit')
 
-        if search_result is None:
-            raise RuntimeError('search tool did not execute before iteration limit')
-
-        return {
-            'grep_samples': grep_samples,
-            'search_result': search_result,
-        }
+            self._end_span(
+                span,
+                output_payload={
+                    'grep_samples': len(grep_samples),
+                    'candidate_count': len(search_result.candidates),
+                    'relevant_count': len(search_result.relevant_candidates),
+                    'reduced_count': len(search_result.reduced_context),
+                },
+                metadata={'mode': 'coding'},
+            )
+            self._record_transition(
+                trace_id=trace_id,
+                source='coding_mode',
+                target='compose_response',
+            )
+            return {
+                'grep_samples': grep_samples,
+                'search_result': search_result,
+            }
+        except Exception as exc:
+            self._end_span(
+                span,
+                output_payload={'error': str(exc)},
+                metadata={'error_type': type(exc).__name__},
+            )
+            raise
 
     def _compose_node(self, state: OrchestratorState) -> OrchestratorState:
+        trace_id = state.get('trace_id', '')
         steps = state['steps']
+        span = self._start_span(
+            name='orchestrator.compose_response',
+            trace_id=trace_id,
+            input_payload={'has_existing_response': bool(str(state.get('assistant_response', '')).strip())},
+        )
         self._record_step_start(steps, 'execute_step.compose_response', {})
 
-        existing_response = str(state.get('assistant_response', '')).strip()
-        if existing_response:
-            assistant_response = existing_response
-        else:
-            search_result = state.get('search_result')
-            if search_result is None:
-                raise RuntimeError('compose step missing research result')
-            message = state.get('message', '')
-            assistant_response = self._compose_response(
-                search_result,
-                message,
-                state.get('memory_summary', ''),
-                state.get('grep_samples', []),
-                state.get('message_history', []),
-            )
+        try:
+            existing_response = str(state.get('assistant_response', '')).strip()
+            if existing_response:
+                assistant_response = existing_response
+            else:
+                search_result = state.get('search_result')
+                if search_result is None:
+                    raise RuntimeError('compose step missing research result')
+                message = state.get('message', '')
+                assistant_response = self._compose_response(
+                    search_result,
+                    message,
+                    state.get('memory_summary', ''),
+                    state.get('grep_samples', []),
+                    state.get('message_history', []),
+                )
 
-        self._record_step_success(
-            steps,
-            'execute_step.compose_response',
-            {'response_length': len(assistant_response)},
+            self._record_step_success(
+                steps,
+                'execute_step.compose_response',
+                {'response_length': len(assistant_response)},
+            )
+            self._end_span(
+                span,
+                output_payload={'response_length': len(assistant_response)},
+                metadata={'used_existing_response': bool(existing_response)},
+            )
+            self._record_transition(
+                trace_id=trace_id,
+                source='compose_response',
+                target='END',
+            )
+            return {'assistant_response': assistant_response}
+        except Exception as exc:
+            self._end_span(
+                span,
+                output_payload={'error': str(exc)},
+                metadata={'error_type': type(exc).__name__},
+            )
+            raise
+
+    def _start_span(
+        self,
+        *,
+        name: str,
+        trace_id: str,
+        input_payload: dict | None = None,
+        session_id: str | None = None,
+        user_id: str | None = None,
+    ) -> TraceSpan | None:
+        if self._observability is None:
+            return None
+        return self._observability.start_span(
+            name=name,
+            trace_id=trace_id,
+            input_payload=input_payload,
+            session_id=session_id,
+            user_id=user_id,
         )
-        return {'assistant_response': assistant_response}
+
+    def _end_span(self, span: TraceSpan | None, output_payload: dict | None = None, metadata: dict | None = None) -> None:
+        if span is None or self._observability is None:
+            return
+        self._observability.end_span(span, output_payload=output_payload, metadata=metadata)
+
+    def _record_transition(
+        self,
+        *,
+        trace_id: str,
+        source: str,
+        target: str,
+        reason: str | None = None,
+    ) -> None:
+        span = self._start_span(
+            name='langgraph.transition',
+            trace_id=trace_id,
+            input_payload={
+                'graph': 'orchestrator',
+                'from': source,
+                'to': target,
+            },
+        )
+        self._end_span(
+            span,
+            output_payload={
+                'from': source,
+                'to': target,
+            },
+            metadata={
+                'graph': 'orchestrator',
+                'from_node': source,
+                'to_node': target,
+                'reason': reason,
+            },
+        )
 
     def _record_step_start(self, steps: list[dict], name: str, payload: dict) -> None:
         steps.append(

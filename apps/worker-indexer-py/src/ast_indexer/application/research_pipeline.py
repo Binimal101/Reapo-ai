@@ -175,6 +175,11 @@ class ResearchPipeline:
                 'reducer_max_contexts': max_contexts,
             },
         )
+        self._record_transition(
+            trace_id=trace_id,
+            source='START',
+            target='reasoning_node',
+        )
         final_state: ResearchState = self._app.invoke(
             {
                 'trace_id': trace_id,
@@ -255,6 +260,11 @@ class ResearchPipeline:
                 'planner': 'deterministic',
             },
         )
+        self._record_transition(
+            trace_id=trace_id,
+            source='reasoning_node',
+            target='prodder_node',
+        )
         return {'objective': objective}
 
     def _prodder_node(self, state: ResearchState) -> ResearchState:
@@ -279,6 +289,11 @@ class ResearchPipeline:
                 'objective_intent': objective.intent,
                 'llm_escalated': escalated,
             },
+        )
+        self._record_transition(
+            trace_id=trace_id,
+            source='prodder_node',
+            target='vector_search_node',
         )
         return {'queries': queries}
 
@@ -350,6 +365,11 @@ class ResearchPipeline:
                 'bottom_score': min((row.score for row in candidates), default=-1.0),
             },
         )
+        self._record_transition(
+            trace_id=trace_id,
+            source='vector_search_node',
+            target='relevancy_node',
+        )
         return {'candidates': candidates}
 
     def _relevancy_node(self, state: ResearchState) -> ResearchState:
@@ -402,6 +422,11 @@ class ResearchPipeline:
                 'llm_shortlist_size': llm_shortlist_size,
                 'llm_shortlist_used': bool(scored),
             },
+        )
+        self._record_transition(
+            trace_id=trace_id,
+            source='relevancy_node',
+            target='retrieval_node',
         )
         return {'relevant_candidates': relevant}
 
@@ -519,6 +544,11 @@ class ResearchPipeline:
 
         enriched_context = self._enrich_candidates(candidates)
         # Keep retrieval span open so reducer_engine can appear as its child in call-depth views.
+        self._record_transition(
+            trace_id=trace_id,
+            source='retrieval_node',
+            target='reducer_node',
+        )
         return {
             'enriched_context': enriched_context,
             '_active_retrieval_span': span,
@@ -594,10 +624,46 @@ class ResearchPipeline:
                 },
             )
 
+        self._record_transition(
+            trace_id=trace_id,
+            source='reducer_node',
+            target='END',
+        )
         return {
             'reduced_context': reduced,
             '_active_retrieval_span': None,
         }
+
+    def _record_transition(
+        self,
+        *,
+        trace_id: str,
+        source: str,
+        target: str,
+        reason: str | None = None,
+    ) -> None:
+        span = self._observability.start_span(
+            'langgraph.transition',
+            trace_id,
+            input_payload={
+                'graph': 'research_pipeline',
+                'from': source,
+                'to': target,
+            },
+        )
+        self._observability.end_span(
+            span,
+            output_payload={
+                'from': source,
+                'to': target,
+            },
+            metadata={
+                'graph': 'research_pipeline',
+                'from_node': source,
+                'to_node': target,
+                'reason': reason,
+            },
+        )
 
     def _rank_candidates(
         self,
