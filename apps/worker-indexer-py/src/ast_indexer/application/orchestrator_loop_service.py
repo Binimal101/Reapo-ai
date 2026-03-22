@@ -55,6 +55,7 @@ class OrchestratorState(TypedDict, total=False):
     message_history: list[dict]
     steps: list[dict]
     plan: OrchestratorPlan
+    coding_request: dict[str, Any] | None
     memory_summary: str
     tool_memory_summary: str
     prior_tool_outcomes: list[dict[str, Any]]
@@ -64,6 +65,7 @@ class OrchestratorState(TypedDict, total=False):
     research_next_steps: str
     satisfaction_clause: str
     satisfaction_met: bool
+    coding_result: dict[str, Any] | None
     assistant_response: str
 
 
@@ -116,6 +118,26 @@ class RoutingAgentTool(Protocol):
         ...
 
 
+class CodingSubagentTool(Protocol):
+    def __call__(
+        self,
+        *,
+        objective: str,
+        coding_request: dict[str, Any],
+        research_context: str,
+        repos_in_scope: tuple[str, ...],
+        trace_id: str,
+        session_id: str,
+        user_id: str,
+        memory_summary: str,
+        tool_memory_summary: str,
+        message_history: list[dict],
+        tool_strategy: str,
+    ) -> dict:
+        """Generate code changes from orchestration context and open a pull request."""
+        ...
+
+
 class OrchestratorLoopService:
     """LangGraph orchestrator: one full graph run per user message (no persisted graph state).
 
@@ -130,6 +152,7 @@ class OrchestratorLoopService:
         grep_repo_tool: GrepRepoTool,
         conversational_agent_tool: ConversationalAgentTool | None = None,
         routing_agent_tool: RoutingAgentTool | None = None,
+        coding_subagent_tool: CodingSubagentTool | None = None,
         memory_threshold_messages: int = 20,
         max_tool_iterations: int = 5,
         context_window_chars: int | None = None,
@@ -139,6 +162,7 @@ class OrchestratorLoopService:
         self._grep_repo_tool = grep_repo_tool
         self._conversational_agent_tool = conversational_agent_tool
         self._routing_agent_tool = routing_agent_tool
+        self._coding_subagent_tool = coding_subagent_tool
         self._memory_threshold_messages = max(4, memory_threshold_messages)
         self._max_tool_iterations = max(1, min(20, max_tool_iterations))
         default_ctx_window = int(os.getenv('AST_INDEXER_CONTEXT_WINDOW_CHARS', '24000'))
@@ -163,6 +187,7 @@ class OrchestratorLoopService:
         reducer_max_contexts: int | None,
         message_history: list[dict],
         prior_tool_outcomes: list[dict[str, Any]] | None = None,
+        coding_request: dict[str, Any] | None = None,
     ) -> dict:
         now = datetime.now(timezone.utc).isoformat()
         steps: list[dict] = []
@@ -180,6 +205,7 @@ class OrchestratorLoopService:
                 'reducer_max_contexts': reducer_max_contexts,
                 'history_size': len(message_history),
                 'prior_tool_outcomes': len(prior_tool_outcomes or []),
+                'has_coding_request': isinstance(coding_request, dict),
             },
             session_id=session_id,
             user_id=user_id,
@@ -205,6 +231,7 @@ class OrchestratorLoopService:
                     'reducer_token_budget': reducer_token_budget,
                     'reducer_max_contexts': reducer_max_contexts,
                     'message_history': message_history,
+                    'coding_request': coding_request if isinstance(coding_request, dict) else None,
                     'prior_tool_outcomes': list(prior_tool_outcomes or []),
                     'steps': steps,
                     'memory_summary': '',
@@ -215,6 +242,7 @@ class OrchestratorLoopService:
                     'research_next_steps': '',
                     'satisfaction_clause': '',
                     'satisfaction_met': False,
+                    'coding_result': None,
                     'assistant_response': '',
                 }
             )
@@ -231,6 +259,7 @@ class OrchestratorLoopService:
                 'finished_at': finished_at,
                 'steps': steps,
                 'final_response': assistant_response,
+                'coding_result': final_state.get('coding_result'),
                 'error': None,
             }
             self._end_span(
@@ -725,6 +754,62 @@ class OrchestratorLoopService:
 
             research_story = self._build_research_story(findings=findings, satisfaction_met=satisfaction_met)
             research_next_steps = self._build_next_steps_summary(next_steps=next_steps)
+            coding_result: dict[str, Any] | None = None
+            coding_request = state.get('coding_request')
+            if isinstance(coding_request, dict) and self._coding_subagent_tool is not None:
+                self._record_step_start(
+                    steps,
+                    'execute_step.coding_subagent',
+                    {
+                        'owner': coding_request.get('owner'),
+                        'repo': coding_request.get('repo'),
+                        'base_branch': coding_request.get('base_branch', 'main'),
+                    },
+                )
+                coding_context = self._build_coding_subagent_context(
+                    message=message,
+                    repos_in_scope=repos_in_scope,
+                    result=search_result,
+                    grep_samples=grep_samples,
+                    research_story=research_story,
+                    research_next_steps=research_next_steps,
+                    satisfaction_clause=satisfaction_clause,
+                    satisfaction_met=satisfaction_met,
+                    memory_summary=str(state.get('memory_summary', '')),
+                    tool_memory_summary=str(state.get('tool_memory_summary', '')),
+                    message_history=state.get('message_history', []),
+                    strategy=strategy,
+                )
+                coding_result = self._coding_subagent_tool(
+                    objective=message,
+                    coding_request=coding_request,
+                    research_context=coding_context,
+                    repos_in_scope=repos_in_scope,
+                    trace_id=trace_id,
+                    session_id=str(state.get('session_id', '')),
+                    user_id=str(state.get('user_id', '')),
+                    memory_summary=str(state.get('memory_summary', '')),
+                    tool_memory_summary=str(state.get('tool_memory_summary', '')),
+                    message_history=state.get('message_history', []),
+                    tool_strategy=strategy,
+                )
+                pr_payload = coding_result.get('pr_payload') if isinstance(coding_result, dict) else None
+                pr_number = None
+                if isinstance(pr_payload, dict):
+                    pull_request = pr_payload.get('pull_request')
+                    if isinstance(pull_request, dict):
+                        pr_number = pull_request.get('number')
+                self._record_step_success(
+                    steps,
+                    'execute_step.coding_subagent',
+                    {
+                        'status': coding_result.get('status') if isinstance(coding_result, dict) else 'unknown',
+                        'pr_number': pr_number,
+                        'has_feature_details': bool(
+                            isinstance(coding_result, dict) and isinstance(coding_result.get('feature_details'), dict)
+                        ),
+                    },
+                )
 
             self._end_span(
                 span,
@@ -734,6 +819,9 @@ class OrchestratorLoopService:
                     'relevant_count': len(search_result.relevant_candidates),
                     'reduced_count': len(search_result.reduced_context),
                     'satisfaction_met': satisfaction_met,
+                    'coding_subagent_status': (
+                        coding_result.get('status') if isinstance(coding_result, dict) else None
+                    ),
                 },
                 metadata={
                     'mode': 'coding',
@@ -753,6 +841,12 @@ class OrchestratorLoopService:
                 'research_next_steps': research_next_steps,
                 'satisfaction_clause': satisfaction_clause,
                 'satisfaction_met': satisfaction_met,
+                'coding_result': coding_result,
+                'assistant_response': (
+                    str(coding_result.get('assistant_response', '')).strip()
+                    if isinstance(coding_result, dict)
+                    else ''
+                ),
             }
         except Exception as exc:
             self._end_span(
@@ -1052,6 +1146,51 @@ class OrchestratorLoopService:
                 f"- status: {'met' if satisfaction_met else 'not_met'}"
             )
 
+        return '\n\n'.join(sections)
+
+    def _build_coding_subagent_context(
+        self,
+        *,
+        message: str,
+        repos_in_scope: tuple[str, ...],
+        result: ResearchPipelineResult,
+        grep_samples: list[GrepRepoMatch],
+        research_story: str,
+        research_next_steps: str,
+        satisfaction_clause: str,
+        satisfaction_met: bool,
+        memory_summary: str,
+        tool_memory_summary: str,
+        message_history: list[dict],
+        strategy: str,
+    ) -> str:
+        retrieval_context = self._build_retrieval_compose_context(
+            result=result,
+            grep_samples=grep_samples,
+            research_story=research_story,
+            research_next_steps=research_next_steps,
+            satisfaction_clause=satisfaction_clause,
+            satisfaction_met=satisfaction_met,
+        )
+        tool_policy = self._build_tool_usage_context(message=message, repos_in_scope=repos_in_scope)
+        history_summary = self._summarize_history(message_history) if message_history else '(none)'
+
+        sections = [
+            'Coding pipeline objective: produce concrete repository edits and an open pull request.',
+            f'Selected strategy: {strategy}',
+            'Development prerequisites from orchestration:',
+            '- Preserve existing public behavior unless objective requires changes.',
+            '- Keep edits minimal and focused to the stated objective.',
+            '- Prefer explicit evidence from retrieved snippets when making code decisions.',
+            '- If evidence is insufficient, use tool calls to collect missing file context before proposing edits.',
+            f'Session memory summary: {memory_summary.strip() or "(none)"}',
+            f'Prior tool outcomes summary: {tool_memory_summary.strip() or "(none)"}',
+            f'Recent message history summary: {history_summary}',
+            'Tool usage policy for coding agent:',
+            tool_policy,
+            'Research evidence package:',
+            retrieval_context,
+        ]
         return '\n\n'.join(sections)
 
     def _compose_retrieval_fallback(self, *, result: ResearchPipelineResult, grep_samples: list[GrepRepoMatch]) -> str:

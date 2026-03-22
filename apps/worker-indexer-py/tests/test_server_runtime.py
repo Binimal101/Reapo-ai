@@ -523,6 +523,70 @@ def test_server_app_writer_open_pr_handles_permission_error(tmp_path: Path) -> N
     assert payload['status'] == 'error'
 
 
+def test_server_app_writer_open_pr_triggers_index_sync_for_changed_and_deleted_paths(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    class _FakeWriterService:
+        def open_pull_request(self, **kwargs: object) -> dict:  # noqa: ARG002
+            return {
+                'status': 'ok',
+                'mode': 'applied',
+                'owner': 'acme',
+                'repo': 'checkout',
+                'changed_paths': ['src/checkout.py', 'src/legacy.py'],
+                'upserted_paths': ['src/checkout.py'],
+                'deleted_paths': ['src/legacy.py'],
+                'files_changed': 2,
+                'pull_request': {'number': 12, 'html_url': 'https://example/pull/12', 'reused': False},
+            }
+
+    captured_job: dict[str, object] = {}
+
+    class _FakeWorker:
+        def process_job(self, job: IndexJob) -> IndexJobProcessOutcome:
+            captured_job['job'] = job
+            return IndexJobProcessOutcome(status='processed', job=job)
+
+    app._writer_service = _FakeWriterService()  # type: ignore[assignment]
+    app._worker = _FakeWorker()  # type: ignore[assignment]
+
+    code, payload = app.writer_open_pr(
+        requesting_user_id='alice',
+        owner='acme',
+        repo='checkout',
+        base_branch='main',
+        title='Sync index impacted files',
+        body='Body',
+        files=[
+            WriterFileChange(path='src/checkout.py', content='print(1)', operation='upsert'),
+            WriterFileChange(path='src/legacy.py', content='', operation='delete'),
+        ],
+        branch_name='reapo-ai/sync-index',
+        commit_message='feat: update checkout',
+        draft=False,
+        dry_run=False,
+    )
+
+    assert code == 200
+    assert payload['status'] == 'ok'
+    assert payload['indexing']['worker_outcome'] == 'processed'
+    assert payload['indexing']['changed_files'] == 2
+    assert payload['indexing']['deleted_files'] == 1
+
+    job = captured_job.get('job')
+    assert isinstance(job, IndexJob)
+    assert job.repo == 'acme/checkout'
+    assert job.changed_paths == ('src/checkout.py', 'src/legacy.py')
+    assert job.deleted_paths == ('src/legacy.py',)
+    assert job.source == 'writer_pr'
+
+
 def test_projects_add_repository_triggers_immediate_indexing(tmp_path: Path) -> None:
     workspace_root = tmp_path / 'workspace'
     repo_root = workspace_root / 'acme' / 'checkout-service' / 'src'

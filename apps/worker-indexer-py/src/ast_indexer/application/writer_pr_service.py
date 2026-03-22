@@ -23,6 +23,7 @@ class GithubWriteAuthPort(Protocol):
 class WriterFileChange:
     path: str
     content: str
+    operation: str = 'upsert'
 
 
 class WriterPrService:
@@ -76,6 +77,14 @@ class WriterPrService:
 
         target_branch = branch_name.strip() if isinstance(branch_name, str) and branch_name.strip() else self._default_branch_name(title)
         if dry_run:
+            upsert_count = sum(1 for item in files if str(getattr(item, 'operation', 'upsert')).strip().lower() != 'delete')
+            delete_count = len(files) - upsert_count
+            upsert_paths = [
+                item.path for item in files if str(getattr(item, 'operation', 'upsert')).strip().lower() != 'delete'
+            ]
+            delete_paths = [
+                item.path for item in files if str(getattr(item, 'operation', 'upsert')).strip().lower() == 'delete'
+            ]
             return {
                 'status': 'ok',
                 'mode': 'dry_run',
@@ -84,6 +93,13 @@ class WriterPrService:
                 'base_branch': base_branch,
                 'target_branch': target_branch,
                 'files_changed': len(files),
+                'changed_paths': [item.path for item in files],
+                'upserted_paths': upsert_paths,
+                'deleted_paths': delete_paths,
+                'operations': {
+                    'upsert': upsert_count,
+                    'delete': delete_count,
+                },
                 'title': title,
             }
 
@@ -107,7 +123,13 @@ class WriterPrService:
             branch_created = True
 
         changed_paths: list[str] = []
+        deleted_paths: list[str] = []
+        upserted_paths: list[str] = []
         for change in files:
+            operation = str(change.operation).strip().lower() if isinstance(change.operation, str) else 'upsert'
+            if operation not in {'upsert', 'delete'}:
+                raise ValueError(f'unsupported file operation: {change.operation}')
+
             encoded_path = quote(change.path, safe='/')
             existing_sha = self._resolve_content_sha(
                 owner=owner,
@@ -116,6 +138,24 @@ class WriterPrService:
                 branch=target_branch,
                 headers=headers,
             )
+
+            if operation == 'delete':
+                if not existing_sha:
+                    continue
+                self._http_json(
+                    'DELETE',
+                    f'{self._github_api_base_url}/repos/{owner}/{repo}/contents/{encoded_path}',
+                    {
+                        'message': commit_message,
+                        'sha': existing_sha,
+                        'branch': target_branch,
+                    },
+                    headers,
+                )
+                changed_paths.append(change.path)
+                deleted_paths.append(change.path)
+                continue
+
             payload = {
                 'message': commit_message,
                 'content': base64.b64encode(change.content.encode('utf-8')).decode('ascii'),
@@ -130,6 +170,7 @@ class WriterPrService:
                 headers,
             )
             changed_paths.append(change.path)
+            upserted_paths.append(change.path)
 
         existing_pr = self._find_open_pr(owner=owner, repo=repo, base=base_branch, branch=target_branch, headers=headers)
         if existing_pr is not None:
@@ -143,6 +184,12 @@ class WriterPrService:
                 'branch_created': branch_created,
                 'files_changed': len(changed_paths),
                 'changed_paths': changed_paths,
+                'upserted_paths': upserted_paths,
+                'deleted_paths': deleted_paths,
+                'operations': {
+                    'upsert': len(upserted_paths),
+                    'delete': len(deleted_paths),
+                },
                 'pull_request': {
                     'number': existing_pr.get('number'),
                     'html_url': existing_pr.get('html_url'),
@@ -173,6 +220,12 @@ class WriterPrService:
             'branch_created': branch_created,
             'files_changed': len(changed_paths),
             'changed_paths': changed_paths,
+            'upserted_paths': upserted_paths,
+            'deleted_paths': deleted_paths,
+            'operations': {
+                'upsert': len(upserted_paths),
+                'delete': len(deleted_paths),
+            },
             'pull_request': {
                 'number': pr_payload.get('number'),
                 'html_url': pr_payload.get('html_url'),

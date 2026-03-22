@@ -170,6 +170,7 @@ def test_chat_service_passes_prior_tool_outcomes_into_orchestrator(tmp_path: Pat
                 'finished_at': '2026-01-01T00:00:01+00:00',
                 'steps': [],
                 'final_response': 'ok',
+                'coding_result': {'status': 'completed', 'feature_details': {'summary': 'done'}},
                 'error': None,
             }
 
@@ -209,14 +210,22 @@ def test_chat_service_passes_prior_tool_outcomes_into_orchestrator(tmp_path: Pat
         error=None,
     )
 
-    service.send_message(
+    response = service.send_message(
         session_id=session_id,
         user_id='user-1',
         message='next prompt',
         repos_in_scope=('repo-a',),
+        coding_request={
+            'owner': 'acme',
+            'repo': 'checkout',
+            'base_branch': 'main',
+            'dry_run': True,
+        },
     )
 
     prior = orchestrator.last_execute_kwargs.get('prior_tool_outcomes')
     assert isinstance(prior, list)
     assert prior
     assert prior[0]['tool'] == 'get_folder_structure'
+    assert isinstance(orchestrator.last_execute_kwargs.get('coding_request'), dict)
+    assert isinstance(response['run'].get('coding_result'), dict)

@@ -98,3 +98,18 @@ def routing_system_prompt() -> str:
         'that does not require repository-grounded evidence. '
         'Be precise and conservative: when uncertain, choose coding_mode.'
     )
+
+
+def coding_pr_system_prompt() -> str:
+    return (
+        'You are a coding subagent that converts an implementation objective into concrete code changes and a pull request plan. '
+        'You may call tools to inspect repository structure and file content before proposing changes. '
+        'Return strict JSON only with keys: '
+        'pr_title (string), pr_body (string), commit_message (string), branch_name (string), '
+        'feature_summary (string), additions (array of file paths), deletions (array of file paths), '
+        'files (array of objects). '
+        'Each files item must include path (string), operation ("upsert" or "delete"), and content (string for upsert, empty string for delete). '
+        'Do not include markdown fences, commentary, or extra keys. '
+        'Every path must be repository-relative. '
+        'Use the provided objective and research context as the primary source of truth.'
+    )

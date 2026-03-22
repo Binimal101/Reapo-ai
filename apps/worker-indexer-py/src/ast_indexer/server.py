@@ -32,6 +32,7 @@ from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import L
 from ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter import HmacGithubSignatureVerifierAdapter
 from ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter import JsonFileWebhookReplayGuardAdapter
 from ast_indexer.application.chat_orchestrator_service import ChatOrchestratorService
+from ast_indexer.application.coding_pr_subagent_service import OpenAICodingPrSubagent
 from ast_indexer.application.github_app_auth_service import GithubAppAuthService, GithubAppConfig
 from ast_indexer.application.github_push_payload_resolver import GithubPushPayloadResolver
 from ast_indexer.application.github_webhook_http_handler import GithubWebhookHttpHandler, WebhookHttpResponse
@@ -43,6 +44,7 @@ from ast_indexer.application.repo_agent_tools import REPO_AGENT_TOOL_SCHEMAS, bu
 from ast_indexer.application.research_openai_agents import OpenAIConversationalAgent, OpenAIRoutingAgent
 from ast_indexer.application import runtime_config
 from ast_indexer.application.writer_pr_service import WriterFileChange, WriterPrService
+from ast_indexer.domain.index_jobs import IndexJob
 from ast_indexer.main import (
     build_persistent_index_service,
     build_persistent_observability_adapter,
@@ -257,6 +259,7 @@ class GithubWebhookServerApp:
 
         conversational_agent_tool = None
         routing_agent_tool = None
+        coding_subagent_tool = None
         if self._openai_api_key or os.getenv('OPENAI_API_KEY'):
             conversational_model = os.getenv('AST_INDEXER_CONVERSATIONAL_MODEL') or runtime_config.default_openai_model()
             conversational_agent_tool = OpenAIConversationalAgent(
@@ -274,11 +277,24 @@ class GithubWebhookServerApp:
                 base_url=self._openai_base_url,
             )
 
+            if self._writer_service is not None:
+                coding_model = os.getenv('AST_INDEXER_CODING_AGENT_MODEL') or conversational_model
+                coding_subagent_tool = OpenAICodingPrSubagent(
+                    open_pr_tool=self.writer_open_pr,
+                    model=coding_model,
+                    api_key=self._openai_api_key,
+                    base_url=self._openai_base_url,
+                    tool_definitions=REPO_AGENT_TOOL_SCHEMAS,
+                    tool_handlers=build_repo_agent_tool_handlers(self._workspace_root),
+                    max_tool_calls=12,
+                )
+
         orchestrator = OrchestratorLoopService(
             search_tool=_search_tool,
             grep_repo_tool=_grep_repo_tool,
             conversational_agent_tool=conversational_agent_tool,
             routing_agent_tool=routing_agent_tool,
+            coding_subagent_tool=coding_subagent_tool,
             memory_threshold_messages=20,
             max_tool_iterations=5,
             observability=self._observability,
@@ -432,6 +448,7 @@ class GithubWebhookServerApp:
         relevancy_workers: int = 6,
         reducer_token_budget: int = 2500,
         reducer_max_contexts: int | None = None,
+        coding_request: dict | None = None,
     ) -> tuple[int, dict]:
         preindex = self._warm_chat_repo_scope(
             session_id=session_id,
@@ -450,6 +467,7 @@ class GithubWebhookServerApp:
                 relevancy_workers=relevancy_workers,
                 reducer_token_budget=reducer_token_budget,
                 reducer_max_contexts=reducer_max_contexts,
+                coding_request=coding_request if isinstance(coding_request, dict) else None,
             )
         except KeyError as exc:
             return (404, {'status': 'error', 'reason': str(exc)})
@@ -1377,7 +1395,47 @@ class GithubWebhookServerApp:
             return (502, {'status': 'error', 'reason': str(exc)})
         except Exception as exc:  # noqa: BLE001
             return (500, {'status': 'error', 'reason': str(exc)})
-        return (200, payload)
+
+        payload_with_indexing: dict[str, object] = dict(payload) if isinstance(payload, dict) else {'status': 'ok'}
+        if isinstance(payload, dict) and payload.get('mode') == 'applied':
+            changed_paths_raw = payload.get('changed_paths')
+            deleted_paths_raw = payload.get('deleted_paths')
+            changed_paths = changed_paths_raw if isinstance(changed_paths_raw, list) else []
+            deleted_paths = deleted_paths_raw if isinstance(deleted_paths_raw, list) else []
+            changed_clean = tuple(str(item) for item in changed_paths if isinstance(item, str) and item.strip())
+            deleted_clean = tuple(str(item) for item in deleted_paths if isinstance(item, str) and item.strip())
+
+            if changed_clean or deleted_clean:
+                trace_id = f'writer-index-sync-{uuid4().hex}'
+                index_job = IndexJob(
+                    repo=f'{owner}/{repo}',
+                    repo_full_name=f'{owner}/{repo}',
+                    changed_paths=changed_clean,
+                    deleted_paths=deleted_clean,
+                    trace_id=trace_id,
+                    source='writer_pr',
+                )
+                try:
+                    index_outcome = self._worker.process_job(index_job)
+                    payload_with_indexing['indexing'] = {
+                        'repo': f'{owner}/{repo}',
+                        'trace_id': trace_id,
+                        'worker_outcome': index_outcome.status,
+                        'changed_files': len(changed_clean),
+                        'deleted_files': len(deleted_clean),
+                        'reason': index_outcome.reason,
+                    }
+                except Exception as exc:  # noqa: BLE001
+                    payload_with_indexing['indexing'] = {
+                        'repo': f'{owner}/{repo}',
+                        'trace_id': trace_id,
+                        'worker_outcome': 'failed',
+                        'changed_files': len(changed_clean),
+                        'deleted_files': len(deleted_clean),
+                        'reason': str(exc),
+                    }
+
+        return (200, payload_with_indexing)
 
     def github_register_webhook(self, owner: str, repo: str, webhook_url: str) -> tuple[int, dict]:
         if self._github_app_auth is None:
@@ -1618,10 +1676,25 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                         return
                     path = item.get('path')
                     content = item.get('content')
-                    if not isinstance(path, str) or not path.strip() or not isinstance(content, str):
-                        self._send_json(400, {'status': 'error', 'reason': 'file path and content are required'})
+                    operation_raw = item.get('operation')
+                    operation = operation_raw if isinstance(operation_raw, str) and operation_raw else 'upsert'
+                    operation_clean = operation.strip().lower()
+                    if operation_clean not in {'upsert', 'delete'}:
+                        self._send_json(400, {'status': 'error', 'reason': 'file operation must be upsert or delete'})
                         return
-                    files.append(WriterFileChange(path=path, content=content))
+                    if not isinstance(path, str) or not path.strip():
+                        self._send_json(400, {'status': 'error', 'reason': 'file path is required'})
+                        return
+                    if operation_clean == 'upsert' and not isinstance(content, str):
+                        self._send_json(400, {'status': 'error', 'reason': 'file content is required for upsert'})
+                        return
+                    files.append(
+                        WriterFileChange(
+                            path=path,
+                            content=content if isinstance(content, str) else '',
+                            operation=operation_clean,
+                        )
+                    )
 
                 base_branch_raw = body.get('base_branch')
                 base_branch = base_branch_raw if isinstance(base_branch_raw, str) and base_branch_raw else 'main'
@@ -1777,6 +1850,8 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
 
                 repos_value = body.get('repos_in_scope', [])
                 repos_in_scope = tuple(item for item in repos_value if isinstance(item, str)) if isinstance(repos_value, list) else ()
+                coding_request_raw = body.get('coding_request')
+                coding_request = coding_request_raw if isinstance(coding_request_raw, dict) else None
                 code, payload = app.chat_send_message(
                     session_id=session_id,
                     user_id=user_id,
@@ -1790,6 +1865,7 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     reducer_max_contexts=(
                         int(body['reducer_max_contexts']) if isinstance(body.get('reducer_max_contexts'), int) else None
                     ),
+                    coding_request=coding_request,
                 )
                 self._send_json(code, payload)
                 return

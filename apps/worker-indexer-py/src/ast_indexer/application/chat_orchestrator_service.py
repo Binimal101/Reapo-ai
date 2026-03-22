@@ -43,6 +43,7 @@ class ChatOrchestratorService:
         relevancy_workers: int = 6,
         reducer_token_budget: int = 2500,
         reducer_max_contexts: int | None = None,
+        coding_request: dict[str, Any] | None = None,
     ) -> dict:
         session = self._state_store.get_session(session_id)
         if session is None:
@@ -86,6 +87,7 @@ class ChatOrchestratorService:
             reducer_max_contexts=reducer_max_contexts,
             message_history=list(session.get('messages', [])),
             prior_tool_outcomes=self._collect_prior_tool_outcomes(session_id=session_id),
+            coding_request=coding_request,
         )
 
         persisted = self._state_store.update_run(
@@ -94,6 +96,8 @@ class ChatOrchestratorService:
             finished_at=execution['finished_at'],
             steps=execution['steps'],
             final_response=execution['final_response'],
+            coding_result=execution.get('coding_result'),
+            coding_request=coding_request,
             error=execution['error'],
         )
 

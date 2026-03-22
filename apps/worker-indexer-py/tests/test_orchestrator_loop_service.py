@@ -938,3 +938,83 @@ def test_orchestrator_records_conversational_tool_events_in_steps() -> None:
     assert isinstance(output, dict)
     assert isinstance(output.get('tool_events'), list)
     assert output['tool_events'][0]['tool'] == 'get_folder_structure'
+
+
+def test_orchestrator_delegates_code_changes_to_coding_subagent() -> None:
+    captured = {'called': False, 'context': ''}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 1,
+            'has_more': False,
+            'matches': [
+                {
+                    'repo': 'repo-a',
+                    'path': 'src/billing.py',
+                    'symbol': 'charge_customer',
+                    'kind': 'function',
+                    'line': 10,
+                    'signature': 'charge_customer(user_id, amount)'[:signature_max_chars],
+                }
+            ],
+        }
+
+    def _coding_subagent(**kwargs: object) -> dict:
+        captured['called'] = True
+        captured['context'] = str(kwargs.get('research_context', ''))
+        return {
+            'status': 'completed',
+            'assistant_response': 'Coding subagent completed and opened a pull request.',
+            'pr_payload': {'pull_request': {'number': 101, 'html_url': 'https://example/pull/101'}},
+            'feature_details': {'summary': 'Implemented requested behavior.', 'changed_paths': ['src/billing.py']},
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        coding_subagent_tool=_coding_subagent,
+    )
+
+    execution = service.execute(
+        run_id='run-coding-subagent',
+        session_id='session-coding-subagent',
+        user_id='user-coding-subagent',
+        trace_id='trace-coding-subagent',
+        message='Implement idempotent billing retry behavior',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+        coding_request={
+            'owner': 'acme',
+            'repo': 'checkout',
+            'base_branch': 'main',
+            'dry_run': True,
+        },
+    )
+
+    assert execution['status'] == 'completed'
+    assert captured['called'] is True
+    assert 'Development prerequisites from orchestration' in captured['context']
+    assert 'Coding subagent completed and opened a pull request.' in str(execution['final_response'])
+    assert isinstance(execution.get('coding_result'), dict)
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'execute_step.coding_subagent' in step_names
