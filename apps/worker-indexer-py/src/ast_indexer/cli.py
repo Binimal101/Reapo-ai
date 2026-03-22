@@ -10,6 +10,7 @@ from typing import Literal
 from uuid import uuid4
 
 from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
+from ast_indexer.application import runtime_config
 from ast_indexer.application.call_graph_linker import CallGraphLinker
 from ast_indexer.domain.models import SymbolRecord
 from ast_indexer.main import build_persistent_index_service, build_persistent_research_pipeline
@@ -154,7 +155,7 @@ def _build_parser() -> argparse.ArgumentParser:
     research.add_argument(
         '--research-model',
         type=str,
-        default=os.getenv('AST_INDEXER_RESEARCH_MODEL', 'gpt-4o-mini'),
+        default=os.getenv('AST_INDEXER_RESEARCH_MODEL') or runtime_config.default_openai_model(),
         help='OpenAI model for reasoning + query generation',
     )
     research.add_argument(
@@ -229,7 +230,7 @@ def _build_parser() -> argparse.ArgumentParser:
         default=os.getenv('AST_INDEXER_WEBHOOK_SECRET'),
         help='GitHub webhook shared secret',
     )
-    serve.add_argument('--host', type=str, default=os.getenv('AST_INDEXER_HOST', '127.0.0.1'), help='Bind host')
+    serve.add_argument('--host', type=str, default=runtime_config.default_bind_host(), help='Bind host')
     serve.add_argument('--port', type=int, default=_env_int('AST_INDEXER_PORT') or 8080, help='Bind port')
     serve.add_argument(
         '--queue-backend',

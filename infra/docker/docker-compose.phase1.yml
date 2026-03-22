@@ -46,7 +46,7 @@ services:
     ports:
       - '${LANGFUSE_PORT:-3000}:3000'
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://localhost:3000/api/public/health || exit 1']
+      test: ['CMD-SHELL', 'wget -qO- http://$(hostname -i):3000/api/public/health >/dev/null 2>&1 || exit 1']
       interval: 15s
       timeout: 5s
       retries: 20

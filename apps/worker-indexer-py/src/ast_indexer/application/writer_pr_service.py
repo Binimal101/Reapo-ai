@@ -9,6 +9,8 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
+from ast_indexer.application import runtime_config
+
 class GithubWriteAuthPort(Protocol):
     def resolve_installation_id_for_repo(self, trace_id: str, owner: str, repo: str) -> int:
         ...
@@ -32,6 +34,7 @@ class WriterPrService:
     ) -> None:
         self._github_auth = github_auth
         self._http_json = http_json or _http_json_request
+        self._github_api_base_url = runtime_config.github_api_base_url()
 
     def open_pull_request(
         self,
@@ -97,7 +100,7 @@ class WriterPrService:
         if not branch_exists:
             self._http_json(
                 'POST',
-                f'https://api.github.com/repos/{owner}/{repo}/git/refs',
+                f'{self._github_api_base_url}/repos/{owner}/{repo}/git/refs',
                 {'ref': f'refs/heads/{target_branch}', 'sha': base_sha},
                 headers,
             )
@@ -122,7 +125,7 @@ class WriterPrService:
                 payload['sha'] = existing_sha
             self._http_json(
                 'PUT',
-                f'https://api.github.com/repos/{owner}/{repo}/contents/{encoded_path}',
+                f'{self._github_api_base_url}/repos/{owner}/{repo}/contents/{encoded_path}',
                 payload,
                 headers,
             )
@@ -149,7 +152,7 @@ class WriterPrService:
 
         created_pr = self._http_json(
             'POST',
-            f'https://api.github.com/repos/{owner}/{repo}/pulls',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/pulls',
             {
                 'title': title,
                 'head': target_branch,
@@ -180,7 +183,7 @@ class WriterPrService:
     def _resolve_ref_sha(self, *, owner: str, repo: str, branch: str, headers: dict[str, str]) -> str:
         payload = self._http_json(
             'GET',
-            f'https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{quote(branch, safe="")}',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/git/ref/heads/{quote(branch, safe="")}',
             None,
             headers,
         )
@@ -194,7 +197,7 @@ class WriterPrService:
         try:
             payload = self._http_json(
                 'GET',
-                f'https://api.github.com/repos/{owner}/{repo}/git/ref/heads/{quote(branch, safe="")}',
+                f'{self._github_api_base_url}/repos/{owner}/{repo}/git/ref/heads/{quote(branch, safe="")}',
                 None,
                 headers,
             )
@@ -214,7 +217,7 @@ class WriterPrService:
         try:
             payload = self._http_json(
                 'GET',
-                f'https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={quote(branch, safe="")}',
+                f'{self._github_api_base_url}/repos/{owner}/{repo}/contents/{path}?ref={quote(branch, safe="")}',
                 None,
                 headers,
             )
@@ -238,7 +241,7 @@ class WriterPrService:
     ) -> dict | None:
         payload = self._http_json(
             'GET',
-            f'https://api.github.com/repos/{owner}/{repo}/pulls?state=open&head={quote(owner, safe="")}:{quote(branch, safe="")}&base={quote(base, safe="")}',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/pulls?state=open&head={quote(owner, safe="")}:{quote(branch, safe="")}&base={quote(base, safe="")}',
             None,
             headers,
         )

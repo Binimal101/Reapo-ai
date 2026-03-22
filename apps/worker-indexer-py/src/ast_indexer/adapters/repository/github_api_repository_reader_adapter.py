@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from urllib.parse import quote
 
+from ast_indexer.application import runtime_config
 from ast_indexer.ports.repository_reader import RepositoryFile, RepositoryReaderPort
 
 
@@ -9,12 +10,13 @@ class GithubApiRepositoryReaderAdapter(RepositoryReaderPort):
     def __init__(self, token: str, http_json) -> None:  # noqa: ANN001
         self._token = token
         self._http_json = http_json
+        self._github_api_base_url = runtime_config.github_api_base_url()
 
     def list_python_files(self, repo: str) -> list[str]:
         owner, name = self._split_repo(repo)
         tree = self._http_json(
             'GET',
-            f'https://api.github.com/repos/{owner}/{name}/git/trees/HEAD?recursive=1',
+            f'{self._github_api_base_url}/repos/{owner}/{name}/git/trees/HEAD?recursive=1',
             None,
             self._headers(),
         )
@@ -34,7 +36,7 @@ class GithubApiRepositoryReaderAdapter(RepositoryReaderPort):
         owner, name = self._split_repo(repo)
         payload = self._http_json(
             'GET',
-            f'https://api.github.com/repos/{owner}/{name}/contents/{quote(path)}',
+            f'{self._github_api_base_url}/repos/{owner}/{name}/contents/{quote(path)}',
             None,
             self._headers(),
         )

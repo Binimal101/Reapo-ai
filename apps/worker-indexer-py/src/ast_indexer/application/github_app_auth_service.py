@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
+from ast_indexer.application import runtime_config
 from ast_indexer.application.oauth_session_service import OAuthSessionService
 from ast_indexer.ports.oauth import OAuthTokenRecord
 from ast_indexer.ports.observability import ObservabilityPort
@@ -63,6 +64,8 @@ class GithubAppAuthService:
         self._oauth_session_service = oauth_session_service
         self._observability = observability
         self._http_json = http_json or _http_json_request
+        self._github_api_base_url = runtime_config.github_api_base_url()
+        self._github_oauth_base_url = runtime_config.github_oauth_base_url()
 
     def _http_json_dict(self, method: str, url: str, body: dict | None, headers: dict[str, str]) -> dict:
         payload = self._http_json(method, url, body, headers)
@@ -84,7 +87,7 @@ class GithubAppAuthService:
         if redirect_uri:
             params['redirect_uri'] = redirect_uri
 
-        return f"https://github.com/login/oauth/authorize?{urlencode(params)}"
+        return f"{self._github_oauth_base_url}/login/oauth/authorize?{urlencode(params)}"
 
     def exchange_oauth_code(
         self,
@@ -115,7 +118,7 @@ class GithubAppAuthService:
 
         token_response = self._http_json_dict(
             'POST',
-            'https://github.com/login/oauth/access_token',
+            f'{self._github_oauth_base_url}/login/oauth/access_token',
             payload,
             {
                 'Accept': 'application/json',
@@ -131,7 +134,7 @@ class GithubAppAuthService:
 
         user_response = self._http_json_dict(
             'GET',
-            'https://api.github.com/user',
+            f'{self._github_api_base_url}/user',
             None,
             {
                 'Accept': 'application/vnd.github+json',
@@ -171,7 +174,7 @@ class GithubAppAuthService:
     def refresh_oauth_token(self, trace_id: str, refresh_token: str, user_id: str) -> OAuthTokenRecord:
         token_response = self._http_json_dict(
             'POST',
-            'https://github.com/login/oauth/access_token',
+            f'{self._github_oauth_base_url}/login/oauth/access_token',
             {
                 'client_id': self._config.client_id,
                 'client_secret': self._config.client_secret,
@@ -209,7 +212,7 @@ class GithubAppAuthService:
             user_id=user_id,
             refresh=lambda value: self._http_json_dict(
                 'POST',
-                'https://github.com/login/oauth/access_token',
+                f'{self._github_oauth_base_url}/login/oauth/access_token',
                 {
                     'client_id': self._config.client_id,
                     'client_secret': self._config.client_secret,
@@ -228,7 +231,7 @@ class GithubAppAuthService:
         try:
             return self._http_json_dict(
                 'GET',
-                'https://api.github.com/user',
+                f'{self._github_api_base_url}/user',
                 None,
                 {
                     'Accept': 'application/vnd.github+json',
@@ -242,7 +245,7 @@ class GithubAppAuthService:
             refreshed = self.refresh_oauth_token(trace_id=trace_id, refresh_token=token.refresh_token, user_id=user_id)
             return self._http_json_dict(
                 'GET',
-                'https://api.github.com/user',
+                f'{self._github_api_base_url}/user',
                 None,
                 {
                     'Accept': 'application/vnd.github+json',
@@ -257,7 +260,7 @@ class GithubAppAuthService:
             user_id=user_id,
             refresh=lambda value: self._http_json_dict(
                 'POST',
-                'https://github.com/login/oauth/access_token',
+                f'{self._github_oauth_base_url}/login/oauth/access_token',
                 {
                     'client_id': self._config.client_id,
                     'client_secret': self._config.client_secret,
@@ -274,7 +277,7 @@ class GithubAppAuthService:
             raise ValueError('No valid OAuth token available for user')
 
         page_size = max(1, min(100, int(per_page)))
-        url = f'https://api.github.com/user/repos?per_page={page_size}&sort=updated&type=owner,public,private'
+        url = f'{self._github_api_base_url}/user/repos?per_page={page_size}&sort=updated&type=owner,public,private'
         headers = {
             'Accept': 'application/vnd.github+json',
             'Authorization': f'Bearer {token.access_token}',
@@ -296,7 +299,7 @@ class GithubAppAuthService:
         app_jwt = self._create_app_jwt()
         token_response = self._http_json_dict(
             'POST',
-            f'https://api.github.com/app/installations/{installation_id}/access_tokens',
+            f'{self._github_api_base_url}/app/installations/{installation_id}/access_tokens',
             {},
             {
                 'Accept': 'application/vnd.github+json',
@@ -327,7 +330,7 @@ class GithubAppAuthService:
         app_jwt = self._create_app_jwt()
         payload = self._http_json_dict(
             'GET',
-            f'https://api.github.com/repos/{owner}/{repo}/installation',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/installation',
             None,
             {
                 'Accept': 'application/vnd.github+json',
@@ -368,7 +371,7 @@ class GithubAppAuthService:
         }
         hooks_response = self._http_json(
             'GET',
-            f'https://api.github.com/repos/{owner}/{repo}/hooks',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/hooks',
             None,
             headers,
         )
@@ -400,7 +403,7 @@ class GithubAppAuthService:
         }
         created = self._http_json(
             'POST',
-            f'https://api.github.com/repos/{owner}/{repo}/hooks',
+            f'{self._github_api_base_url}/repos/{owner}/{repo}/hooks',
             payload,
             headers,
         )

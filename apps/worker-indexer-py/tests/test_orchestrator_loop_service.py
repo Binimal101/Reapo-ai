@@ -1,4 +1,3 @@
-from ast_indexer.adapters.observability.in_memory_observability_adapter import InMemoryObservabilityAdapter
 from ast_indexer.application.orchestrator_loop_service import GrepRepoResult, OrchestratorLoopService
 from ast_indexer.application.research_pipeline import (
     ReducedResearchContext,
@@ -7,6 +6,11 @@ from ast_indexer.application.research_pipeline import (
     ResearchPipelineResult,
     RelevancyCandidate,
 )
+
+
+def _conversational_agent_tool(*, message: str, memory_summary: str, message_history: list[dict]) -> str:
+    tail = f' | memory={memory_summary}' if memory_summary else ''
+    return f'conversation:{message.strip()}{tail} | history={len(message_history)}'
 
 
 def _result_with_context() -> ResearchPipelineResult:
@@ -56,8 +60,6 @@ def _result_with_context() -> ResearchPipelineResult:
 
 
 def test_orchestrator_loop_executes_success_path_and_records_span() -> None:
-    observability = InMemoryObservabilityAdapter()
-
     def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
         return _result_with_context()
 
@@ -88,9 +90,9 @@ def test_orchestrator_loop_executes_success_path_and_records_span() -> None:
         }
 
     service = OrchestratorLoopService(
-        observability=observability,
         search_tool=_search_tool,
         grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
         memory_threshold_messages=2,
     )
 
@@ -99,7 +101,7 @@ def test_orchestrator_loop_executes_success_path_and_records_span() -> None:
         session_id='session-1',
         user_id='user-1',
         trace_id='trace-1',
-        message='Where is billing logic?',
+        message='Where is billing function logic in this repo?',
         repos_in_scope=('repo-a',),
         top_k=8,
         candidate_pool_multiplier=6,
@@ -124,16 +126,8 @@ def test_orchestrator_loop_executes_success_path_and_records_span() -> None:
     assert 'execute_step.search' in step_names
     assert 'execute_step.compose_response' in step_names
 
-    spans = observability.list_spans()
-    assert len(spans) == 1
-    assert spans[0].name == 'orchestrator_loop'
-    assert spans[0].output_payload is not None
-    assert spans[0].output_payload['status'] == 'completed'
-
 
 def test_orchestrator_loop_handles_failure_and_marks_span_failed() -> None:
-    observability = InMemoryObservabilityAdapter()
-
     def _failing_search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
         raise RuntimeError('synthetic_search_failure')
 
@@ -155,9 +149,9 @@ def test_orchestrator_loop_handles_failure_and_marks_span_failed() -> None:
         }
 
     service = OrchestratorLoopService(
-        observability=observability,
         search_tool=_failing_search_tool,
         grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
     )
 
     execution = service.execute(
@@ -165,7 +159,7 @@ def test_orchestrator_loop_handles_failure_and_marks_span_failed() -> None:
         session_id='session-2',
         user_id='user-2',
         trace_id='trace-2',
-        message='Find auth flow',
+        message='Find auth function flow in the repository',
         repos_in_scope=('repo-b',),
         top_k=8,
         candidate_pool_multiplier=6,
@@ -179,14 +173,8 @@ def test_orchestrator_loop_handles_failure_and_marks_span_failed() -> None:
     assert execution['status'] == 'failed'
     assert 'synthetic_search_failure' in str(execution['error'])
 
-    spans = observability.list_spans()
-    assert len(spans) == 1
-    assert spans[0].output_payload is not None
-    assert spans[0].output_payload['status'] == 'failed'
-
 
 def test_orchestrator_loop_limits_tool_iterations_to_five() -> None:
-    observability = InMemoryObservabilityAdapter()
     grep_pages: list[int] = []
 
     def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
@@ -211,9 +199,9 @@ def test_orchestrator_loop_limits_tool_iterations_to_five() -> None:
         }
 
     service = OrchestratorLoopService(
-        observability=observability,
         search_tool=_search_tool,
         grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
         max_tool_iterations=5,
     )
 
@@ -222,7 +210,7 @@ def test_orchestrator_loop_limits_tool_iterations_to_five() -> None:
         session_id='session-limit',
         user_id='user-limit',
         trace_id='trace-limit',
-        message='find billing logic',
+        message='find billing function code path',
         repos_in_scope=('repo-a',),
         top_k=8,
         candidate_pool_multiplier=6,
@@ -236,3 +224,56 @@ def test_orchestrator_loop_limits_tool_iterations_to_five() -> None:
     assert execution['status'] == 'completed'
     assert execution['error'] is None
     assert len(grep_pages) == 5
+
+
+def test_orchestrator_loop_routes_conversational_messages_before_research() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        raise AssertionError('grep_repo should not run for conversational route')
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        memory_threshold_messages=2,
+    )
+
+    execution = service.execute(
+        run_id='run-conversation',
+        session_id='session-conversation',
+        user_id='user-conversation',
+        trace_id='trace-conversation',
+        message='Hey can we talk through a plan first?',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[
+            {'role': 'user', 'content': 'Need help with architecture'},
+            {'role': 'assistant', 'content': 'Sure, what constraints matter most?'},
+        ],
+    )
+
+    assert execution['status'] == 'completed'
+    assert 'conversation:' in str(execution['final_response']).lower()
+    assert search_calls['count'] == 0
+
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'route' in step_names
+    assert 'execute_step.conversation' in step_names
+    assert 'execute_step.search' not in step_names

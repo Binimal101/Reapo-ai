@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pytest
 
-from ast_indexer.adapters.observability.in_memory_observability_adapter import InMemoryObservabilityAdapter
 from ast_indexer.adapters.orchestrator.json_file_orchestrator_state_store_adapter import (
     JsonFileOrchestratorStateStoreAdapter,
 )
@@ -15,6 +14,11 @@ from ast_indexer.application.research_pipeline import (
     ResearchPipelineResult,
     RelevancyCandidate,
 )
+
+
+def _conversational_agent_tool(*, message: str, memory_summary: str, message_history: list[dict]) -> str:
+    tail = f' | memory={memory_summary}' if memory_summary else ''
+    return f'conversation:{message.strip()}{tail} | history={len(message_history)}'
 
 
 def _build_service(tmp_path: Path) -> ChatOrchestratorService:
@@ -92,9 +96,9 @@ def _build_service(tmp_path: Path) -> ChatOrchestratorService:
         }
 
     orchestrator = OrchestratorLoopService(
-        observability=InMemoryObservabilityAdapter(),
         search_tool=_search_tool,
         grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
     )
     return ChatOrchestratorService(state_store=store, orchestrator=orchestrator)
 
@@ -106,7 +110,7 @@ def test_chat_service_creates_session_and_sends_message(tmp_path: Path) -> None:
     response = service.send_message(
         session_id=str(session['session_id']),
         user_id='user-1',
-        message='Find checkout flow',
+        message='Find checkout function flow',
         repos_in_scope=('checkout',),
     )
 
