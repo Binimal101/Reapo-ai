@@ -143,6 +143,70 @@ class SqliteMultiTenantOAuthStoreAdapter(OAuthTokenStorePort):
             'updated_at': now,
         }
 
+    def update_project(self, *, project_id: str, owner_user_id: str, name: str, description: str | None = None) -> dict:
+        if not project_id.strip():
+            raise ValueError('project_id is required')
+        if not owner_user_id.strip():
+            raise ValueError('owner_user_id is required')
+        if not name.strip():
+            raise ValueError('project name is required')
+
+        now = _utc_now_iso()
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT project_id, owner_user_id, created_at
+                FROM projects
+                WHERE project_id = ?
+                """,
+                (project_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(f'project not found: {project_id}')
+            if str(row['owner_user_id']) != owner_user_id:
+                raise PermissionError('project_owner_required')
+
+            conn.execute(
+                """
+                UPDATE projects
+                SET name = ?, description = ?, updated_at = ?
+                WHERE project_id = ?
+                """,
+                (name.strip(), description, now, project_id),
+            )
+
+            return {
+                'project_id': str(row['project_id']),
+                'owner_user_id': str(row['owner_user_id']),
+                'name': name.strip(),
+                'description': description,
+                'created_at': str(row['created_at']),
+                'updated_at': now,
+            }
+
+    def delete_project(self, *, project_id: str, owner_user_id: str) -> bool:
+        if not project_id.strip():
+            raise ValueError('project_id is required')
+        if not owner_user_id.strip():
+            raise ValueError('owner_user_id is required')
+
+        with self._lock, self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT owner_user_id
+                FROM projects
+                WHERE project_id = ?
+                """,
+                (project_id,),
+            ).fetchone()
+            if row is None:
+                raise KeyError(f'project not found: {project_id}')
+            if str(row['owner_user_id']) != owner_user_id:
+                raise PermissionError('project_owner_required')
+
+            cursor = conn.execute('DELETE FROM projects WHERE project_id = ?', (project_id,))
+            return cursor.rowcount > 0
+
     def add_project_member(self, *, project_id: str, user_id: str, role: str = 'member') -> dict:
         if role not in {'owner', 'member', 'viewer'}:
             raise ValueError('role must be one of: owner, member, viewer')
@@ -338,6 +402,17 @@ class SqliteMultiTenantOAuthStoreAdapter(OAuthTokenStorePort):
                 }
                 for row in rows
             ]
+
+    def remove_repository_from_project(self, *, project_id: str, repository_id: int) -> bool:
+        with self._lock, self._connect() as conn:
+            cursor = conn.execute(
+                """
+                DELETE FROM project_repositories
+                WHERE project_id = ? AND repository_id = ?
+                """,
+                (project_id, repository_id),
+            )
+            return cursor.rowcount > 0
 
     def list_user_accessible_repositories(self, *, user_id: str) -> list[dict]:
         with self._lock, self._connect() as conn:

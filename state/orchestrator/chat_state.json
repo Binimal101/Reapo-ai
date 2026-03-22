@@ -1,0 +1,467 @@
+{
+  "sessions": {
+    "9348a61923cf43eb97991e55bf457657": {
+      "session_id": "9348a61923cf43eb97991e55bf457657",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T01:52:25.610653+00:00",
+      "updated_at": "2026-03-22T01:52:25.610653+00:00",
+      "messages": []
+    },
+    "9d122e925c57488ab629990fd9b56af2": {
+      "session_id": "9d122e925c57488ab629990fd9b56af2",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T01:52:25.619871+00:00",
+      "updated_at": "2026-03-22T01:52:25.619871+00:00",
+      "messages": []
+    },
+    "50ada25b2f5249449cde348b74f894b1": {
+      "session_id": "50ada25b2f5249449cde348b74f894b1",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:04:52.868398+00:00",
+      "updated_at": "2026-03-22T02:04:52.868398+00:00",
+      "messages": []
+    },
+    "701656270f6242069937af3ab591f582": {
+      "session_id": "701656270f6242069937af3ab591f582",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:04:52.875444+00:00",
+      "updated_at": "2026-03-22T02:05:19.225816+00:00",
+      "messages": [
+        {
+          "role": "user",
+          "content": "yo",
+          "timestamp": "2026-03-22T02:05:02.510608+00:00",
+          "run_id": null
+        },
+        {
+          "role": "assistant",
+          "content": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+          "timestamp": "2026-03-22T02:05:02.683658+00:00",
+          "run_id": "48c8c076542a4b079a25ccb3e6d0ae8b"
+        },
+        {
+          "role": "user",
+          "content": "I need you to go and fix shit brother",
+          "timestamp": "2026-03-22T02:05:19.168868+00:00",
+          "run_id": null
+        },
+        {
+          "role": "assistant",
+          "content": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+          "timestamp": "2026-03-22T02:05:19.225816+00:00",
+          "run_id": "a993f8bc6ac94a62a2ab0be1ddcc9e8e"
+        }
+      ]
+    },
+    "e094bd98bd594820a0c180831364fe7a": {
+      "session_id": "e094bd98bd594820a0c180831364fe7a",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:07:33.868303+00:00",
+      "updated_at": "2026-03-22T02:07:55.075276+00:00",
+      "messages": [
+        {
+          "role": "user",
+          "content": "yo",
+          "timestamp": "2026-03-22T02:07:37.473828+00:00",
+          "run_id": null
+        },
+        {
+          "role": "assistant",
+          "content": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+          "timestamp": "2026-03-22T02:07:37.540045+00:00",
+          "run_id": "ae330fb10b924dba8d996ed57bbf07fb"
+        },
+        {
+          "role": "user",
+          "content": "can u look at the bubblesort implementation to see whats good",
+          "timestamp": "2026-03-22T02:07:55.017731+00:00",
+          "run_id": null
+        },
+        {
+          "role": "assistant",
+          "content": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+          "timestamp": "2026-03-22T02:07:55.075276+00:00",
+          "run_id": "783dc30d02914499ac6c34859e86233d"
+        }
+      ]
+    },
+    "fc9d9ac6049144c885207742f88a2b99": {
+      "session_id": "fc9d9ac6049144c885207742f88a2b99",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:36:31.522852+00:00",
+      "updated_at": "2026-03-22T02:36:31.522852+00:00",
+      "messages": []
+    },
+    "6da96be24850403b9e1049a9f275dc64": {
+      "session_id": "6da96be24850403b9e1049a9f275dc64",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:36:31.527622+00:00",
+      "updated_at": "2026-03-22T02:36:37.645557+00:00",
+      "messages": [
+        {
+          "role": "user",
+          "content": "yooo",
+          "timestamp": "2026-03-22T02:36:37.549247+00:00",
+          "run_id": null
+        },
+        {
+          "role": "assistant",
+          "content": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+          "timestamp": "2026-03-22T02:36:37.645557+00:00",
+          "run_id": "9cf8332ab7da4d42b63c0ffbb1d4d0b7"
+        }
+      ]
+    },
+    "ae18ef268ad84712b20a7274413aa28d": {
+      "session_id": "ae18ef268ad84712b20a7274413aa28d",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:49:03.714196+00:00",
+      "updated_at": "2026-03-22T02:49:03.714196+00:00",
+      "messages": []
+    },
+    "9c0360ae14b444febff05861f0d6a21a": {
+      "session_id": "9c0360ae14b444febff05861f0d6a21a",
+      "user_id": "Binimal101",
+      "created_at": "2026-03-22T02:49:03.718729+00:00",
+      "updated_at": "2026-03-22T02:49:03.718729+00:00",
+      "messages": []
+    }
+  },
+  "runs": {
+    "48c8c076542a4b079a25ccb3e6d0ae8b": {
+      "run_id": "48c8c076542a4b079a25ccb3e6d0ae8b",
+      "session_id": "701656270f6242069937af3ab591f582",
+      "user_id": "Binimal101",
+      "trace_id": "orchestrator-186273d1fe2d434e",
+      "prompt": "yo",
+      "repos_in_scope": [],
+      "status": "completed",
+      "started_at": "2026-03-22T02:05:02.512733+00:00",
+      "finished_at": "2026-03-22T02:05:02.656509+00:00",
+      "steps": [
+        {
+          "name": "plan",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:02.532238+00:00",
+          "finished_at": "2026-03-22T02:05:02.532251+00:00",
+          "input": {
+            "message": "yo"
+          },
+          "output": {
+            "plan": {
+              "intent": "search_and_answer",
+              "use_memory": false
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.search",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:02.532272+00:00",
+          "finished_at": "2026-03-22T02:05:02.656471+00:00",
+          "input": {
+            "top_k": 8,
+            "candidate_pool_multiplier": 6,
+            "relevancy_threshold": 0.35,
+            "reducer_token_budget": 2500,
+            "tool_iteration": 1
+          },
+          "output": {
+            "candidate_count": 0,
+            "relevant_count": 0,
+            "reduced_count": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.compose_response",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:02.656490+00:00",
+          "finished_at": "2026-03-22T02:05:02.656504+00:00",
+          "input": {},
+          "output": {
+            "response_length": 99
+          },
+          "error": null
+        }
+      ],
+      "final_response": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+      "error": null
+    },
+    "a993f8bc6ac94a62a2ab0be1ddcc9e8e": {
+      "run_id": "a993f8bc6ac94a62a2ab0be1ddcc9e8e",
+      "session_id": "701656270f6242069937af3ab591f582",
+      "user_id": "Binimal101",
+      "trace_id": "orchestrator-1906092aea094a45",
+      "prompt": "I need you to go and fix shit brother",
+      "repos_in_scope": [],
+      "status": "completed",
+      "started_at": "2026-03-22T02:05:19.171136+00:00",
+      "finished_at": "2026-03-22T02:05:19.206792+00:00",
+      "steps": [
+        {
+          "name": "plan",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:19.190549+00:00",
+          "finished_at": "2026-03-22T02:05:19.190564+00:00",
+          "input": {
+            "message": "I need you to go and fix shit brother"
+          },
+          "output": {
+            "plan": {
+              "intent": "search_and_answer",
+              "use_memory": false
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.search",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:19.190585+00:00",
+          "finished_at": "2026-03-22T02:05:19.206750+00:00",
+          "input": {
+            "top_k": 8,
+            "candidate_pool_multiplier": 6,
+            "relevancy_threshold": 0.35,
+            "reducer_token_budget": 2500,
+            "tool_iteration": 1
+          },
+          "output": {
+            "candidate_count": 0,
+            "relevant_count": 0,
+            "reduced_count": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.compose_response",
+          "status": "completed",
+          "started_at": "2026-03-22T02:05:19.206770+00:00",
+          "finished_at": "2026-03-22T02:05:19.206785+00:00",
+          "input": {},
+          "output": {
+            "response_length": 99
+          },
+          "error": null
+        }
+      ],
+      "final_response": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+      "error": null
+    },
+    "ae330fb10b924dba8d996ed57bbf07fb": {
+      "run_id": "ae330fb10b924dba8d996ed57bbf07fb",
+      "session_id": "e094bd98bd594820a0c180831364fe7a",
+      "user_id": "Binimal101",
+      "trace_id": "orchestrator-7d7e19f2d5404d66",
+      "prompt": "yo",
+      "repos_in_scope": [
+        "Ashan-264/Q-Safe",
+        "Binimal101/ansi_c_practice-bubblesort"
+      ],
+      "status": "completed",
+      "started_at": "2026-03-22T02:07:37.476280+00:00",
+      "finished_at": "2026-03-22T02:07:37.512913+00:00",
+      "steps": [
+        {
+          "name": "plan",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:37.496982+00:00",
+          "finished_at": "2026-03-22T02:07:37.497000+00:00",
+          "input": {
+            "message": "yo"
+          },
+          "output": {
+            "plan": {
+              "intent": "search_and_answer",
+              "use_memory": false
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.search",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:37.497023+00:00",
+          "finished_at": "2026-03-22T02:07:37.512857+00:00",
+          "input": {
+            "top_k": 8,
+            "candidate_pool_multiplier": 6,
+            "relevancy_threshold": 0.35,
+            "reducer_token_budget": 2500,
+            "tool_iteration": 1
+          },
+          "output": {
+            "candidate_count": 0,
+            "relevant_count": 0,
+            "reduced_count": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.compose_response",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:37.512886+00:00",
+          "finished_at": "2026-03-22T02:07:37.512905+00:00",
+          "input": {},
+          "output": {
+            "response_length": 99
+          },
+          "error": null
+        }
+      ],
+      "final_response": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+      "error": null
+    },
+    "783dc30d02914499ac6c34859e86233d": {
+      "run_id": "783dc30d02914499ac6c34859e86233d",
+      "session_id": "e094bd98bd594820a0c180831364fe7a",
+      "user_id": "Binimal101",
+      "trace_id": "orchestrator-eaa10ede06134123",
+      "prompt": "can u look at the bubblesort implementation to see whats good",
+      "repos_in_scope": [
+        "Ashan-264/Q-Safe",
+        "Binimal101/ansi_c_practice-bubblesort"
+      ],
+      "status": "completed",
+      "started_at": "2026-03-22T02:07:55.020352+00:00",
+      "finished_at": "2026-03-22T02:07:55.051770+00:00",
+      "steps": [
+        {
+          "name": "plan",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:55.040957+00:00",
+          "finished_at": "2026-03-22T02:07:55.040976+00:00",
+          "input": {
+            "message": "can u look at the bubblesort implementation to see whats good"
+          },
+          "output": {
+            "plan": {
+              "intent": "search_and_answer",
+              "use_memory": false
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.grep_repo",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:55.041000+00:00",
+          "finished_at": "2026-03-22T02:07:55.041055+00:00",
+          "input": {
+            "query": "can u look at the bubblesort implementation to see whats good",
+            "page": 1,
+            "page_size": 8,
+            "signature_max_chars": 120,
+            "tool_iteration": 1
+          },
+          "output": {
+            "page": 1,
+            "returned": 0,
+            "total_matches": 0,
+            "has_more": false,
+            "aggregated_matches": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.search",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:55.041065+00:00",
+          "finished_at": "2026-03-22T02:07:55.051733+00:00",
+          "input": {
+            "top_k": 8,
+            "candidate_pool_multiplier": 6,
+            "relevancy_threshold": 0.35,
+            "reducer_token_budget": 2500,
+            "tool_iteration": 1
+          },
+          "output": {
+            "candidate_count": 0,
+            "relevant_count": 0,
+            "reduced_count": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.compose_response",
+          "status": "completed",
+          "started_at": "2026-03-22T02:07:55.051753+00:00",
+          "finished_at": "2026-03-22T02:07:55.051765+00:00",
+          "input": {},
+          "output": {
+            "response_length": 99
+          },
+          "error": null
+        }
+      ],
+      "final_response": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+      "error": null
+    },
+    "9cf8332ab7da4d42b63c0ffbb1d4d0b7": {
+      "run_id": "9cf8332ab7da4d42b63c0ffbb1d4d0b7",
+      "session_id": "6da96be24850403b9e1049a9f275dc64",
+      "user_id": "Binimal101",
+      "trace_id": "orchestrator-42fd51e31ff14c4a",
+      "prompt": "yooo",
+      "repos_in_scope": [
+        "NikBandi/empire_hacks_chatgpt",
+        "NikBandi/empire_hacks_twilio"
+      ],
+      "status": "completed",
+      "started_at": "2026-03-22T02:36:37.551596+00:00",
+      "finished_at": "2026-03-22T02:36:37.605344+00:00",
+      "steps": [
+        {
+          "name": "plan",
+          "status": "completed",
+          "started_at": "2026-03-22T02:36:37.577422+00:00",
+          "finished_at": "2026-03-22T02:36:37.577463+00:00",
+          "input": {
+            "message": "yooo"
+          },
+          "output": {
+            "plan": {
+              "intent": "search_and_answer",
+              "use_memory": false
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.search",
+          "status": "completed",
+          "started_at": "2026-03-22T02:36:37.577509+00:00",
+          "finished_at": "2026-03-22T02:36:37.605279+00:00",
+          "input": {
+            "top_k": 8,
+            "candidate_pool_multiplier": 6,
+            "relevancy_threshold": 0.35,
+            "reducer_token_budget": 2500,
+            "tool_iteration": 1
+          },
+          "output": {
+            "candidate_count": 0,
+            "relevant_count": 0,
+            "reduced_count": 0
+          },
+          "error": null
+        },
+        {
+          "name": "execute_step.compose_response",
+          "status": "completed",
+          "started_at": "2026-03-22T02:36:37.605312+00:00",
+          "finished_at": "2026-03-22T02:36:37.605334+00:00",
+          "input": {},
+          "output": {
+            "response_length": 99
+          },
+          "error": null
+        }
+      ],
+      "final_response": "I did not find strong matching symbols yet. Try adding repo scope or a more specific function name.",
+      "error": null
+    }
+  }
+}

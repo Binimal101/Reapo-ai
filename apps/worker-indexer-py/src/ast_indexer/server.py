@@ -7,6 +7,7 @@ import hmac
 import json
 import os
 import time
+from datetime import datetime, timezone
 from json import JSONDecodeError
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -305,6 +306,145 @@ class GithubWebhookServerApp:
         except Exception as exc:  # noqa: BLE001
             return (500, {'status': 'error', 'reason': str(exc)})
         return (200, {'status': 'ok', **payload})
+
+    def observability_trace_stack(self, *, trace_id: str | None = None, limit: int = 80) -> tuple[int, dict]:
+        spans = self._observability.list_spans()
+        if not spans:
+            return (
+                200,
+                {
+                    'status': 'ok',
+                    'trace_id': trace_id,
+                    'max_depth': 0,
+                    'active_depth': 0,
+                    'spans': [],
+                    'events': [],
+                },
+            )
+
+        selected_trace_id = trace_id
+        if not selected_trace_id:
+            selected_trace_id = spans[-1].trace_id
+
+        trace_spans = [span for span in spans if span.trace_id == selected_trace_id]
+        if not trace_spans:
+            return (
+                404,
+                {
+                    'status': 'error',
+                    'reason': 'trace_not_found',
+                    'trace_id': selected_trace_id,
+                },
+            )
+
+        events: list[tuple[datetime, str, str]] = []
+        open_span_ids: set[str] = set()
+        for span in trace_spans:
+            events.append((span.started_at, 'start', span.span_id))
+            if span.finished_at is not None:
+                events.append((span.finished_at, 'end', span.span_id))
+            else:
+                open_span_ids.add(span.span_id)
+
+        events.sort(key=lambda item: (item[0], 0 if item[1] == 'start' else 1))
+
+        current_depth = 0
+        max_depth = 0
+        depth_by_span: dict[str, int] = {}
+        event_rows: list[dict] = []
+        for timestamp, kind, span_id in events:
+            if kind == 'start':
+                current_depth += 1
+                depth_by_span[span_id] = current_depth
+                if current_depth > max_depth:
+                    max_depth = current_depth
+                event_rows.append(
+                    {
+                        'at': timestamp.isoformat(),
+                        'kind': 'start',
+                        'span_id': span_id,
+                        'depth': current_depth,
+                    }
+                )
+            else:
+                depth = depth_by_span.get(span_id, current_depth)
+                event_rows.append(
+                    {
+                        'at': timestamp.isoformat(),
+                        'kind': 'end',
+                        'span_id': span_id,
+                        'depth': max(1, depth),
+                    }
+                )
+                current_depth = max(0, current_depth - 1)
+
+        span_rows = []
+        for span in trace_spans[-max(1, min(200, int(limit))) :]:
+            duration_ms = None
+            if span.finished_at is not None:
+                duration_ms = int((span.finished_at - span.started_at).total_seconds() * 1000)
+            span_rows.append(
+                {
+                    'span_id': span.span_id,
+                    'name': span.name,
+                    'started_at': span.started_at.isoformat(),
+                    'finished_at': span.finished_at.isoformat() if span.finished_at is not None else None,
+                    'duration_ms': duration_ms,
+                    'session_id': span.session_id,
+                    'user_id': span.user_id,
+                }
+            )
+
+        return (
+            200,
+            {
+                'status': 'ok',
+                'trace_id': selected_trace_id,
+                'max_depth': max_depth,
+                'active_depth': len(open_span_ids),
+                'span_count': len(trace_spans),
+                'spans': span_rows,
+                'events': event_rows[-200:],
+            },
+        )
+
+    def observability_write_event(
+        self,
+        *,
+        user_id: str,
+        name: str,
+        trace_id: str | None,
+        input_payload: dict | None,
+        output_payload: dict | None,
+    ) -> tuple[int, dict]:
+        cleaned_name = name.strip()
+        if not cleaned_name:
+            return (400, {'status': 'error', 'reason': 'name is required'})
+
+        resolved_trace_id = (trace_id or '').strip() or uuid4().hex
+        span = self._observability.start_span(
+            name=cleaned_name,
+            trace_id=resolved_trace_id,
+            input_payload=input_payload,
+            user_id=user_id,
+        )
+        self._observability.end_span(
+            span,
+            output_payload=output_payload,
+            metadata={
+                'source': 'frontend_observability_event',
+                'received_at': datetime.now(timezone.utc).isoformat(),
+            },
+        )
+        return (
+            200,
+            {
+                'status': 'ok',
+                'trace_id': resolved_trace_id,
+                'span_id': span.span_id,
+                'name': cleaned_name,
+            },
+        )
 
     def _build_oauth_token_store(self, state_root: Path) -> OAuthTokenStorePort:
         token_store_path = os.getenv('AST_INDEXER_OAUTH_TOKEN_STORE_PATH')
@@ -642,6 +782,195 @@ class GithubWebhookServerApp:
             )
         return (200, {'status': 'ok', 'record': record})
 
+    def github_user_repositories(self, *, user_id: str, per_page: int = 100) -> tuple[int, dict]:
+        if self._github_app_auth is None:
+            _, status = self.github_auth_status()
+            return (
+                503,
+                {
+                    'status': 'error',
+                    'reason': 'github_app_not_configured',
+                    'missing_fields': status['missing_fields'],
+                },
+            )
+
+        try:
+            rows = self._github_app_auth.list_user_repositories(
+                trace_id=uuid4().hex,
+                user_id=user_id,
+                per_page=per_page,
+            )
+        except Exception as exc:
+            return (500, {'status': 'error', 'reason': str(exc)})
+
+        repositories: list[dict] = []
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            owner_raw = row.get('owner')
+            owner = owner_raw if isinstance(owner_raw, dict) else {}
+            owner_login = owner.get('login') if isinstance(owner.get('login'), str) else None
+            name = row.get('name') if isinstance(row.get('name'), str) else None
+            full_name = row.get('full_name') if isinstance(row.get('full_name'), str) else None
+            if not owner_login or not name or not full_name:
+                continue
+            repositories.append(
+                {
+                    'id': row.get('id'),
+                    'owner': owner_login,
+                    'name': name,
+                    'full_name': full_name,
+                    'private': bool(row.get('private')),
+                    'visibility': row.get('visibility'),
+                    'default_branch': row.get('default_branch'),
+                }
+            )
+
+        repositories.sort(key=lambda item: str(item.get('full_name', '')).lower())
+        return (200, {'status': 'ok', 'repositories': repositories})
+
+    def projects_list(self, *, user_id: str) -> tuple[int, dict]:
+        list_projects = getattr(self._oauth_token_store, 'list_user_projects', None)
+        if not callable(list_projects):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+        return (200, {'status': 'ok', 'projects': list_projects(user_id=user_id)})
+
+    def projects_get(self, *, user_id: str, project_id: str, require_owner: bool = False) -> tuple[int, dict]:
+        list_projects = getattr(self._oauth_token_store, 'list_user_projects', None)
+        if not callable(list_projects):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+
+        projects_raw = list_projects(user_id=user_id)
+        projects = projects_raw if isinstance(projects_raw, list) else []
+        project = next((item for item in projects if str(item.get('project_id', '')) == project_id), None)
+        if project is None:
+            return (404, {'status': 'error', 'reason': 'project_not_found', 'project_id': project_id})
+
+        owner_user_id = str(project.get('owner_user_id', ''))
+        if require_owner and owner_user_id != user_id:
+            return (403, {'status': 'error', 'reason': 'project_owner_required', 'project_id': project_id})
+
+        return (200, {'status': 'ok', 'project': project})
+
+    def projects_create(self, *, user_id: str, name: str, description: str | None) -> tuple[int, dict]:
+        create_project = getattr(self._oauth_token_store, 'create_project', None)
+        if not callable(create_project):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+        try:
+            project = create_project(owner_user_id=user_id, name=name, description=description)
+        except Exception as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+        return (201, {'status': 'ok', 'project': project})
+
+    def projects_update(self, *, user_id: str, project_id: str, name: str, description: str | None) -> tuple[int, dict]:
+        update_project = getattr(self._oauth_token_store, 'update_project', None)
+        if not callable(update_project):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+        try:
+            project = update_project(
+                project_id=project_id,
+                owner_user_id=user_id,
+                name=name,
+                description=description,
+            )
+        except KeyError:
+            return (404, {'status': 'error', 'reason': 'project_not_found', 'project_id': project_id})
+        except PermissionError:
+            return (403, {'status': 'error', 'reason': 'project_owner_required', 'project_id': project_id})
+        except Exception as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+        return (200, {'status': 'ok', 'project': project})
+
+    def projects_delete(self, *, user_id: str, project_id: str) -> tuple[int, dict]:
+        delete_project = getattr(self._oauth_token_store, 'delete_project', None)
+        if not callable(delete_project):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+        try:
+            deleted = delete_project(project_id=project_id, owner_user_id=user_id)
+        except KeyError:
+            return (404, {'status': 'error', 'reason': 'project_not_found', 'project_id': project_id})
+        except PermissionError:
+            return (403, {'status': 'error', 'reason': 'project_owner_required', 'project_id': project_id})
+        except Exception as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+        return (200, {'status': 'ok', 'deleted': bool(deleted), 'project_id': project_id})
+
+    def projects_add_repository(
+        self,
+        *,
+        user_id: str,
+        project_id: str,
+        owner: str,
+        name: str,
+        github_repo_id: int | None,
+        visibility: str | None,
+    ) -> tuple[int, dict]:
+        add_repo = getattr(self._oauth_token_store, 'add_repository_to_project', None)
+        if not callable(add_repo):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+
+        project_code, project_payload = self.projects_get(user_id=user_id, project_id=project_id, require_owner=True)
+        if project_code != 200:
+            return (project_code, project_payload)
+
+        try:
+            link = add_repo(
+                project_id=project_id,
+                owner=owner,
+                name=name,
+                added_by_user_id=user_id,
+                github_repo_id=github_repo_id,
+                visibility=visibility,
+            )
+        except Exception as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+
+        code, listing = self.projects_list_repositories(user_id=user_id, project_id=project_id, require_owner=True)
+        if code != 200:
+            return (200, {'status': 'ok', 'link': link, 'repositories': []})
+        return (200, {'status': 'ok', 'link': link, 'repositories': listing.get('repositories', [])})
+
+    def projects_list_repositories(self, *, user_id: str, project_id: str, require_owner: bool = True) -> tuple[int, dict]:
+        list_repos = getattr(self._oauth_token_store, 'list_project_repositories', None)
+        if not callable(list_repos):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+
+        project_code, project_payload = self.projects_get(
+            user_id=user_id,
+            project_id=project_id,
+            require_owner=require_owner,
+        )
+        if project_code != 200:
+            return (project_code, project_payload)
+
+        return (200, {'status': 'ok', 'repositories': list_repos(project_id=project_id)})
+
+    def projects_remove_repository(self, *, user_id: str, project_id: str, repository_id: int) -> tuple[int, dict]:
+        remove_repo = getattr(self._oauth_token_store, 'remove_repository_from_project', None)
+        if not callable(remove_repo):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+
+        project_code, project_payload = self.projects_get(user_id=user_id, project_id=project_id, require_owner=True)
+        if project_code != 200:
+            return (project_code, project_payload)
+
+        try:
+            removed = remove_repo(project_id=project_id, repository_id=repository_id)
+        except Exception as exc:
+            return (400, {'status': 'error', 'reason': str(exc)})
+        code, listing = self.projects_list_repositories(user_id=user_id, project_id=project_id, require_owner=True)
+        if code != 200:
+            return (200, {'status': 'ok', 'removed': bool(removed), 'repository_id': repository_id})
+        return (
+            200,
+            {
+                'status': 'ok',
+                'removed': bool(removed),
+                'repository_id': repository_id,
+                'repositories': listing.get('repositories', []),
+            },
+        )
+
     def writer_open_pr(
         self,
         *,
@@ -847,9 +1176,17 @@ def _build_queue(
 
 def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
+        def _route_path(self, raw_path: str) -> str:
+            if raw_path == '/api':
+                return '/'
+            if raw_path.startswith('/api/'):
+                return raw_path[4:]
+            return raw_path
+
         def do_POST(self) -> None:  # noqa: N802
             parsed = urlparse(self.path)
-            if parsed.path == '/auth/oauth/signup/start' or parsed.path == '/auth/oauth/signin/start':
+            path = self._route_path(parsed.path)
+            if path == '/auth/oauth/signup/start' or path == '/auth/oauth/signin/start':
                 content_length = int(self.headers.get('Content-Length', '0'))
                 raw_body = self.rfile.read(content_length)
                 try:
@@ -864,14 +1201,14 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 state_raw = body.get('state') if isinstance(body, dict) else None
                 state = state_raw if isinstance(state_raw, str) and state_raw else f'state-{uuid4().hex}'
 
-                if parsed.path == '/auth/oauth/signup/start':
+                if path == '/auth/oauth/signup/start':
                     code, payload = app.oauth_signup_start(provider=provider, state=state, redirect_uri=redirect_uri)
                 else:
                     code, payload = app.oauth_signin_start(provider=provider, state=state, redirect_uri=redirect_uri)
                 self._send_json(code, payload)
                 return
 
-            if parsed.path == '/auth/oauth/callback':
+            if path == '/auth/oauth/callback':
                 content_length = int(self.headers.get('Content-Length', '0'))
                 raw_body = self.rfile.read(content_length)
                 try:
@@ -892,24 +1229,27 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 if not code:
                     self._send_json(400, {'status': 'error', 'reason': 'code is required'})
                     return
-                response_code, payload = app.oauth_callback(
-                    flow=flow,
-                    provider=provider,
-                    code=code,
-                    state=state,
-                    redirect_uri=redirect_uri,
-                )
-                self._send_json(response_code, payload)
+                try:
+                    response_code, payload = app.oauth_callback(
+                        flow=flow,
+                        provider=provider,
+                        code=code,
+                        state=state,
+                        redirect_uri=redirect_uri,
+                    )
+                    self._send_json(response_code, payload)
+                except Exception as exc:
+                    self._send_json(500, {'status': 'error', 'reason': str(exc)})
                 return
 
-            if parsed.path == '/auth/session/validate':
+            if path == '/auth/session/validate':
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
                 self._send_json(200, {'status': 'ok', 'user_id': user_id})
                 return
 
-            if parsed.path == '/writer/pr':
+            if path == '/writer/pr':
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
@@ -974,7 +1314,67 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 self._send_json(code, payload)
                 return
 
-            if parsed.path == '/chat/sessions':
+            if path == '/projects':
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                name_raw = body.get('name') if isinstance(body, dict) else None
+                description_raw = body.get('description') if isinstance(body, dict) else None
+                name = name_raw if isinstance(name_raw, str) else ''
+                description = description_raw if isinstance(description_raw, str) else None
+                if not name:
+                    self._send_json(400, {'status': 'error', 'reason': 'project name is required'})
+                    return
+                code, payload = app.projects_create(user_id=user_id, name=name, description=description)
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/projects/') and path.endswith('/repositories'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 3:
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                owner_raw = body.get('owner') if isinstance(body, dict) else None
+                name_raw = body.get('name') if isinstance(body, dict) else None
+                repo_id_raw = body.get('id') if isinstance(body, dict) else None
+                visibility_raw = body.get('visibility') if isinstance(body, dict) else None
+                owner = owner_raw if isinstance(owner_raw, str) else ''
+                name = name_raw if isinstance(name_raw, str) else ''
+                github_repo_id = repo_id_raw if isinstance(repo_id_raw, int) else None
+                visibility = visibility_raw if isinstance(visibility_raw, str) else None
+                if not owner or not name:
+                    self._send_json(400, {'status': 'error', 'reason': 'owner and name are required'})
+                    return
+                code, payload = app.projects_add_repository(
+                    user_id=user_id,
+                    project_id=project_id,
+                    owner=owner,
+                    name=name,
+                    github_repo_id=github_repo_id,
+                    visibility=visibility,
+                )
+                self._send_json(code, payload)
+                return
+
+            if path == '/chat/sessions':
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
@@ -993,7 +1393,7 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 self._send_json(code, payload)
                 return
 
-            if parsed.path == '/chat/messages':
+            if path == '/chat/messages':
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
@@ -1030,7 +1430,36 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 self._send_json(code, payload)
                 return
 
-            if parsed.path == '/auth/github/installation-token':
+            if path == '/observability/events':
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                name_raw = body.get('name') if isinstance(body, dict) else None
+                trace_id_raw = body.get('trace_id') if isinstance(body, dict) else None
+                input_payload_raw = body.get('input') if isinstance(body, dict) else None
+                output_payload_raw = body.get('output') if isinstance(body, dict) else None
+                name = name_raw if isinstance(name_raw, str) else ''
+                trace_id = trace_id_raw if isinstance(trace_id_raw, str) else None
+                input_payload = input_payload_raw if isinstance(input_payload_raw, dict) else None
+                output_payload = output_payload_raw if isinstance(output_payload_raw, dict) else None
+                code, payload = app.observability_write_event(
+                    user_id=user_id,
+                    name=name,
+                    trace_id=trace_id,
+                    input_payload=input_payload,
+                    output_payload=output_payload,
+                )
+                self._send_json(code, payload)
+                return
+
+            if path == '/auth/github/installation-token':
                 content_length = int(self.headers.get('Content-Length', '0'))
                 raw_body = self.rfile.read(content_length)
                 try:
@@ -1054,7 +1483,7 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     self._send_json(500, {'status': 'error', 'reason': str(exc)})
                 return
 
-            if parsed.path == '/auth/github/webhook/register':
+            if path == '/auth/github/webhook/register':
                 content_length = int(self.headers.get('Content-Length', '0'))
                 raw_body = self.rfile.read(content_length)
                 try:
@@ -1075,7 +1504,7 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     self._send_json(500, {'status': 'error', 'reason': str(exc)})
                 return
 
-            if parsed.path != '/webhooks/github':
+            if path != '/webhooks/github':
                 self._send_json(404, {'status': 'error', 'reason': 'not_found'})
                 return
 
@@ -1095,41 +1524,99 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
 
         def do_GET(self) -> None:  # noqa: N802
             parsed = urlparse(self.path)
-            if parsed.path.startswith('/chat/sessions/'):
+            path = self._route_path(parsed.path)
+            if path == '/auth/github/user-repos':
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
-                session_id = parsed.path.rsplit('/', 1)[-1]
+                query = parse_qs(parsed.query)
+                per_page_raw = query.get('per_page', ['100'])[0]
+                per_page = int(per_page_raw) if isinstance(per_page_raw, str) and per_page_raw.isdigit() else 100
+                code, payload = app.github_user_repositories(user_id=user_id, per_page=per_page)
+                self._send_json(code, payload)
+                return
+
+            if path == '/projects':
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                code, payload = app.projects_list(user_id=user_id)
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/projects/') and not path.endswith('/repositories'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 2:
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                code, payload = app.projects_get(user_id=user_id, project_id=project_id, require_owner=True)
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/projects/') and path.endswith('/repositories'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 3:
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                code, payload = app.projects_list_repositories(user_id=user_id, project_id=project_id, require_owner=True)
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/chat/sessions/'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                session_id = path.rsplit('/', 1)[-1]
                 code, payload = app.chat_get_session(session_id, requesting_user_id=user_id)
                 self._send_json(code, payload)
                 return
-            if parsed.path.startswith('/chat/runs/'):
+            if path.startswith('/chat/runs/'):
                 user_id = self._require_authenticated_user()
                 if user_id is None:
                     return
-                run_id = parsed.path.rsplit('/', 1)[-1]
+                run_id = path.rsplit('/', 1)[-1]
                 code, payload = app.chat_get_run(run_id, requesting_user_id=user_id)
                 self._send_json(code, payload)
                 return
-            if parsed.path == '/healthz':
+            if path == '/observability/trace-stack':
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                query = parse_qs(parsed.query)
+                trace_id_value = query.get('trace_id', [None])[0]
+                trace_id = trace_id_value if isinstance(trace_id_value, str) and trace_id_value.strip() else None
+                limit_raw = query.get('limit', ['80'])[0]
+                limit = int(limit_raw) if isinstance(limit_raw, str) and limit_raw.isdigit() else 80
+                code, payload = app.observability_trace_stack(trace_id=trace_id, limit=limit)
+                self._send_json(code, payload)
+                return
+            if path == '/healthz':
                 self._send_json(200, {'status': 'ok'})
                 return
-            if parsed.path == '/readyz':
+            if path == '/readyz':
                 status_code, payload = app.readiness()
                 self._send_json(status_code, payload)
                 return
-            if parsed.path == '/auth/github/status':
+            if path == '/auth/github/status':
                 status_code, payload = app.github_auth_status()
                 self._send_json(status_code, payload)
                 return
-            if parsed.path == '/auth/github/start':
+            if path == '/auth/github/start':
                 query = parse_qs(parsed.query)
                 state = query.get('state', [f'state-{uuid4().hex}'])[0]
                 redirect_uri = query.get('redirect_uri', [None])[0]
                 status_code, payload = app.github_auth_start(state=state, redirect_uri=redirect_uri)
                 self._send_json(status_code, payload)
                 return
-            if parsed.path == '/auth/github/callback':
+            if path == '/auth/github/callback':
                 query = parse_qs(parsed.query)
                 code = query.get('code', [None])[0]
                 if not isinstance(code, str) or not code.strip():
@@ -1147,7 +1634,7 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 except Exception as exc:
                     self._send_json(500, {'status': 'error', 'reason': str(exc)})
                 return
-            if parsed.path == '/auth/github/access':
+            if path == '/auth/github/access':
                 query = parse_qs(parsed.query)
                 owner = query.get('owner', [None])[0]
                 repo = query.get('repo', [None])[0]
@@ -1157,6 +1644,83 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                 code, payload = app.github_repo_access(owner=owner, repo=repo)
                 self._send_json(code, payload)
                 return
+            self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+
+        def do_PATCH(self) -> None:  # noqa: N802
+            parsed = urlparse(self.path)
+            path = self._route_path(parsed.path)
+            if path.startswith('/projects/') and not path.endswith('/repositories'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 2:
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                name_raw = body.get('name') if isinstance(body, dict) else None
+                description_raw = body.get('description') if isinstance(body, dict) else None
+                name = name_raw if isinstance(name_raw, str) else ''
+                description = description_raw if isinstance(description_raw, str) else None
+                if not name:
+                    self._send_json(400, {'status': 'error', 'reason': 'project name is required'})
+                    return
+                code, payload = app.projects_update(
+                    user_id=user_id,
+                    project_id=project_id,
+                    name=name,
+                    description=description,
+                )
+                self._send_json(code, payload)
+                return
+
+            self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+
+        def do_DELETE(self) -> None:  # noqa: N802
+            parsed = urlparse(self.path)
+            path = self._route_path(parsed.path)
+
+            if path.startswith('/projects/') and '/repositories/' in path:
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 4 or parts[2] != 'repositories':
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                repository_id_raw = parts[3]
+                if not repository_id_raw.isdigit():
+                    self._send_json(400, {'status': 'error', 'reason': 'repository_id must be an integer'})
+                    return
+                code, payload = app.projects_remove_repository(
+                    user_id=user_id,
+                    project_id=project_id,
+                    repository_id=int(repository_id_raw),
+                )
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/projects/') and not path.endswith('/repositories'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 2:
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                code, payload = app.projects_delete(user_id=user_id, project_id=project_id)
+                self._send_json(code, payload)
+                return
+
             self._send_json(404, {'status': 'error', 'reason': 'not_found'})
 
         def log_message(self, format: str, *args: object) -> None:  # noqa: A003

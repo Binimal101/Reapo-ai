@@ -251,6 +251,41 @@ class GithubAppAuthService:
                 },
             )
 
+    def list_user_repositories(self, trace_id: str, user_id: str, per_page: int = 100) -> list[dict]:
+        token = self._oauth_session_service.get_valid_token_with_refresh(
+            trace_id=trace_id,
+            user_id=user_id,
+            refresh=lambda value: self._http_json_dict(
+                'POST',
+                'https://github.com/login/oauth/access_token',
+                {
+                    'client_id': self._config.client_id,
+                    'client_secret': self._config.client_secret,
+                    'grant_type': 'refresh_token',
+                    'refresh_token': value,
+                },
+                {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                },
+            ),
+        )
+        if token is None:
+            raise ValueError('No valid OAuth token available for user')
+
+        page_size = max(1, min(100, int(per_page)))
+        url = f'https://api.github.com/user/repos?per_page={page_size}&sort=updated&type=owner,public,private'
+        headers = {
+            'Accept': 'application/vnd.github+json',
+            'Authorization': f'Bearer {token.access_token}',
+            'X-GitHub-Api-Version': '2022-11-28',
+        }
+
+        payload = self._http_json('GET', url, None, headers)
+        if isinstance(payload, list):
+            return [row for row in payload if isinstance(row, dict)]
+        raise RuntimeError(f'GitHub API returned unexpected payload type: {type(payload).__name__}')
+
     def create_installation_access_token(self, trace_id: str, installation_id: int) -> dict:
         span = self._observability.start_span(
             name='github_app_create_installation_token',

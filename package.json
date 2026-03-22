@@ -6,6 +6,10 @@
   "scripts": {
     "test": "vitest run --coverage",
     "build": "tsc -b",
+    "backend:dev": ".venv\\Scripts\\python.exe apps/worker-indexer-py/dev_serve_webhook.py serve-webhook --workspace-root . --state-root state --webhook-secret dev-secret --port 8094",
+    "frontend:dev": "npm run dev -w @reapo/frontend",
+    "frontend:build": "npm run build -w @reapo/frontend",
+    "frontend:preview": "npm run preview -w @reapo/frontend",
     "test:watch": "vitest",
     "lint": "eslint .",
     "typecheck": "tsc -b --pretty false",
@@ -35,6 +39,7 @@
     "@typescript-eslint/parser": "^8.57.1",
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^10.1.0",
+    "playwright": "^1.58.2",
     "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
