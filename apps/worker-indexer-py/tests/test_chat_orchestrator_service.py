@@ -115,7 +115,7 @@ def test_chat_service_creates_session_and_sends_message(tmp_path: Path) -> None:
     )
 
     assert response['run']['status'] == 'completed'
-    assert 'Here is what I found:' in response['assistant_message']['content']
+    assert 'conversation:' in response['assistant_message']['content']
 
     updated_session = service.get_session(session_id=str(session['session_id']))
     assert updated_session is not None
@@ -152,3 +152,71 @@ def test_chat_service_enforces_session_access_and_input_validation(tmp_path: Pat
             message='Find code',
             repos_in_scope=(),
         )
+
+
+def test_chat_service_passes_prior_tool_outcomes_into_orchestrator(tmp_path: Path) -> None:
+    store = JsonFileOrchestratorStateStoreAdapter(tmp_path / 'orchestrator' / 'chat_state.json')
+
+    class _CapturingOrchestrator:
+        def __init__(self) -> None:
+            self.last_execute_kwargs: dict = {}
+
+        def execute(self, **kwargs: object) -> dict:
+            self.last_execute_kwargs = dict(kwargs)
+            return {
+                'run_id': str(kwargs['run_id']),
+                'status': 'completed',
+                'started_at': '2026-01-01T00:00:00+00:00',
+                'finished_at': '2026-01-01T00:00:01+00:00',
+                'steps': [],
+                'final_response': 'ok',
+                'error': None,
+            }
+
+    orchestrator = _CapturingOrchestrator()
+    service = ChatOrchestratorService(state_store=store, orchestrator=orchestrator)  # type: ignore[arg-type]
+
+    session = service.create_session(user_id='user-1')
+    session_id = str(session['session_id'])
+
+    historical = store.create_run(
+        session_id=session_id,
+        user_id='user-1',
+        trace_id='trace-history',
+        prompt='older',
+        repos_in_scope=('repo-a',),
+    )
+    store.update_run(
+        str(historical['run_id']),
+        status='completed',
+        steps=[
+            {
+                'name': 'execute_step.conversation',
+                'status': 'completed',
+                'output': {
+                    'tool_events': [
+                        {
+                            'tool': 'get_folder_structure',
+                            'ok': True,
+                            'result': {'path': 'src', 'total_entries': 24},
+                        }
+                    ]
+                },
+            }
+        ],
+        final_response='done',
+        finished_at='2026-01-01T00:00:00+00:00',
+        error=None,
+    )
+
+    service.send_message(
+        session_id=session_id,
+        user_id='user-1',
+        message='next prompt',
+        repos_in_scope=('repo-a',),
+    )
+
+    prior = orchestrator.last_execute_kwargs.get('prior_tool_outcomes')
+    assert isinstance(prior, list)
+    assert prior
+    assert prior[0]['tool'] == 'get_folder_structure'

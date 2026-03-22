@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from uuid import uuid4
 
 from ast_indexer.adapters.orchestrator.json_file_orchestrator_state_store_adapter import (
@@ -84,6 +85,7 @@ class ChatOrchestratorService:
             reducer_token_budget=reducer_token_budget,
             reducer_max_contexts=reducer_max_contexts,
             message_history=list(session.get('messages', [])),
+            prior_tool_outcomes=self._collect_prior_tool_outcomes(session_id=session_id),
         )
 
         persisted = self._state_store.update_run(
@@ -113,3 +115,54 @@ class ChatOrchestratorService:
                 'run_id': str(run['run_id']),
             },
         }
+
+    def _collect_prior_tool_outcomes(self, *, session_id: str) -> list[dict[str, Any]]:
+        if not hasattr(self._state_store, 'list_runs_for_session'):
+            return []
+        runs = self._state_store.list_runs_for_session(session_id=session_id, limit=12)
+        outcomes: list[dict[str, Any]] = []
+        for run in runs:
+            steps = run.get('steps', [])
+            if not isinstance(steps, list):
+                continue
+            for step in steps:
+                if not isinstance(step, dict):
+                    continue
+                output = step.get('output')
+                if not isinstance(output, dict):
+                    continue
+
+                tool_events = output.get('tool_events')
+                if isinstance(tool_events, list):
+                    for event in tool_events:
+                        if isinstance(event, dict):
+                            outcomes.append(event)
+                    continue
+
+                name = str(step.get('name', ''))
+                if name.startswith('execute_step.search'):
+                    outcomes.append(
+                        {
+                            'tool': 'search_tool',
+                            'ok': True,
+                            'result': {
+                                'candidate_count': output.get('candidate_count'),
+                                'relevant_count': output.get('relevant_count'),
+                                'reduced_count': output.get('reduced_count'),
+                            },
+                        }
+                    )
+                elif name.startswith('execute_step.grep_repo'):
+                    outcomes.append(
+                        {
+                            'tool': 'grep_repo_tool',
+                            'ok': True,
+                            'result': {
+                                'returned': output.get('returned'),
+                                'total_matches': output.get('total_matches'),
+                                'has_more': output.get('has_more'),
+                            },
+                        }
+                    )
+
+        return outcomes[-50:]

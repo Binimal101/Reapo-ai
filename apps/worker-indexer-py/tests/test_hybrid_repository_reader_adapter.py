@@ -1,6 +1,10 @@
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 
-from ast_indexer.adapters.repository.hybrid_repository_reader_adapter import HybridRepositoryReaderAdapter
+from ast_indexer.adapters.repository.hybrid_repository_reader_adapter import (
+    HybridRepositoryReaderAdapter,
+    build_github_app_token_provider,
+)
 from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
 
 
@@ -67,3 +71,66 @@ def test_hybrid_reader_requires_github_provider_for_owner_repo(tmp_path: Path) -
         return
 
     raise AssertionError('expected ValueError when github token provider is missing')
+
+
+def test_build_github_app_token_provider_caches_installation_and_token() -> None:
+    class _FakeGithubAuth:
+        def __init__(self) -> None:
+            self.resolve_calls = 0
+            self.create_calls = 0
+
+        def resolve_installation_id_for_repo(self, *, trace_id: str, owner: str, repo: str) -> int:  # noqa: ARG002
+            self.resolve_calls += 1
+            return 123
+
+        def create_installation_access_token(self, *, trace_id: str, installation_id: int) -> dict:  # noqa: ARG002
+            self.create_calls += 1
+            expires = datetime.now(timezone.utc) + timedelta(minutes=30)
+            return {
+                'token': f'ghs_token_{self.create_calls}',
+                'expires_at': expires.isoformat(),
+            }
+
+    auth = _FakeGithubAuth()
+    provider = build_github_app_token_provider(auth)
+
+    token_first = provider('octo/sample')
+    token_second = provider('octo/sample')
+
+    assert token_first == 'ghs_token_1'
+    assert token_second == 'ghs_token_1'
+    assert auth.resolve_calls == 1
+    assert auth.create_calls == 1
+
+
+def test_build_github_app_token_provider_refreshes_expired_token() -> None:
+    class _FakeGithubAuth:
+        def __init__(self) -> None:
+            self.resolve_calls = 0
+            self.create_calls = 0
+
+        def resolve_installation_id_for_repo(self, *, trace_id: str, owner: str, repo: str) -> int:  # noqa: ARG002
+            self.resolve_calls += 1
+            return 456
+
+        def create_installation_access_token(self, *, trace_id: str, installation_id: int) -> dict:  # noqa: ARG002
+            self.create_calls += 1
+            if self.create_calls == 1:
+                expires = datetime.now(timezone.utc) - timedelta(seconds=10)
+            else:
+                expires = datetime.now(timezone.utc) + timedelta(minutes=30)
+            return {
+                'token': f'ghs_token_{self.create_calls}',
+                'expires_at': expires.isoformat(),
+            }
+
+    auth = _FakeGithubAuth()
+    provider = build_github_app_token_provider(auth)
+
+    token_first = provider('octo/sample')
+    token_second = provider('octo/sample')
+
+    assert token_first == 'ghs_token_1'
+    assert token_second == 'ghs_token_2'
+    assert auth.resolve_calls == 1
+    assert auth.create_calls == 2

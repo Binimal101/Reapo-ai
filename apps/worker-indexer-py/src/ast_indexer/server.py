@@ -39,7 +39,8 @@ from ast_indexer.application.index_job_dispatch_service import IndexJobDispatchS
 from ast_indexer.application.index_job_worker_service import IndexJobWorkerService
 from ast_indexer.application.orchestrator_loop_service import GrepRepoMatch, GrepRepoResult, OrchestratorLoopService
 from ast_indexer.application.oauth_session_service import OAuthSessionService
-from ast_indexer.application.research_openai_agents import OpenAIConversationalAgent
+from ast_indexer.application.repo_agent_tools import REPO_AGENT_TOOL_SCHEMAS, build_repo_agent_tool_handlers
+from ast_indexer.application.research_openai_agents import OpenAIConversationalAgent, OpenAIRoutingAgent
 from ast_indexer.application import runtime_config
 from ast_indexer.application.writer_pr_service import WriterFileChange, WriterPrService
 from ast_indexer.main import (
@@ -78,6 +79,7 @@ class GithubWebhookServerApp:
         github_app_auth_service: GithubAppAuthService | None = None,
         chat_orchestrator_service: ChatOrchestratorService | None = None,
     ) -> None:
+        self._workspace_root = workspace_root
         self._session_secret = os.getenv('AST_INDEXER_SESSION_SECRET', webhook_secret)
         self._session_ttl_seconds = max(300, int(os.getenv('AST_INDEXER_SESSION_TTL_SECONDS', '604800')))
         self._openai_api_key = openai_api_key
@@ -161,11 +163,13 @@ class GithubWebhookServerApp:
             repository_reader=repository_reader,
         )
         self._writer_service = WriterPrService(github_auth=self._github_app_auth) if self._github_app_auth else None
+        self._symbol_index_store = None
         self._chat_orchestrator = chat_orchestrator_service or self._build_chat_orchestrator_service(state_root)
 
     def _build_chat_orchestrator_service(self, state_root: Path) -> ChatOrchestratorService:
         store = JsonFileOrchestratorStateStoreAdapter(state_root / 'orchestrator' / 'chat_state.json')
         symbol_index_store = JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json')
+        self._symbol_index_store = symbol_index_store
 
         def _search_tool(
             *,
@@ -252,10 +256,20 @@ class GithubWebhookServerApp:
             return payload
 
         conversational_agent_tool = None
+        routing_agent_tool = None
         if self._openai_api_key or os.getenv('OPENAI_API_KEY'):
             conversational_model = os.getenv('AST_INDEXER_CONVERSATIONAL_MODEL') or runtime_config.default_openai_model()
             conversational_agent_tool = OpenAIConversationalAgent(
                 model=conversational_model,
+                api_key=self._openai_api_key,
+                base_url=self._openai_base_url,
+                tool_definitions=REPO_AGENT_TOOL_SCHEMAS,
+                tool_handlers=build_repo_agent_tool_handlers(self._workspace_root),
+                max_tool_calls=8,
+            )
+            routing_model = os.getenv('AST_INDEXER_ROUTER_MODEL') or conversational_model
+            routing_agent_tool = OpenAIRoutingAgent(
+                model=routing_model,
                 api_key=self._openai_api_key,
                 base_url=self._openai_base_url,
             )
@@ -264,6 +278,7 @@ class GithubWebhookServerApp:
             search_tool=_search_tool,
             grep_repo_tool=_grep_repo_tool,
             conversational_agent_tool=conversational_agent_tool,
+            routing_agent_tool=routing_agent_tool,
             memory_threshold_messages=20,
             max_tool_iterations=5,
             observability=self._observability,
@@ -293,6 +308,117 @@ class GithubWebhookServerApp:
             return (403, {'status': 'error', 'reason': 'run_access_denied'})
         return (200, {'status': 'ok', 'run': run})
 
+    def _chat_indexed_repos(self) -> set[str]:
+        store = getattr(self, '_symbol_index_store', None)
+        if store is None or not hasattr(store, 'list_symbols'):
+            return set()
+        try:
+            rows = store.list_symbols()
+        except Exception:
+            return set()
+
+        repos: set[str] = set()
+        for row in rows:
+            repo_name = getattr(row, 'repo', None)
+            if isinstance(repo_name, str) and repo_name.strip():
+                repos.add(repo_name.strip())
+        return repos
+
+    def _warm_chat_repo_scope(
+        self,
+        *,
+        session_id: str,
+        user_id: str,
+        repos_in_scope: tuple[str, ...],
+    ) -> dict:
+        requested = [repo.strip() for repo in repos_in_scope if isinstance(repo, str) and '/' in repo and repo.strip()]
+        if not requested:
+            return {
+                'requested': 0,
+                'already_indexed': 0,
+                'attempted': 0,
+                'processed': 0,
+                'queued_for_retry': 0,
+                'failed': 0,
+                'results': [],
+            }
+
+        indexed = self._chat_indexed_repos()
+        missing = [repo for repo in requested if repo not in indexed]
+        if not missing:
+            return {
+                'requested': len(requested),
+                'already_indexed': len(requested),
+                'attempted': 0,
+                'processed': 0,
+                'queued_for_retry': 0,
+                'failed': 0,
+                'results': [],
+            }
+
+        results: list[dict] = []
+        for repo in missing:
+            owner, name = repo.split('/', 1)
+            trace_id = f'chat-preindex-{uuid4().hex}'
+            span = self._observability.start_span(
+                name='chat_preindex_repo',
+                trace_id=trace_id,
+                input_payload={
+                    'repo': repo,
+                    'session_id': session_id,
+                    'user_id': user_id,
+                },
+                session_id=session_id,
+                user_id=user_id,
+            )
+
+            outcome_status = 'failed'
+            reason = None
+            try:
+                job = self._dispatch.build_repository_full_index_job(
+                    owner=owner,
+                    name=name,
+                    trace_id=trace_id,
+                )
+                outcome = self._worker.process_job(job)
+                outcome_status = outcome.status
+                reason = outcome.reason
+            except Exception as exc:  # noqa: BLE001
+                reason = str(exc)
+
+            self._observability.end_span(
+                span,
+                output_payload={
+                    'repo': repo,
+                    'worker_outcome': outcome_status,
+                },
+                metadata={
+                    'reason': reason,
+                    'session_id': session_id,
+                },
+            )
+
+            results.append(
+                {
+                    'repo': repo,
+                    'worker_outcome': outcome_status,
+                    'reason': reason,
+                }
+            )
+
+        processed = sum(1 for row in results if row['worker_outcome'] == 'processed')
+        queued_for_retry = sum(1 for row in results if row['worker_outcome'] == 'retried')
+        failed = sum(1 for row in results if row['worker_outcome'] not in {'processed', 'retried'})
+        return {
+            'requested': len(requested),
+            'already_indexed': len(requested) - len(missing),
+            'attempted': len(results),
+            'processed': processed,
+            'queued_for_retry': queued_for_retry,
+            'failed': failed,
+            'results': results,
+        }
+
     def chat_send_message(
         self,
         *,
@@ -307,6 +433,11 @@ class GithubWebhookServerApp:
         reducer_token_budget: int = 2500,
         reducer_max_contexts: int | None = None,
     ) -> tuple[int, dict]:
+        preindex = self._warm_chat_repo_scope(
+            session_id=session_id,
+            user_id=user_id,
+            repos_in_scope=repos_in_scope,
+        )
         try:
             payload = self._chat_orchestrator.send_message(
                 session_id=session_id,
@@ -328,7 +459,7 @@ class GithubWebhookServerApp:
             return (400, {'status': 'error', 'reason': str(exc)})
         except Exception as exc:  # noqa: BLE001
             return (500, {'status': 'error', 'reason': str(exc)})
-        return (200, {'status': 'ok', **payload})
+        return (200, {'status': 'ok', 'preindex': preindex, **payload})
 
     def observability_trace_stack(self, *, trace_id: str | None = None, limit: int = 80) -> tuple[int, dict]:
         spans = self._observability.list_spans()

@@ -65,3 +65,41 @@ def test_state_store_raises_for_missing_session_or_run(tmp_path: Path) -> None:
         assert False, 'expected KeyError'
     except KeyError:
         pass
+
+
+def test_state_store_lists_recent_runs_for_session(tmp_path: Path) -> None:
+    store = JsonFileOrchestratorStateStoreAdapter(tmp_path / 'orchestrator' / 'chat_state.json')
+
+    session_a = store.create_session(user_id='user-a')
+    session_b = store.create_session(user_id='user-b')
+
+    run_a1 = store.create_run(
+        session_id=str(session_a['session_id']),
+        user_id='user-a',
+        trace_id='trace-a1',
+        prompt='first',
+        repos_in_scope=('repo-a',),
+    )
+    run_a2 = store.create_run(
+        session_id=str(session_a['session_id']),
+        user_id='user-a',
+        trace_id='trace-a2',
+        prompt='second',
+        repos_in_scope=('repo-a',),
+    )
+    store.create_run(
+        session_id=str(session_b['session_id']),
+        user_id='user-b',
+        trace_id='trace-b1',
+        prompt='other-session',
+        repos_in_scope=('repo-b',),
+    )
+
+    listed = store.list_runs_for_session(session_id=str(session_a['session_id']), limit=1)
+    assert len(listed) == 1
+    assert listed[0]['run_id'] == run_a2['run_id']
+
+    listed_all = store.list_runs_for_session(session_id=str(session_a['session_id']), limit=10)
+    run_ids = [row['run_id'] for row in listed_all]
+    assert run_a1['run_id'] in run_ids
+    assert run_a2['run_id'] in run_ids

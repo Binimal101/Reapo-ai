@@ -9,6 +9,7 @@ from ast_indexer.adapters.queue.in_memory_index_job_queue_adapter import InMemor
 from ast_indexer.application.index_job_worker_service import IndexJobProcessOutcome
 from ast_indexer.application.writer_pr_service import WriterFileChange
 from ast_indexer.domain.index_jobs import IndexJob
+from ast_indexer.domain.models import SymbolRecord
 from ast_indexer.server import GithubWebhookServerApp
 
 
@@ -350,6 +351,104 @@ def test_chat_session_access_is_scoped_to_authenticated_user(tmp_path: Path) -> 
     intruder_code, intruder_payload = app.chat_get_session(session_id, requesting_user_id='intruder')
     assert intruder_code == 403
     assert intruder_payload['reason'] == 'session_access_denied'
+
+
+def test_chat_warm_repo_scope_indexes_missing_repositories(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'acme' / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    class _FakeSymbolStore:
+        def list_symbols(self) -> list[SymbolRecord]:
+            return [
+                SymbolRecord(
+                    repo='acme/indexed-repo',
+                    path='src/a.py',
+                    symbol='f',
+                    kind='function',
+                    line=1,
+                    signature='def f()',
+                )
+            ]
+
+    class _FakeDispatch:
+        def build_repository_full_index_job(self, *, owner: str, name: str, trace_id: str) -> IndexJob:  # noqa: ARG002
+            return IndexJob(
+                repo=f'{owner}/{name}',
+                repo_full_name=f'{owner}/{name}',
+                changed_paths=(),
+                deleted_paths=(),
+                trace_id='trace-preindex',
+                source='project_repository_linked',
+            )
+
+    class _FakeWorker:
+        def process_job(self, job: IndexJob) -> IndexJobProcessOutcome:
+            return IndexJobProcessOutcome(status='processed', job=job)
+
+    app._symbol_index_store = _FakeSymbolStore()  # type: ignore[assignment]
+    app._dispatch = _FakeDispatch()  # type: ignore[assignment]
+    app._worker = _FakeWorker()  # type: ignore[assignment]
+
+    summary = app._warm_chat_repo_scope(
+        session_id='session-1',
+        user_id='owner',
+        repos_in_scope=('acme/indexed-repo', 'acme/new-repo'),
+    )
+
+    assert summary['requested'] == 2
+    assert summary['already_indexed'] == 1
+    assert summary['attempted'] == 1
+    assert summary['processed'] == 1
+    assert summary['queued_for_retry'] == 0
+    assert summary['failed'] == 0
+    assert summary['results'][0]['repo'] == 'acme/new-repo'
+
+
+def test_chat_send_message_includes_preindex_payload(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    (workspace_root / 'checkout-service').mkdir(parents=True)
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    app._warm_chat_repo_scope = lambda **kwargs: {  # type: ignore[assignment]
+        'requested': 1,
+        'already_indexed': 0,
+        'attempted': 1,
+        'processed': 1,
+        'queued_for_retry': 0,
+        'failed': 0,
+        'results': [{'repo': 'acme/repo', 'worker_outcome': 'processed', 'reason': None}],
+    }
+
+    class _FakeChatOrchestrator:
+        def send_message(self, **kwargs: object) -> dict:  # noqa: ARG002
+            return {
+                'session': {'session_id': 's-1', 'messages': []},
+                'run': {'run_id': 'r-1', 'status': 'completed'},
+                'assistant_message': {'role': 'assistant', 'content': 'ok', 'run_id': 'r-1'},
+            }
+
+    app._chat_orchestrator = _FakeChatOrchestrator()  # type: ignore[assignment]
+
+    code, payload = app.chat_send_message(
+        session_id='s-1',
+        user_id='owner',
+        message='explain repo',
+        repos_in_scope=('acme/repo',),
+    )
+
+    assert code == 200
+    assert payload['status'] == 'ok'
+    assert payload['preindex']['attempted'] == 1
+    assert payload['preindex']['processed'] == 1
 
 
 def test_server_app_writer_open_pr_uses_writer_service(tmp_path: Path) -> None:

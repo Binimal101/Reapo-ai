@@ -119,7 +119,7 @@ def test_orchestrator_loop_executes_success_path_and_records_span() -> None:
     )
 
     assert execution['status'] == 'completed'
-    assert 'Here is what I found' in str(execution['final_response'])
+    assert 'conversation:' in str(execution['final_response'])
     step_names = [step['name'] for step in execution['steps']]
     assert 'plan' in step_names
     assert 'memory_check' in step_names
@@ -385,9 +385,556 @@ def test_orchestrator_loop_logs_conversational_transitions() -> None:
     transitions = [
         span for span in observability.list_spans() if span.name == 'langgraph.transition' and span.metadata
     ]
-    transition_pairs = {(str(span.metadata['from_node']), str(span.metadata['to_node'])) for span in transitions}
+    transition_pairs = {
+        (str(metadata.get('from_node')), str(metadata.get('to_node')))
+        for span in transitions
+        for metadata in [span.metadata or {}]
+    }
     assert ('START', 'plan') in transition_pairs
     assert ('plan', 'memory_check') in transition_pairs
     assert ('memory_check', 'conversational_mode') in transition_pairs
     assert ('conversational_mode', 'compose_response') in transition_pairs
     assert ('compose_response', 'END') in transition_pairs
+
+
+def test_orchestrator_routes_broad_repo_exploration_to_conversational_mode() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        raise AssertionError('grep should not run for broad conversational exploration route')
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    execution = service.execute(
+        run_id='run-broad-explore',
+        session_id='session-broad-explore',
+        user_id='user-broad-explore',
+        trace_id='trace-broad-explore',
+        message='Can you map the repository structure and help me understand this codebase?',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    assert 'conversation:' in str(execution['final_response'])
+    assert search_calls['count'] == 0
+
+
+def test_orchestrator_routes_explicit_search_request_to_coding_mode() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    execution = service.execute(
+        run_id='run-explicit-search',
+        session_id='session-explicit-search',
+        user_id='user-explicit-search',
+        trace_id='trace-explicit-search',
+        message='use search tool to look for stuff about sms',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    assert search_calls['count'] == 1
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'execute_step.search' in step_names
+
+
+def test_orchestrator_routes_follow_up_to_coding_when_tool_memory_exists() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    execution = service.execute(
+        run_id='run-memory-aware-route',
+        session_id='session-memory-aware-route',
+        user_id='user-memory-aware-route',
+        trace_id='trace-memory-aware-route',
+        message='im ready lets do this, tell me more',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+        prior_tool_outcomes=[
+            {
+                'tool': 'search_tool',
+                'ok': True,
+                'result': {'candidate_count': 0, 'reduced_count': 0},
+            }
+        ],
+    )
+
+    assert execution['status'] == 'completed'
+    assert search_calls['count'] == 1
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'execute_step.search' in step_names
+
+
+def test_orchestrator_prefers_routing_agent_decision() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    def _routing_agent_tool(**kwargs: object) -> dict:  # noqa: ARG001
+        return {'route': 'coding_mode', 'reason': 'explicit_agent_choice'}
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        routing_agent_tool=_routing_agent_tool,
+    )
+
+    execution = service.execute(
+        run_id='run-routing-agent-priority',
+        session_id='session-routing-agent-priority',
+        user_id='user-routing-agent-priority',
+        trace_id='trace-routing-agent-priority',
+        message='Hey can we talk through a plan first?',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    assert search_calls['count'] == 1
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'execute_step.search' in step_names
+
+
+def test_orchestrator_defaults_to_coding_when_routing_agent_returns_invalid_route() -> None:
+    search_calls = {'count': 0}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        search_calls['count'] += 1
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    def _routing_agent_tool(**kwargs: object) -> dict:  # noqa: ARG001
+        return {'route': 'something_else'}
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+        routing_agent_tool=_routing_agent_tool,
+    )
+
+    execution = service.execute(
+        run_id='run-routing-agent-fallback',
+        session_id='session-routing-agent-fallback',
+        user_id='user-routing-agent-fallback',
+        trace_id='trace-routing-agent-fallback',
+        message='Hey can we talk through a plan first?',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    assert search_calls['count'] == 1
+    step_names = [step['name'] for step in execution['steps']]
+    assert 'execute_step.search' in step_names
+
+
+def test_orchestrator_selects_semantic_strategy_for_system_mapping_prompt() -> None:
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    strategy = service._select_tool_strategy('Look for general pieces of the system and map architecture')
+    assert strategy == 'semantic_then_grep_then_file'
+
+
+def test_orchestrator_retrieval_compose_context_contains_fuller_tool_outputs() -> None:
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    context = service._build_retrieval_compose_context(
+        result=_result_with_context(),
+        grep_samples=[],
+        research_story='1) Started iterative research run.',
+        research_next_steps='- No additional research steps required.',
+        satisfaction_clause='Return when evidence is grounded.',
+        satisfaction_met=True,
+    )
+
+    assert 'Research objective:' in context
+    assert 'Semantic queries used:' in context
+    assert 'Vector candidate matches (top 12):' in context
+    assert 'Relevancy-filtered candidates (top 12):' in context
+    assert 'Retrieved source contexts (top 8):' in context
+    assert 'Repository access note:' in context
+    assert 'Research story so far:' in context
+    assert 'Research next steps:' in context
+    assert 'Satisfaction clause:' in context
+
+
+def test_orchestrator_selects_grep_first_strategy_for_variable_import_prompt() -> None:
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_conversational_agent_tool,
+    )
+
+    strategy = service._select_tool_strategy('Find variable imports for auth environment constants')
+    assert strategy == 'grep_then_semantic_then_file'
+
+
+def test_orchestrator_loop_uses_human_readable_fallback_without_conversational_tool() -> None:
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        return {
+            'query': query,
+            'page': page,
+            'page_size': page_size,
+            'total_matches': 0,
+            'has_more': False,
+            'matches': [],
+        }
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=None,
+    )
+
+    execution = service.execute(
+        run_id='run-fallback',
+        session_id='session-fallback',
+        user_id='user-fallback',
+        trace_id='trace-fallback',
+        message='where is billing function logic?',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    final_response = str(execution['final_response'])
+    assert 'I found relevant code in the indexed repositories' in final_response
+    assert 'repo-a:src/billing.py:charge_customer' in final_response
+
+
+def test_orchestrator_compacts_context_when_window_is_small() -> None:
+    observed_context = {'value': ''}
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        raise AssertionError('grep should not run for conversational flow')
+
+    def _capturing_conversation_tool(*, message: str, context: str | None = None) -> str:
+        observed_context['value'] = context or ''
+        return f'conversation:{message}'
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_capturing_conversation_tool,
+        context_window_chars=420,
+    )
+
+    long_history = [
+        {'role': 'user', 'content': 'A' * 380},
+        {'role': 'assistant', 'content': 'B' * 380},
+        {'role': 'user', 'content': 'C' * 380},
+        {'role': 'assistant', 'content': 'D' * 380},
+        {'role': 'user', 'content': 'E' * 380},
+    ]
+
+    execution = service.execute(
+        run_id='run-compact',
+        session_id='session-compact',
+        user_id='user-compact',
+        trace_id='trace-compact',
+        message='help me understand this',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=long_history,
+        prior_tool_outcomes=[
+            {'tool': 'get_folder_structure', 'ok': True, 'result': {'path': 'src', 'total_entries': 240}},
+            {'tool': 'get_file_contents', 'ok': False, 'result': {'error': 'max_tokens_exceeded'}},
+        ],
+    )
+
+    assert execution['status'] == 'completed'
+    assert 'Recent messages (compacted):' in observed_context['value']
+    assert 'Prior tool outcomes (compacted):' in observed_context['value']
+
+
+def test_orchestrator_records_conversational_tool_events_in_steps() -> None:
+    class _ToolAwareConversationAgent:
+        def __call__(self, *, message: str, context: str | None = None) -> str:  # noqa: ARG002
+            return f'conversation:{message}'
+
+        def pop_last_tool_events(self) -> list[dict]:
+            return [
+                {
+                    'tool': 'get_folder_structure',
+                    'ok': True,
+                    'result': {'path': 'src', 'total_entries': 12},
+                }
+            ]
+
+    def _search_tool(**kwargs: object) -> ResearchPipelineResult:  # noqa: ARG001
+        return _result_with_context()
+
+    def _grep_repo_tool(
+        *,
+        query: str,
+        repos_in_scope: tuple[str, ...],
+        page: int = 1,
+        page_size: int = 10,
+        signature_max_chars: int = 120,
+    ) -> GrepRepoResult:  # noqa: ARG001
+        raise AssertionError('grep should not run for conversational flow')
+
+    service = OrchestratorLoopService(
+        search_tool=_search_tool,
+        grep_repo_tool=_grep_repo_tool,
+        conversational_agent_tool=_ToolAwareConversationAgent(),
+    )
+
+    execution = service.execute(
+        run_id='run-tool-events',
+        session_id='session-tool-events',
+        user_id='user-tool-events',
+        trace_id='trace-tool-events',
+        message='hello there',
+        repos_in_scope=('repo-a',),
+        top_k=8,
+        candidate_pool_multiplier=6,
+        relevancy_threshold=0.35,
+        relevancy_workers=4,
+        reducer_token_budget=1200,
+        reducer_max_contexts=3,
+        message_history=[],
+    )
+
+    assert execution['status'] == 'completed'
+    conversation_steps = [step for step in execution['steps'] if step.get('name') == 'execute_step.conversation']
+    assert conversation_steps
+    output = conversation_steps[-1].get('output', {})
+    assert isinstance(output, dict)
+    assert isinstance(output.get('tool_events'), list)
+    assert output['tool_events'][0]['tool'] == 'get_folder_structure'

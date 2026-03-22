@@ -110,6 +110,24 @@ class JsonFileOrchestratorStateStoreAdapter:
             run = state['runs'].get(run_id)
             return dict(run) if isinstance(run, dict) else None
 
+    def list_runs_for_session(self, *, session_id: str, limit: int = 20) -> list[dict]:
+        limit_clean = max(1, min(200, int(limit)))
+        with self._lock:
+            state = self._read_state()
+            runs = []
+            for value in state['runs'].values():
+                if not isinstance(value, dict):
+                    continue
+                if str(value.get('session_id', '')) != session_id:
+                    continue
+                runs.append(dict(value))
+
+        runs.sort(
+            key=lambda row: str(row.get('started_at') or ''),
+            reverse=True,
+        )
+        return runs[:limit_clean]
+
     def _read_state(self) -> dict:
         if not self._file_path.exists():
             return {'sessions': {}, 'runs': {}}
