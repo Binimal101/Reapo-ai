@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable, Literal
@@ -12,6 +13,10 @@ from uuid import uuid4
 from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
 from ast_indexer.application import runtime_config
 from ast_indexer.application.call_graph_linker import CallGraphLinker
+from ast_indexer.application.startup_preconditions import (
+    validate_index_or_research,
+    validate_serve_webhook,
+)
 from ast_indexer.domain.models import SymbolRecord
 from ast_indexer.main import build_persistent_index_service, build_persistent_research_pipeline
 from ast_indexer.server import run_webhook_server
@@ -512,6 +517,18 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     if args.command == 'index':
+        try:
+            validate_index_or_research(
+                args.embedding_backend,
+                args.openai_api_key,
+                args.observability_backend,
+                args.langfuse_host,
+                args.langfuse_public_key,
+                args.langfuse_secret_key,
+            )
+        except ValueError as exc:
+            print(f'ERROR: {exc}', file=sys.stderr)
+            return 2
         summary = run_index_once(
             workspace_root=args.workspace_root,
             repo=args.repo,
@@ -536,6 +553,20 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == 'serve-webhook':
         if not args.webhook_secret:
             parser.error('webhook secret is required: set --webhook-secret or AST_INDEXER_WEBHOOK_SECRET')
+        try:
+            validate_serve_webhook(
+                args.embedding_backend,
+                args.openai_api_key,
+                args.observability_backend,
+                args.langfuse_host,
+                args.langfuse_public_key,
+                args.langfuse_secret_key,
+                args.queue_backend,
+                args.redis_url,
+            )
+        except ValueError as exc:
+            print(f'ERROR: {exc}', file=sys.stderr)
+            return 2
         run_webhook_server(
             workspace_root=args.workspace_root,
             state_root=args.state_root,
@@ -563,6 +594,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.command == 'research':
+        try:
+            validate_index_or_research(
+                args.embedding_backend,
+                args.openai_api_key,
+                args.observability_backend,
+                args.langfuse_host,
+                args.langfuse_public_key,
+                args.langfuse_secret_key,
+            )
+        except ValueError as exc:
+            print(f'ERROR: {exc}', file=sys.stderr)
+            return 2
         run_trace_id = args.trace_id or f'research-{datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")}-{uuid4().hex[:8]}'
         pipeline = build_persistent_research_pipeline(
             workspace_root=args.workspace_root,

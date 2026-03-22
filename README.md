@@ -39,17 +39,29 @@ docker compose -f infra/docker/docker-compose.phase1.yml ps
 
 This stack starts postgres, redis, langfuse, backend, and frontend.
 
-Place your env file at repository root (`Reapo-ai/.env`), then run from repository root:
+From repository root you can use **`run.ps1`** (Windows) or **`run.sh`** (Git Bash / WSL / macOS / Linux): same as `docker compose ... up -d --build` for the local stack. Use `./run.sh remote` or `.\run.ps1 -Stack remote` for the remote compose file.
+
+Full stack (defaults are in the compose file; optional `.env` at repo root overrides):
+
+**Local**
 
 ```powershell
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --build
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local up -d --build
 ```
 
-Optional stop command from repository root:
+**Remote / droplet**
 
 ```powershell
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest down
+docker compose -f infra/docker/docker-compose.remote.yml --project-name reapo-remote up -d --build
 ```
+
+Stop (example — local):
+
+```powershell
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local down
+```
+
+See `infra/docker/README.md` for details.
 
 ### Validate required Phase 1 secrets and auth settings
 From repository root:

@@ -8,8 +8,8 @@ Expected layout:
 
 - personal_brand/
   - Reapo-ai/
-    - .env
-    - infra/docker/docker-compose.prodtest.yml
+    - .env (optional — compose has defaults)
+    - infra/docker/docker-compose.local.yml
 
 ## 2) Minimum required env for Langfuse startup
 
@@ -48,13 +48,13 @@ Notes:
 From repository root `Reapo-ai`:
 
 ```powershell
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --build
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local up -d --build
 ```
 
 ## 4) Verify health
 
 ```powershell
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest ps
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local ps
 curl http://localhost:3000/api/public/health
 curl http://localhost:8090/auth/github/status
 curl http://localhost:8080
@@ -84,7 +84,7 @@ LANGFUSE_SECRET_KEY=sk-lf-...
 5. Restart backend only:
 
 ```powershell
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --force-recreate backend
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local up -d --force-recreate backend
 ```
 
 ## 6) Common failures and fixes
@@ -102,12 +102,12 @@ docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --p
 
 ```powershell
 # Follow logs
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest logs -f --tail 200
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local logs -f --tail 200
 
 # Restart all
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest down
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local down
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local up -d
 
 # Destroy including volumes (fresh reset)
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest down -v
+docker compose -f infra/docker/docker-compose.local.yml --project-name reapo-local down -v
 ```

@@ -6,64 +6,35 @@ This guide is for running the same stack on a remote droplet with Docker Compose
 
 - /opt/personal_brand/
   - Reapo-ai/
-    - .env
-    - infra/docker/docker-compose.prodtest.yml
+    - .env (optional — `docker-compose.remote.yml` has defaults)
+    - infra/docker/docker-compose.remote.yml
 
-Use repo-level `.env` at `/opt/personal_brand/Reapo-ai/.env`.
+Optional repo-level `.env` at `/opt/personal_brand/Reapo-ai/.env` overrides compose defaults.
 
-## 2) Minimum required env values
+## 2) Env overrides (optional)
 
-In `/opt/personal_brand/Reapo-ai/.env` set:
+`docker-compose.remote.yml` ships with working defaults (Postgres password, NextAuth secret/salt, webhook secret). Add or edit `.env` only when you need to override (OpenAI key, GitHub App, public Langfuse URL, Langfuse API keys).
+
+Public Langfuse URL (when not using an SSH tunnel):
 
 ```env
-# Postgres
-POSTGRES_DB=langfuse
-POSTGRES_USER=langfuse
-POSTGRES_PASSWORD=replace-with-strong-password
-
-# Langfuse session/auth
 LANGFUSE_NEXTAUTH_URL=https://your-domain-or-public-url
-LANGFUSE_NEXTAUTH_SECRET=replace-with-long-random-secret
-LANGFUSE_SALT=replace-with-long-random-salt
-
-# Langfuse SDK keys (after bootstrap)
-LANGFUSE_HOST=http://langfuse:3000
-LANGFUSE_PUBLIC_KEY=
-LANGFUSE_SECRET_KEY=
-
-# Backend
-AST_INDEXER_WEBHOOK_SECRET=replace-with-strong-secret
-
-# GitHub App key path for Docker backend
-GITHUB_APP_PRIVATE_KEY_PATH=/workspace/reapo-ai.2026-03-20.private-key.pem
 ```
 
-Also ensure GitHub App credentials exist in env:
-
-```env
-GITHUB_APP_ID=...
-GITHUB_APP_CLIENT_ID=...
-GITHUB_APP_CLIENT_SECRET=...
-GITHUB_APP_WEBHOOK_SECRET=...
-```
-
-Notes:
-
-- Keep `NEXTAUTH_SECRET` and `SALT` stable after first deployment.
-- If these rotate unexpectedly, existing sessions may be invalidated.
+Backend still uses `LANGFUSE_HOST=http://langfuse:3000` inside Docker.
 
 ## 3) Start stack on droplet
 
 From `/opt/personal_brand/Reapo-ai`:
 
 ```bash
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --build
+docker compose -f infra/docker/docker-compose.remote.yml --project-name reapo-remote up -d --build
 ```
 
 ## 4) Verify from terminal
 
 ```bash
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest ps
+docker compose -f infra/docker/docker-compose.remote.yml --project-name reapo-remote ps
 curl -fsS http://localhost:3000/api/public/health
 curl -fsS http://localhost:8090/auth/github/status
 ```
@@ -96,7 +67,7 @@ LANGFUSE_SECRET_KEY=sk-lf-...
 Then recreate backend:
 
 ```bash
-docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --force-recreate backend
+docker compose -f infra/docker/docker-compose.remote.yml --project-name reapo-remote up -d --force-recreate backend
 ```
 
 ## 7) Fresh Postgres implications
@@ -113,10 +84,10 @@ If postgres volume is new/empty:
 # Backup
 mkdir -p /opt/backups
 
-docker exec -t reapo-prodtest-postgres-1 pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > /opt/backups/langfuse_$(date +%F).sql
+docker exec -t reapo-remote-postgres-1 pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" > /opt/backups/langfuse_$(date +%F).sql
 
 # Restore example (danger: overwrites db state)
-cat /opt/backups/langfuse_YYYY-MM-DD.sql | docker exec -i reapo-prodtest-postgres-1 psql -U "$POSTGRES_USER" "$POSTGRES_DB"
+cat /opt/backups/langfuse_YYYY-MM-DD.sql | docker exec -i reapo-remote-postgres-1 psql -U "$POSTGRES_USER" "$POSTGRES_DB"
 ```
 
 ## 9) Troubleshooting
