@@ -22,6 +22,57 @@ class IndexJobDispatchService:
     def enqueue_from_github_push(self, payload: dict, trace_id: str) -> IndexJob:
         return self.enqueue_from_github_push_with_context(payload=payload, trace_id=trace_id, correlation_id=None)
 
+    def enqueue_repository_full_index(
+        self,
+        *,
+        owner: str,
+        name: str,
+        trace_id: str,
+        correlation_id: str | None = None,
+        user_id: str | None = None,
+    ) -> IndexJob:
+        owner_clean = owner.strip()
+        name_clean = name.strip()
+        if not owner_clean or not name_clean:
+            raise ValueError('owner and name are required')
+
+        repo_full_name = f'{owner_clean}/{name_clean}'
+        span = self._observability.start_span(
+            name='enqueue_index_job',
+            trace_id=trace_id,
+            input_payload={
+                'event': 'project_repository_linked',
+                'repo_full_name': repo_full_name,
+                'correlation_id': correlation_id,
+            },
+            session_id=correlation_id,
+            user_id=user_id,
+        )
+
+        job = IndexJob(
+            repo=repo_full_name,
+            repo_full_name=repo_full_name,
+            changed_paths=(),
+            deleted_paths=(),
+            trace_id=trace_id,
+            max_attempts=self._max_attempts,
+            source='project_repository_linked',
+        )
+        self._queue.enqueue(job)
+
+        self._observability.end_span(
+            span,
+            output_payload={
+                'repo': job.repo,
+                'repo_full_name': job.repo_full_name,
+                'changed_files': 0,
+                'deleted_files': 0,
+                'correlation_id': correlation_id,
+                'user_id': user_id,
+            },
+        )
+        return job
+
     def enqueue_from_github_push_with_context(
         self,
         payload: dict,

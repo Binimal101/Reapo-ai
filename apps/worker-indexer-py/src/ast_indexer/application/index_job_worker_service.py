@@ -28,12 +28,18 @@ class IndexJobWorkerService:
             return IndexJobProcessOutcome(status='no_job')
 
         try:
-            metrics = self._index_service.index_repository_subset(
-                repo=job.repo,
-                trace_id=job.trace_id,
-                file_paths=list(job.changed_paths),
-                deleted_paths=list(job.deleted_paths),
-            )
+            if not job.changed_paths and not job.deleted_paths:
+                metrics = self._index_service.index_repository(
+                    repo=job.repo,
+                    trace_id=job.trace_id,
+                )
+            else:
+                metrics = self._index_service.index_repository_subset(
+                    repo=job.repo,
+                    trace_id=job.trace_id,
+                    file_paths=list(job.changed_paths),
+                    deleted_paths=list(job.deleted_paths),
+                )
             return IndexJobProcessOutcome(status='processed', job=job, metrics=metrics)
         except Exception as exc:
             if job.attempt + 1 < job.max_attempts:

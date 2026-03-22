@@ -73,6 +73,34 @@ def test_dispatch_applies_custom_max_attempts() -> None:
     assert job.max_attempts == 5
 
 
+def test_dispatch_enqueues_full_index_job_for_project_link() -> None:
+    queue = InMemoryIndexJobQueueAdapter()
+    observability = InMemoryObservabilityAdapter()
+    dispatch = IndexJobDispatchService(queue, observability, GithubPushPayloadResolver())
+
+    job = dispatch.enqueue_repository_full_index(
+        owner='acme',
+        name='checkout-service',
+        trace_id='trace-project-link-1',
+        correlation_id='project-123',
+        user_id='alice',
+    )
+
+    assert job.repo == 'acme/checkout-service'
+    assert job.repo_full_name == 'acme/checkout-service'
+    assert job.changed_paths == ()
+    assert job.deleted_paths == ()
+    assert job.source == 'project_repository_linked'
+
+    queued = queue.dequeue()
+    assert queued is not None
+    assert queued.repo == 'acme/checkout-service'
+
+    spans = observability.list_spans()
+    assert spans[-1].name == 'enqueue_index_job'
+    assert spans[-1].finished_at is not None
+
+
 def test_dispatch_enriches_span_with_session_and_user_context() -> None:
     queue = InMemoryIndexJobQueueAdapter()
     observability = InMemoryObservabilityAdapter()
@@ -142,6 +170,28 @@ class _AlwaysFailIndexService:
         raise RuntimeError('synthetic failure')
 
 
+class _CaptureFullScanIndexService:
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, str]] = []
+
+    def index_repository(self, *, repo: str, trace_id: str):  # noqa: ANN201
+        from datetime import datetime, timezone
+        from ast_indexer.domain.models import IndexRunMetrics
+
+        self.calls.append((repo, trace_id))
+        now = datetime.now(timezone.utc)
+        return IndexRunMetrics(
+            files_scanned=2,
+            symbols_indexed=3,
+            linked_edges=0,
+            embeddings_generated=0,
+            vectors_upserted=0,
+            vectors_deleted=0,
+            started_at=now,
+            finished_at=now,
+        )
+
+
 def test_worker_requeues_job_until_max_attempts_then_dead_letters() -> None:
     queue = InMemoryIndexJobQueueAdapter()
     queue.enqueue(
@@ -176,3 +226,24 @@ def test_worker_requeues_job_until_max_attempts_then_dead_letters() -> None:
     assert len(dead_letters) == 1
     assert dead_letters[0].job.trace_id == 'trace-worker-fail-1'
     assert 'synthetic failure' in dead_letters[0].reason
+
+
+def test_worker_full_indexes_when_job_has_no_paths() -> None:
+    queue = InMemoryIndexJobQueueAdapter()
+    queue.enqueue(
+        IndexJob(
+            repo='acme/checkout-service',
+            repo_full_name='acme/checkout-service',
+            changed_paths=(),
+            deleted_paths=(),
+            trace_id='trace-worker-full-1',
+        )
+    )
+    index_service = _CaptureFullScanIndexService()
+    worker = IndexJobWorkerService(queue, index_service)  # type: ignore[arg-type]
+
+    processed = worker.process_next()
+    assert processed.status == 'processed'
+    assert processed.metrics is not None
+    assert processed.metrics.files_scanned == 2
+    assert index_service.calls == [('acme/checkout-service', 'trace-worker-full-1')]

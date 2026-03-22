@@ -9,6 +9,11 @@ export default function ProjectsPage({
   onListProjectRepositories,
   onAddRepository,
   onRemoveRepository,
+  onAttachAllRepositories,
+  onReloadRepositories,
+  repositoryLoadError,
+  githubAppConfigured,
+  githubAppInstallUrl,
   loadingProjects,
   loadingRepositories,
   onOpenDashboard,
@@ -21,6 +26,8 @@ export default function ProjectsPage({
   const [selectedRepositoryNames, setSelectedRepositoryNames] = useState(() => new Set());
   const [currentLinkedRepositories, setCurrentLinkedRepositories] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [syncingAll, setSyncingAll] = useState(false);
+  const [refreshingRepositories, setRefreshingRepositories] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState("");
   const [error, setError] = useState("");
 
@@ -82,9 +89,7 @@ export default function ProjectsPage({
       const selectedList = repositories.filter((repo) => selectedRepositoryNames.has(repo.full_name));
       if (mode === "create") {
         const created = await onCreateProject(projectName.trim(), projectDescription.trim());
-        for (const repo of selectedList) {
-          await onAddRepository(created.project_id, repo);
-        }
+        await Promise.all(selectedList.map((repo) => onAddRepository(created.project_id, repo)));
         await loadProjectForEdit(created);
         return;
       }
@@ -103,11 +108,8 @@ export default function ProjectsPage({
         }
       }
 
-      for (const repo of selectedList) {
-        if (!linkedByFullName.has(repo.full_name)) {
-          await onAddRepository(editingProjectId, repo);
-        }
-      }
+      const repositoriesToAdd = selectedList.filter((repo) => !linkedByFullName.has(repo.full_name));
+      await Promise.all(repositoriesToAdd.map((repo) => onAddRepository(editingProjectId, repo)));
 
       const refreshedLinked = await onListProjectRepositories(editingProjectId);
       setCurrentLinkedRepositories(refreshedLinked);
@@ -134,6 +136,37 @@ export default function ProjectsPage({
     }
   };
 
+  const handleAttachAllRepositories = async () => {
+    if (!editingProjectId) {
+      setError("Create the project first, then attach all repositories.");
+      return;
+    }
+    setError("");
+    setSyncingAll(true);
+    try {
+      const payload = await onAttachAllRepositories(editingProjectId);
+      const linked = Array.isArray(payload?.repositories) ? payload.repositories : [];
+      setCurrentLinkedRepositories(linked);
+      setSelectedRepositoryNames(new Set(linked.map((repo) => repo.full_name)));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to attach all repositories");
+    } finally {
+      setSyncingAll(false);
+    }
+  };
+
+  const handleRefreshRepositories = async () => {
+    setError("");
+    setRefreshingRepositories(true);
+    try {
+      await onReloadRepositories();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to refresh GitHub repositories");
+    } finally {
+      setRefreshingRepositories(false);
+    }
+  };
+
   const filteredRepositoryOptions = useMemo(() => {
     const query = repositorySearch.trim().toLowerCase();
     if (!query) {
@@ -145,6 +178,9 @@ export default function ProjectsPage({
       return fullName.includes(query) || fallback.includes(query);
     });
   }, [repositories, repositorySearch]);
+
+  const hasNoRepositories = !loadingRepositories && filteredRepositoryOptions.length === 0;
+  const showInstallGuidance = hasNoRepositories || Boolean(repositoryLoadError) || !githubAppConfigured;
 
   const linkedCount = useMemo(
     () => Array.from(selectedRepositoryNames).length,
@@ -267,6 +303,16 @@ export default function ProjectsPage({
             <h2>Repository Selection</h2>
             <span className="mono">OAuth /user/repos</span>
           </div>
+          <div className="projects-header-actions">
+            <button
+              type="button"
+              className="cta secondary"
+              onClick={handleAttachAllRepositories}
+              disabled={!editingProjectId || syncingAll || saving}
+            >
+              {syncingAll ? "Attaching all..." : "Attach All Repositories"}
+            </button>
+          </div>
           <div className="repo-search-wrap">
             <input
               value={repositorySearch}
@@ -277,6 +323,32 @@ export default function ProjectsPage({
             />
           </div>
           {loadingRepositories ? <p className="mono">Loading repositories...</p> : null}
+          {showInstallGuidance ? (
+            <div className="panel repo-guidance">
+              <p className="mono">Repository sync guidance</p>
+              {!githubAppConfigured ? <p className="error-text">GitHub App is not configured on the backend.</p> : null}
+              {repositoryLoadError ? <p className="error-text">{repositoryLoadError}</p> : null}
+              <p className="mono">
+                If no repositories are listed, install the GitHub App for your account/org, choose All repositories,
+                then refresh.
+              </p>
+              <div className="projects-header-actions">
+                <button
+                  type="button"
+                  className="cta secondary"
+                  onClick={handleRefreshRepositories}
+                  disabled={refreshingRepositories || loadingRepositories}
+                >
+                  {refreshingRepositories ? "Refreshing..." : "Refresh Repositories"}
+                </button>
+                {githubAppInstallUrl ? (
+                  <a className="cta primary" href={githubAppInstallUrl} target="_blank" rel="noreferrer">
+                    Install GitHub App
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
           <div className="repo-catalog">
             {filteredRepositoryOptions.map((repo) => {
               const isSelected = selectedRepositoryNames.has(repo.full_name);

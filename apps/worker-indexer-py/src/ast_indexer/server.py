@@ -24,6 +24,11 @@ from ast_indexer.adapters.index_store.json_file_symbol_index_store_adapter impor
 from ast_indexer.adapters.access.json_file_repo_capability_store_adapter import JsonFileRepoCapabilityStoreAdapter
 from ast_indexer.adapters.queue.in_memory_index_job_queue_adapter import InMemoryIndexJobQueueAdapter
 from ast_indexer.adapters.queue.redis_index_job_queue_adapter import RedisIndexJobQueueAdapter
+from ast_indexer.adapters.repository.hybrid_repository_reader_adapter import (
+    HybridRepositoryReaderAdapter,
+    build_github_app_token_provider,
+)
+from ast_indexer.adapters.repository.local_fs_repository_reader_adapter import LocalFsRepositoryReaderAdapter
 from ast_indexer.adapters.webhooks.hmac_github_signature_verifier_adapter import HmacGithubSignatureVerifierAdapter
 from ast_indexer.adapters.webhooks.json_file_webhook_replay_guard_adapter import JsonFileWebhookReplayGuardAdapter
 from ast_indexer.application.chat_orchestrator_service import ChatOrchestratorService
@@ -108,6 +113,7 @@ class GithubWebhookServerApp:
             resolver=resolver,
             max_attempts=max_attempts,
         )
+        self._dispatch = dispatch
         verifier = HmacGithubSignatureVerifierAdapter(webhook_secret)
 
         self._http_handler = GithubWebhookHttpHandler(
@@ -115,6 +121,8 @@ class GithubWebhookServerApp:
             dispatch=dispatch,
             replay_guard=self._webhook_replay_guard,
         )
+        self._github_app_auth = github_app_auth_service or self._build_github_app_auth_service()
+        repository_reader = self._build_repository_reader(workspace_root)
         self._worker = IndexJobWorkerService(
             queue=run_queue,
             index_service=build_persistent_index_service(
@@ -132,6 +140,7 @@ class GithubWebhookServerApp:
                 langfuse_public_key=langfuse_public_key,
                 langfuse_secret_key=langfuse_secret_key,
                 observability_strict=observability_strict,
+                repository_reader=repository_reader,
             ),
         )
         self._research_pipeline = build_persistent_research_pipeline(
@@ -149,8 +158,8 @@ class GithubWebhookServerApp:
             langfuse_public_key=langfuse_public_key,
             langfuse_secret_key=langfuse_secret_key,
             observability_strict=observability_strict,
+            repository_reader=repository_reader,
         )
-        self._github_app_auth = github_app_auth_service or self._build_github_app_auth_service()
         self._writer_service = WriterPrService(github_auth=self._github_app_auth) if self._github_app_auth else None
         self._chat_orchestrator = chat_orchestrator_service or self._build_chat_orchestrator_service(state_root)
 
@@ -485,6 +494,44 @@ class GithubWebhookServerApp:
             oauth_session_service=self._oauth_session_service,
             observability=self._observability,
         )
+
+    def _build_repository_reader(self, workspace_root: Path):  # noqa: ANN201
+        local_reader = LocalFsRepositoryReaderAdapter(workspace_root)
+        token_provider = None
+        if self._github_app_auth is not None:
+            token_provider = build_github_app_token_provider(self._github_app_auth)
+
+        # Owner/name repositories are read directly from GitHub via app installation tokens.
+        # Bare repo names (legacy webhook payloads/tests) still use local workspace resolution.
+        return HybridRepositoryReaderAdapter(
+            local_reader=local_reader,
+            github_token_provider=token_provider,
+            http_json=self._http_json_request,
+        )
+
+    def _http_json_request(self, method: str, url: str, body: dict | None, headers: dict[str, str]) -> dict | list | str:
+        encoded = None if body is None else json.dumps(body).encode('utf-8')
+        request_headers = dict(headers)
+        if body is not None and 'Content-Type' not in request_headers:
+            request_headers['Content-Type'] = 'application/json'
+
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError, URLError
+
+        request = Request(url=url, data=encoded, method=method, headers=request_headers)
+        try:
+            with urlopen(request, timeout=30) as response:
+                payload = response.read()
+                content_type = response.headers.get('Content-Type', '')
+                text = payload.decode('utf-8')
+                if 'application/json' in content_type:
+                    return json.loads(text)
+                return text
+        except HTTPError as exc:
+            details = exc.read().decode('utf-8', errors='replace')
+            raise RuntimeError(f'HTTP {exc.code} for {method} {url}: {details}') from exc
+        except URLError as exc:
+            raise RuntimeError(f'Network error for {method} {url}: {exc.reason}') from exc
 
     def github_auth_status(self) -> tuple[int, dict]:
         config = GithubAppConfig.from_env()
@@ -939,10 +986,35 @@ class GithubWebhookServerApp:
         except Exception as exc:
             return (400, {'status': 'error', 'reason': str(exc)})
 
+        index_trace_id = f'project-link-{uuid4().hex}'
+        index_job = None
+        index_outcome = None
+        try:
+            index_job = self._dispatch.enqueue_repository_full_index(
+                owner=owner,
+                name=name,
+                trace_id=index_trace_id,
+                correlation_id=f'project-{project_id}',
+                user_id=user_id,
+            )
+            index_outcome = self._worker.process_next()
+        except Exception:
+            index_job = None
+            index_outcome = None
+
         code, listing = self.projects_list_repositories(user_id=user_id, project_id=project_id, require_owner=True)
+        indexing_payload = {
+            'indexing': {
+                'queued': index_job is not None,
+                'trace_id': index_trace_id,
+                'repo': index_job.repo if index_job is not None else f'{owner}/{name}',
+                'worker_outcome': index_outcome.status if index_outcome is not None else 'enqueue_failed',
+                'processed': bool(index_outcome is not None and index_outcome.status == 'processed'),
+            }
+        }
         if code != 200:
-            return (200, {'status': 'ok', 'link': link, 'repositories': []})
-        return (200, {'status': 'ok', 'link': link, 'repositories': listing.get('repositories', [])})
+            return (200, {'status': 'ok', 'link': link, 'repositories': [], **indexing_payload})
+        return (200, {'status': 'ok', 'link': link, 'repositories': listing.get('repositories', []), **indexing_payload})
 
     def projects_list_repositories(self, *, user_id: str, project_id: str, require_owner: bool = True) -> tuple[int, dict]:
         list_repos = getattr(self._oauth_token_store, 'list_project_repositories', None)
@@ -982,6 +1054,107 @@ class GithubWebhookServerApp:
                 'removed': bool(removed),
                 'repository_id': repository_id,
                 'repositories': listing.get('repositories', []),
+            },
+        )
+
+    def projects_sync_all_repositories(self, *, user_id: str, project_id: str, per_page: int = 100) -> tuple[int, dict]:
+        add_repo = getattr(self._oauth_token_store, 'add_repository_to_project', None)
+        list_repos = getattr(self._oauth_token_store, 'list_project_repositories', None)
+        if not callable(add_repo) or not callable(list_repos):
+            return (501, {'status': 'error', 'reason': 'projects_not_supported_for_current_token_store'})
+
+        project_code, project_payload = self.projects_get(user_id=user_id, project_id=project_id, require_owner=True)
+        if project_code != 200:
+            return (project_code, project_payload)
+
+        repos_code, repos_payload = self.github_user_repositories(user_id=user_id, per_page=per_page)
+        if repos_code != 200:
+            return (repos_code, repos_payload)
+
+        rows_raw = repos_payload.get('repositories') if isinstance(repos_payload, dict) else None
+        rows = rows_raw if isinstance(rows_raw, list) else []
+        existing_rows_raw = list_repos(project_id=project_id)
+        existing_rows = existing_rows_raw if isinstance(existing_rows_raw, list) else []
+        existing_full_names = {
+            str(row.get('full_name', '')).lower()
+            for row in existing_rows
+            if isinstance(row, dict) and isinstance(row.get('full_name'), str)
+        }
+
+        linked = 0
+        skipped_existing = 0
+        queued_index_jobs = 0
+        failed: list[dict] = []
+
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            owner = row.get('owner') if isinstance(row.get('owner'), str) else ''
+            name = row.get('name') if isinstance(row.get('name'), str) else ''
+            if not owner or not name:
+                continue
+            full_name = f'{owner}/{name}'.lower()
+            if full_name in existing_full_names:
+                skipped_existing += 1
+                continue
+
+            github_repo_id = row.get('id') if isinstance(row.get('id'), int) else None
+            visibility = row.get('visibility') if isinstance(row.get('visibility'), str) else None
+            try:
+                add_repo(
+                    project_id=project_id,
+                    owner=owner,
+                    name=name,
+                    added_by_user_id=user_id,
+                    github_repo_id=github_repo_id,
+                    visibility=visibility,
+                )
+                linked += 1
+                existing_full_names.add(full_name)
+                try:
+                    self._dispatch.enqueue_repository_full_index(
+                        owner=owner,
+                        name=name,
+                        trace_id=f'project-sync-{uuid4().hex}',
+                        correlation_id=f'project-sync-{project_id}',
+                        user_id=user_id,
+                    )
+                    queued_index_jobs += 1
+                except Exception:
+                    # Linking should remain successful even when queueing fails.
+                    pass
+            except Exception as exc:
+                failed.append(
+                    {
+                        'full_name': f'{owner}/{name}',
+                        'reason': str(exc),
+                    }
+                )
+
+        listing_code, listing_payload = self.projects_list_repositories(
+            user_id=user_id,
+            project_id=project_id,
+            require_owner=True,
+        )
+        repositories = (
+            listing_payload.get('repositories', [])
+            if listing_code == 200 and isinstance(listing_payload, dict)
+            else []
+        )
+        return (
+            200,
+            {
+                'status': 'ok',
+                'project_id': project_id,
+                'summary': {
+                    'discovered': len(rows),
+                    'linked': linked,
+                    'skipped_existing': skipped_existing,
+                    'failed': len(failed),
+                    'queued_index_jobs': queued_index_jobs,
+                },
+                'failed': failed,
+                'repositories': repositories,
             },
         )
 
@@ -1384,6 +1557,32 @@ def _make_handler(app: GithubWebhookServerApp) -> type[BaseHTTPRequestHandler]:
                     name=name,
                     github_repo_id=github_repo_id,
                     visibility=visibility,
+                )
+                self._send_json(code, payload)
+                return
+
+            if path.startswith('/projects/') and path.endswith('/repositories/sync-all'):
+                user_id = self._require_authenticated_user()
+                if user_id is None:
+                    return
+                parts = [part for part in path.split('/') if part]
+                if len(parts) != 4 or parts[2] != 'repositories' or parts[3] != 'sync-all':
+                    self._send_json(404, {'status': 'error', 'reason': 'not_found'})
+                    return
+                project_id = parts[1]
+                content_length = int(self.headers.get('Content-Length', '0'))
+                raw_body = self.rfile.read(content_length)
+                try:
+                    body = json.loads(raw_body.decode('utf-8')) if raw_body else {}
+                except JSONDecodeError:
+                    self._send_json(400, {'status': 'error', 'reason': 'invalid_json'})
+                    return
+                per_page_raw = body.get('per_page') if isinstance(body, dict) else None
+                per_page = int(per_page_raw) if isinstance(per_page_raw, int) else 100
+                code, payload = app.projects_sync_all_repositories(
+                    user_id=user_id,
+                    project_id=project_id,
+                    per_page=per_page,
                 )
                 self._send_json(code, payload)
                 return

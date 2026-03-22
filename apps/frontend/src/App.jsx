@@ -10,12 +10,15 @@ import {
   clearSessionToken,
   createProject,
   deleteProject,
+  getGithubAuthStatus,
   getStoredSessionToken,
+  githubAppInstallUrlFromEnv,
   listGithubUserRepositories,
   listProjectRepositories,
   listUserProjects,
   removeRepositoryFromProject,
   startOAuthFlow,
+  syncAllRepositoriesToProject,
   updateProject,
   validateSessionToken,
 } from "./lib/authApi.js";
@@ -60,6 +63,9 @@ export default function App() {
   const [githubRepositories, setGithubRepositories] = useState([]);
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingRepositories, setLoadingRepositories] = useState(false);
+  const [repositoryLoadError, setRepositoryLoadError] = useState("");
+  const [githubAppConfigured, setGithubAppConfigured] = useState(true);
+  const githubAppInstallUrl = githubAppInstallUrlFromEnv();
 
   const navigate = useCallback((path) => {
     window.history.pushState({}, "", path);
@@ -139,10 +145,50 @@ export default function App() {
       .then((rows) => setProjects(rows))
       .finally(() => setLoadingProjects(false));
     listGithubUserRepositories(sessionToken)
-      .then((rows) => setGithubRepositories(rows))
+      .then((rows) => {
+        setGithubRepositories(rows);
+        setRepositoryLoadError("");
+      })
+      .catch((err) => {
+        setGithubRepositories([]);
+        setRepositoryLoadError(err instanceof Error ? err.message : "Unable to load GitHub repositories");
+      })
       .finally(() => setLoadingRepositories(false));
+
+    getGithubAuthStatus()
+      .then((status) => {
+        const configured =
+          typeof status?.configured === "boolean"
+            ? status.configured
+            : status?.status === "configured";
+        setGithubAppConfigured(Boolean(configured));
+      })
+      .catch(() => {
+        setGithubAppConfigured(false);
+      });
   }, [sessionToken, hasSession]);
 
+  const refreshGithubRepositories = useCallback(async () => {
+    if (!sessionToken) {
+      throw new Error("Missing session token");
+    }
+    setLoadingRepositories(true);
+    try {
+      const rows = await listGithubUserRepositories(sessionToken);
+      setGithubRepositories(rows);
+      setRepositoryLoadError("");
+      return rows;
+    } catch (err) {
+      setGithubRepositories([]);
+      setRepositoryLoadError(err instanceof Error ? err.message : "Unable to load GitHub repositories");
+      throw err;
+    } finally {
+      setLoadingRepositories(false);
+    }
+  }, [sessionToken]);
+
+       getGithubAuthStatus,
+       githubAppInstallUrlFromEnv,
   useEffect(() => {
     if (route !== "project" || !hasSession) {
       return;
@@ -237,6 +283,14 @@ export default function App() {
             if (!sessionToken) throw new Error("Missing session token");
             return removeRepositoryFromProject(sessionToken, projectId, repositoryId);
           }}
+          onAttachAllRepositories={async (projectId) => {
+            if (!sessionToken) throw new Error("Missing session token");
+            return syncAllRepositoriesToProject(sessionToken, projectId);
+          }}
+          onReloadRepositories={refreshGithubRepositories}
+          repositoryLoadError={repositoryLoadError}
+          githubAppConfigured={githubAppConfigured}
+          githubAppInstallUrl={githubAppInstallUrl}
         />
       );
     }

@@ -191,6 +191,29 @@ Response includes `session_token` (Bearer token) and `user` payload.
 - `GET /chat/runs/<run_id>`
 - Both require Bearer token.
 
+### Project repository bulk sync endpoint
+
+Attach all repositories visible to the authenticated GitHub OAuth user into a project (owner only), and enqueue full-index jobs for newly linked repositories:
+
+- `POST /projects/<project_id>/repositories/sync-all`
+- Required header: `Authorization: Bearer <session_token>`
+- Optional body:
+
+```json
+{
+	"per_page": 100
+}
+```
+
+Response includes:
+
+- `summary.discovered`
+- `summary.linked`
+- `summary.skipped_existing`
+- `summary.failed`
+- `summary.queued_index_jobs`
+- `repositories` (current project repository list)
+
 ### Writer endpoint for frontend (Phase 8)
 
 Create/reuse branch, apply file changes, and open (or reuse) a pull request:

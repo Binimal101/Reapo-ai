@@ -153,3 +153,23 @@ export async function removeRepositoryFromProject(token, projectId, repositoryId
     withBearer(token, { method: "DELETE" })
   );
 }
+
+export async function syncAllRepositoriesToProject(token, projectId, perPage = 100) {
+  const data = await apiFetch(
+    `/projects/${encodeURIComponent(projectId)}/repositories/sync-all`,
+    withBearer(token, {
+      method: "POST",
+      body: JSON.stringify({ per_page: perPage }),
+    })
+  );
+  return data;
+}
+
+export async function getGithubAuthStatus() {
+  return apiFetch("/auth/github/status", { method: "GET" });
+}
+
+export function githubAppInstallUrlFromEnv() {
+  const url = import.meta.env.VITE_GITHUB_APP_INSTALL_URL;
+  return typeof url === "string" && url.trim() ? url.trim() : "";
+}

@@ -24,6 +24,7 @@ from ast_indexer.application.research_pipeline import QueryProdderPort, Research
 from ast_indexer.parsing.python_ast_symbol_extractor import PythonAstSymbolExtractor
 from ast_indexer.ports.embedding_generator import EmbeddingGeneratorPort
 from ast_indexer.ports.observability import ObservabilityPort
+from ast_indexer.ports.repository_reader import RepositoryReaderPort
 
 
 class DeterministicReasoningAgent(ReasoningAgentPort):
@@ -142,6 +143,7 @@ def build_persistent_index_service(
     langfuse_public_key: str | None = None,
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
+    repository_reader: RepositoryReaderPort | None = None,
 ) -> IndexPythonRepositoryService:
     observability = build_persistent_observability_adapter(
         state_root=state_root,
@@ -151,7 +153,7 @@ def build_persistent_index_service(
         langfuse_secret_key=langfuse_secret_key,
         strict=observability_strict,
     )
-    reader = LocalFsRepositoryReaderAdapter(workspace_root)
+    reader = repository_reader or LocalFsRepositoryReaderAdapter(workspace_root)
     index_store = JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json')
     vector_store = JsonFileVectorStoreAdapter(state_root / 'index' / 'vectors.json')
     embedding_generator = _build_embedding_generator(
@@ -190,6 +192,7 @@ def build_persistent_research_pipeline(
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
     research_model: str | None = None,
+    repository_reader: RepositoryReaderPort | None = None,
 ) -> ResearchPipeline:
     observability = build_persistent_observability_adapter(
         state_root=state_root,
@@ -199,7 +202,7 @@ def build_persistent_research_pipeline(
         langfuse_secret_key=langfuse_secret_key,
         strict=observability_strict,
     )
-    reader = LocalFsRepositoryReaderAdapter(workspace_root)
+    reader = repository_reader or LocalFsRepositoryReaderAdapter(workspace_root)
     index_store = JsonFileSymbolIndexStoreAdapter(state_root / 'index' / 'symbols.json')
     vector_store = JsonFileVectorStoreAdapter(state_root / 'index' / 'vectors.json')
     query_embedding_generator = _build_embedding_generator(

@@ -422,3 +422,95 @@ def test_server_app_writer_open_pr_handles_permission_error(tmp_path: Path) -> N
 
     assert code == 403
     assert payload['status'] == 'error'
+
+
+def test_projects_add_repository_triggers_immediate_indexing(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    repo_root = workspace_root / 'acme' / 'checkout-service' / 'src'
+    repo_root.mkdir(parents=True)
+    (repo_root / 'orders.py').write_text('def process(order_id):\n    return order_id\n', encoding='utf-8')
+
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    created_code, created_payload = app.projects_create(
+        user_id='alice',
+        name='Acme Project',
+        description='seeded project',
+    )
+    assert created_code == 201
+    project_id = str(created_payload['project']['project_id'])
+
+    add_code, add_payload = app.projects_add_repository(
+        user_id='alice',
+        project_id=project_id,
+        owner='acme',
+        name='checkout-service',
+        github_repo_id=1234,
+        visibility='private',
+    )
+
+    assert add_code == 200
+    assert add_payload['status'] == 'ok'
+    assert add_payload['indexing']['queued'] is True
+    assert add_payload['indexing']['worker_outcome'] in {'processed', 'retried', 'dead_lettered'}
+
+
+def test_projects_sync_all_repositories_links_missing_and_queues_jobs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    workspace_root = tmp_path / 'workspace'
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    created_code, created_payload = app.projects_create(
+        user_id='alice',
+        name='Acme Fleet',
+        description='all repos',
+    )
+    assert created_code == 201
+    project_id = str(created_payload['project']['project_id'])
+
+    add_code, _ = app.projects_add_repository(
+        user_id='alice',
+        project_id=project_id,
+        owner='acme',
+        name='existing-repo',
+        github_repo_id=11,
+        visibility='private',
+    )
+    assert add_code == 200
+
+    monkeypatch.setattr(
+        app,
+        'github_user_repositories',
+        lambda *, user_id, per_page=100: (  # noqa: ARG005
+            200,
+            {
+                'status': 'ok',
+                'repositories': [
+                    {'id': 11, 'owner': 'acme', 'name': 'existing-repo', 'full_name': 'acme/existing-repo', 'visibility': 'private'},
+                    {'id': 12, 'owner': 'acme', 'name': 'new-repo-1', 'full_name': 'acme/new-repo-1', 'visibility': 'private'},
+                    {'id': 13, 'owner': 'acme', 'name': 'new-repo-2', 'full_name': 'acme/new-repo-2', 'visibility': 'public'},
+                ],
+            },
+        ),
+    )
+
+    sync_code, sync_payload = app.projects_sync_all_repositories(
+        user_id='alice',
+        project_id=project_id,
+    )
+
+    assert sync_code == 200
+    assert sync_payload['status'] == 'ok'
+    assert sync_payload['summary']['discovered'] == 3
+    assert sync_payload['summary']['linked'] == 2
+    assert sync_payload['summary']['skipped_existing'] == 1
+    assert sync_payload['summary']['failed'] == 0
+    assert sync_payload['summary']['queued_index_jobs'] == 2
+    assert len(sync_payload['repositories']) == 3
