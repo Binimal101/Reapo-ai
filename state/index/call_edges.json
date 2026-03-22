@@ -1,0 +1,2729 @@
+[
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "caller_symbol": "JsonFileRepoCapabilityStoreAdapter.__init__",
+    "callee": "JsonFileRepoCapabilityStoreAdapter._load",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "resolved_symbol": "JsonFileRepoCapabilityStoreAdapter._load",
+    "resolved_canonical": "JsonFileRepoCapabilityStoreAdapter._load"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "caller_symbol": "JsonFileRepoCapabilityStoreAdapter.upsert",
+    "callee": "JsonFileRepoCapabilityStoreAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/access/json_file_repo_capability_store_adapter.py",
+    "resolved_symbol": "JsonFileRepoCapabilityStoreAdapter._persist",
+    "resolved_canonical": "JsonFileRepoCapabilityStoreAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/embedding/stub_embedding_adapter.py",
+    "caller_symbol": "StubEmbeddingAdapter.embed_batch",
+    "callee": "StubEmbeddingAdapter.embed",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/embedding/stub_embedding_adapter.py",
+    "resolved_symbol": "StubEmbeddingAdapter.embed",
+    "resolved_canonical": "StubEmbeddingAdapter.embed"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.__init__",
+    "callee": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._load_existing",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._load_existing"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.upsert_symbols",
+    "callee": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "caller_symbol": "JsonFileSymbolIndexStoreAdapter.delete_symbols_for_paths",
+    "callee": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/index_store/json_file_symbol_index_store_adapter.py",
+    "resolved_symbol": "JsonFileSymbolIndexStoreAdapter._persist",
+    "resolved_canonical": "JsonFileSymbolIndexStoreAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "caller_symbol": "EncryptedFileOAuthTokenStoreAdapter.save",
+    "callee": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "resolved_symbol": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_canonical": "EncryptedFileOAuthTokenStoreAdapter._read_records"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "caller_symbol": "EncryptedFileOAuthTokenStoreAdapter.save",
+    "callee": "EncryptedFileOAuthTokenStoreAdapter._write_records",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "resolved_symbol": "EncryptedFileOAuthTokenStoreAdapter._write_records",
+    "resolved_canonical": "EncryptedFileOAuthTokenStoreAdapter._write_records"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "caller_symbol": "EncryptedFileOAuthTokenStoreAdapter.get",
+    "callee": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "resolved_symbol": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_canonical": "EncryptedFileOAuthTokenStoreAdapter._read_records"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "caller_symbol": "EncryptedFileOAuthTokenStoreAdapter.list_user_ids",
+    "callee": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/encrypted_file_oauth_token_store_adapter.py",
+    "resolved_symbol": "EncryptedFileOAuthTokenStoreAdapter._read_records",
+    "resolved_canonical": "EncryptedFileOAuthTokenStoreAdapter._read_records"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.__init__",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._init_db",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._init_db",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._init_db"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.save",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.save",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.save",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_user"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.get",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.list_user_ids",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.create_project",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.create_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.create_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_user"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.update_project",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.update_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.delete_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_project_member",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_project_member",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_project_member",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_user"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.record_github_installation_for_user",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.record_github_installation_for_user",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.record_github_installation_for_user",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_user"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.record_github_installation_for_user",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_github_account",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_github_account",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_github_account"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_repository_to_project",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_repository_to_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.add_repository_to_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._ensure_user"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.list_user_projects",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.list_project_repositories",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.remove_repository_from_project",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter.list_user_accessible_repositories",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter._init_db",
+    "callee": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "SqliteMultiTenantOAuthStoreAdapter._connect",
+    "resolved_canonical": "SqliteMultiTenantOAuthStoreAdapter._connect"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_user",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "caller_symbol": "SqliteMultiTenantOAuthStoreAdapter._ensure_github_account",
+    "callee": "_utc_now_iso",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/oauth/sqlite_multitenant_oauth_store_adapter.py",
+    "resolved_symbol": "_utc_now_iso",
+    "resolved_canonical": "_utc_now_iso"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "_normalize_trace_id",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "_normalize_trace_id",
+    "resolved_canonical": "_normalize_trace_id"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "_extract_live_observation_id",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "_extract_live_observation_id",
+    "resolved_canonical": "_extract_live_observation_id"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.start_span",
+    "callee": "LangfuseObservabilityAdapter._record_error",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "LangfuseObservabilityAdapter._record_error",
+    "resolved_canonical": "LangfuseObservabilityAdapter._record_error"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.end_span",
+    "callee": "LangfuseObservabilityAdapter._record_error",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "LangfuseObservabilityAdapter._record_error",
+    "resolved_canonical": "LangfuseObservabilityAdapter._record_error"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "caller_symbol": "LangfuseObservabilityAdapter.check_health",
+    "callee": "LangfuseObservabilityAdapter._record_error",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/observability/langfuse_observability_adapter.py",
+    "resolved_symbol": "LangfuseObservabilityAdapter._record_error",
+    "resolved_canonical": "LangfuseObservabilityAdapter._record_error"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.create_session",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.create_session",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._write_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.get_session",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.append_message",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.append_message",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._write_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.create_run",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.create_run",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._write_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.update_run",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.update_run",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._write_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._write_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "caller_symbol": "JsonFileOrchestratorStateStoreAdapter.get_run",
+    "callee": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/orchestrator/json_file_orchestrator_state_store_adapter.py",
+    "resolved_symbol": "JsonFileOrchestratorStateStoreAdapter._read_state",
+    "resolved_canonical": "JsonFileOrchestratorStateStoreAdapter._read_state"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "caller_symbol": "GithubApiRepositoryReaderAdapter.list_python_files",
+    "callee": "GithubApiRepositoryReaderAdapter._split_repo",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "resolved_symbol": "GithubApiRepositoryReaderAdapter._split_repo",
+    "resolved_canonical": "GithubApiRepositoryReaderAdapter._split_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "caller_symbol": "GithubApiRepositoryReaderAdapter.list_python_files",
+    "callee": "GithubApiRepositoryReaderAdapter._headers",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "resolved_symbol": "GithubApiRepositoryReaderAdapter._headers",
+    "resolved_canonical": "GithubApiRepositoryReaderAdapter._headers"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "caller_symbol": "GithubApiRepositoryReaderAdapter.read_python_file",
+    "callee": "GithubApiRepositoryReaderAdapter._split_repo",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "resolved_symbol": "GithubApiRepositoryReaderAdapter._split_repo",
+    "resolved_canonical": "GithubApiRepositoryReaderAdapter._split_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "caller_symbol": "GithubApiRepositoryReaderAdapter.read_python_file",
+    "callee": "GithubApiRepositoryReaderAdapter._headers",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/github_api_repository_reader_adapter.py",
+    "resolved_symbol": "GithubApiRepositoryReaderAdapter._headers",
+    "resolved_canonical": "GithubApiRepositoryReaderAdapter._headers"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "caller_symbol": "LocalFsRepositoryReaderAdapter.list_python_files",
+    "callee": "LocalFsRepositoryReaderAdapter._load_indexignore_patterns",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "resolved_symbol": "LocalFsRepositoryReaderAdapter._load_indexignore_patterns",
+    "resolved_canonical": "LocalFsRepositoryReaderAdapter._load_indexignore_patterns"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "caller_symbol": "LocalFsRepositoryReaderAdapter.list_python_files",
+    "callee": "LocalFsRepositoryReaderAdapter._build_ignore_matcher",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/repository/local_fs_repository_reader_adapter.py",
+    "resolved_symbol": "LocalFsRepositoryReaderAdapter._build_ignore_matcher",
+    "resolved_canonical": "LocalFsRepositoryReaderAdapter._build_ignore_matcher"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "caller_symbol": "JsonFileVectorStoreAdapter.__init__",
+    "callee": "JsonFileVectorStoreAdapter._load_existing",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "resolved_symbol": "JsonFileVectorStoreAdapter._load_existing",
+    "resolved_canonical": "JsonFileVectorStoreAdapter._load_existing"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "caller_symbol": "JsonFileVectorStoreAdapter.upsert_vectors",
+    "callee": "JsonFileVectorStoreAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "resolved_symbol": "JsonFileVectorStoreAdapter._persist",
+    "resolved_canonical": "JsonFileVectorStoreAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "caller_symbol": "JsonFileVectorStoreAdapter.delete_vectors_for_paths",
+    "callee": "JsonFileVectorStoreAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/vector_store/json_file_vector_store_adapter.py",
+    "resolved_symbol": "JsonFileVectorStoreAdapter._persist",
+    "resolved_canonical": "JsonFileVectorStoreAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "caller_symbol": "JsonFileWebhookReplayGuardAdapter.__init__",
+    "callee": "JsonFileWebhookReplayGuardAdapter._load",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "resolved_symbol": "JsonFileWebhookReplayGuardAdapter._load",
+    "resolved_canonical": "JsonFileWebhookReplayGuardAdapter._load"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "caller_symbol": "JsonFileWebhookReplayGuardAdapter.seen_before_then_mark",
+    "callee": "JsonFileWebhookReplayGuardAdapter._prune",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "resolved_symbol": "JsonFileWebhookReplayGuardAdapter._prune",
+    "resolved_canonical": "JsonFileWebhookReplayGuardAdapter._prune"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "caller_symbol": "JsonFileWebhookReplayGuardAdapter.seen_before_then_mark",
+    "callee": "JsonFileWebhookReplayGuardAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "resolved_symbol": "JsonFileWebhookReplayGuardAdapter._persist",
+    "resolved_canonical": "JsonFileWebhookReplayGuardAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "caller_symbol": "JsonFileWebhookReplayGuardAdapter._prune",
+    "callee": "JsonFileWebhookReplayGuardAdapter._persist",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/adapters/webhooks/json_file_webhook_replay_guard_adapter.py",
+    "resolved_symbol": "JsonFileWebhookReplayGuardAdapter._persist",
+    "resolved_canonical": "JsonFileWebhookReplayGuardAdapter._persist"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link",
+    "callee": "CallGraphLinker.link_report",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker.link_report",
+    "resolved_canonical": "CallGraphLinker.link_report"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinkReport",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinkReport",
+    "resolved_canonical": "CallGraphLinkReport"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._canonical_names",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._canonical_names",
+    "resolved_canonical": "CallGraphLinker._canonical_names"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._module_name",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._module_name",
+    "resolved_canonical": "CallGraphLinker._module_name"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker.link_report",
+    "callee": "CallGraphLinker._classify_unresolved",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._classify_unresolved",
+    "resolved_canonical": "CallGraphLinker._classify_unresolved"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "caller_symbol": "CallGraphLinker._canonical_names",
+    "callee": "CallGraphLinker._module_name",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/call_graph_linker.py",
+    "resolved_symbol": "CallGraphLinker._module_name",
+    "resolved_canonical": "CallGraphLinker._module_name"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.is_configured",
+    "callee": "GithubAppAuthService.missing_fields",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService.missing_fields",
+    "resolved_canonical": "GithubAppAuthService.missing_fields"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.exchange_oauth_code",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.refresh_oauth_token",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.fetch_user_with_retry",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.fetch_user_with_retry",
+    "callee": "GithubAppAuthService.refresh_oauth_token",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService.refresh_oauth_token",
+    "resolved_canonical": "GithubAppAuthService.refresh_oauth_token"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.list_user_repositories",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.create_installation_access_token",
+    "callee": "GithubAppAuthService._create_app_jwt",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._create_app_jwt",
+    "resolved_canonical": "GithubAppAuthService._create_app_jwt"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.create_installation_access_token",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.resolve_installation_id_for_repo",
+    "callee": "GithubAppAuthService._create_app_jwt",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._create_app_jwt",
+    "resolved_canonical": "GithubAppAuthService._create_app_jwt"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.resolve_installation_id_for_repo",
+    "callee": "GithubAppAuthService._http_json_dict",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService._http_json_dict",
+    "resolved_canonical": "GithubAppAuthService._http_json_dict"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.ensure_repository_webhook",
+    "callee": "GithubAppAuthService.resolve_installation_id_for_repo",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService.resolve_installation_id_for_repo",
+    "resolved_canonical": "GithubAppAuthService.resolve_installation_id_for_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "caller_symbol": "GithubAppAuthService.ensure_repository_webhook",
+    "callee": "GithubAppAuthService.create_installation_access_token",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_app_auth_service.py",
+    "resolved_symbol": "GithubAppAuthService.create_installation_access_token",
+    "resolved_canonical": "GithubAppAuthService.create_installation_access_token"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_push_payload_resolver.py",
+    "caller_symbol": "GithubPushPayloadResolver.resolve",
+    "callee": "PushDelta",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_push_payload_resolver.py",
+    "resolved_symbol": "PushDelta",
+    "resolved_canonical": "PushDelta"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/github_webhook_http_handler.py",
+    "caller_symbol": "GithubWebhookHttpHandler.handle",
+    "callee": "WebhookHttpResponse",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/github_webhook_http_handler.py",
+    "resolved_symbol": "WebhookHttpResponse",
+    "resolved_canonical": "WebhookHttpResponse"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_dispatch_service.py",
+    "caller_symbol": "IndexJobDispatchService.enqueue_from_github_push",
+    "callee": "IndexJobDispatchService.enqueue_from_github_push_with_context",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_dispatch_service.py",
+    "resolved_symbol": "IndexJobDispatchService.enqueue_from_github_push_with_context",
+    "resolved_canonical": "IndexJobDispatchService.enqueue_from_github_push_with_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_dispatch_service.py",
+    "caller_symbol": "IndexJobDispatchService.enqueue_from_github_push_with_context",
+    "callee": "IndexJobDispatchService._resolve_user_id",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_dispatch_service.py",
+    "resolved_symbol": "IndexJobDispatchService._resolve_user_id",
+    "resolved_canonical": "IndexJobDispatchService._resolve_user_id"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_worker_service.py",
+    "caller_symbol": "IndexJobWorkerService.process_next",
+    "callee": "IndexJobProcessOutcome",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/index_job_worker_service.py",
+    "resolved_symbol": "IndexJobProcessOutcome",
+    "resolved_canonical": "IndexJobProcessOutcome"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/index_python_repository_service.py",
+    "caller_symbol": "IndexPythonRepositoryService.index_repository",
+    "callee": "IndexPythonRepositoryService.index_repository_subset",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/index_python_repository_service.py",
+    "resolved_symbol": "IndexPythonRepositoryService.index_repository_subset",
+    "resolved_canonical": "IndexPythonRepositoryService.index_repository_subset"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/index_python_repository_service.py",
+    "caller_symbol": "IndexPythonRepositoryService.index_repository_subset",
+    "callee": "IndexPythonRepositoryService._compute_tree_sha",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/index_python_repository_service.py",
+    "resolved_symbol": "IndexPythonRepositoryService._compute_tree_sha",
+    "resolved_canonical": "IndexPythonRepositoryService._compute_tree_sha"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/oauth_session_service.py",
+    "caller_symbol": "OAuthSessionService.get_valid_token_with_refresh",
+    "callee": "OAuthSessionService.save_token",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/oauth_session_service.py",
+    "resolved_symbol": "OAuthSessionService.save_token",
+    "resolved_canonical": "OAuthSessionService.save_token"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService.__init__",
+    "callee": "OrchestratorLoopService._build_graph",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._build_graph",
+    "resolved_canonical": "OrchestratorLoopService._build_graph"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._plan_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._plan_node",
+    "callee": "OrchestratorLoopService._route_intent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._route_intent",
+    "resolved_canonical": "OrchestratorLoopService._route_intent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._plan_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._memory_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._memory_node",
+    "callee": "OrchestratorLoopService._build_cag_memory_context",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._build_cag_memory_context",
+    "resolved_canonical": "OrchestratorLoopService._build_cag_memory_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._memory_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._route_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._route_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._conversational_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._conversational_node",
+    "callee": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_canonical": "OrchestratorLoopService._compose_conversational_response"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._conversational_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._coding_node",
+    "callee": "OrchestratorLoopService._needs_research",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._needs_research",
+    "resolved_canonical": "OrchestratorLoopService._needs_research"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._coding_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._coding_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_node",
+    "callee": "OrchestratorLoopService._record_step_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_start",
+    "resolved_canonical": "OrchestratorLoopService._record_step_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_node",
+    "callee": "OrchestratorLoopService._record_step_success",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._record_step_success",
+    "resolved_canonical": "OrchestratorLoopService._record_step_success"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_node",
+    "callee": "OrchestratorLoopService._is_conversational_message",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._is_conversational_message",
+    "resolved_canonical": "OrchestratorLoopService._is_conversational_message"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_node",
+    "callee": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_canonical": "OrchestratorLoopService._compose_conversational_response"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_node",
+    "callee": "OrchestratorLoopService._compose_response",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._compose_response",
+    "resolved_canonical": "OrchestratorLoopService._compose_response"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._record_step_success",
+    "callee": "OrchestratorLoopService._find_last_step",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._find_last_step",
+    "resolved_canonical": "OrchestratorLoopService._find_last_step"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._compose_response",
+    "callee": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._compose_conversational_response",
+    "resolved_canonical": "OrchestratorLoopService._compose_conversational_response"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._route_intent",
+    "callee": "OrchestratorLoopService._is_conversational_message",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._is_conversational_message",
+    "resolved_canonical": "OrchestratorLoopService._is_conversational_message"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "caller_symbol": "OrchestratorLoopService._is_conversational_message",
+    "callee": "OrchestratorLoopService._needs_research",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/orchestrator_loop_service.py",
+    "resolved_symbol": "OrchestratorLoopService._needs_research",
+    "resolved_canonical": "OrchestratorLoopService._needs_research"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.__init__",
+    "callee": "ResearchPipeline._build_graph",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._build_graph",
+    "resolved_canonical": "ResearchPipeline._build_graph"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "ResearchPipelineResult",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipelineResult",
+    "resolved_canonical": "ResearchPipelineResult"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "ResearchObjective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchObjective",
+    "resolved_canonical": "ResearchObjective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline.run",
+    "callee": "_serialize_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reasoning_node",
+    "callee": "_deterministic_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_deterministic_objective",
+    "resolved_canonical": "_deterministic_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reasoning_node",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reasoning_node",
+    "callee": "_serialize_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._prodder_node",
+    "callee": "ResearchPipeline._build_queries_with_escalation",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._build_queries_with_escalation",
+    "resolved_canonical": "ResearchPipeline._build_queries_with_escalation"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._prodder_node",
+    "callee": "_serialize_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._prodder_node",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_queries_with_escalation",
+    "callee": "_deterministic_queries",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_deterministic_queries",
+    "resolved_canonical": "_deterministic_queries"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_queries_with_escalation",
+    "callee": "ResearchPipeline._should_escalate_query_generation",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._should_escalate_query_generation",
+    "resolved_canonical": "ResearchPipeline._should_escalate_query_generation"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._should_escalate_query_generation",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._vector_search_node",
+    "callee": "ResearchPipeline._rank_candidates",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._rank_candidates",
+    "resolved_canonical": "ResearchPipeline._rank_candidates"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._vector_search_node",
+    "callee": "_serialize_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._vector_search_node",
+    "callee": "_serialize_candidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_candidate",
+    "resolved_canonical": "_serialize_candidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._relevancy_node",
+    "callee": "ResearchPipeline._score_candidates_with_llm_batch",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._score_candidates_with_llm_batch",
+    "resolved_canonical": "ResearchPipeline._score_candidates_with_llm_batch"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._relevancy_node",
+    "callee": "ResearchPipeline._score_candidates_parallel",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._score_candidates_parallel",
+    "resolved_canonical": "ResearchPipeline._score_candidates_parallel"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._relevancy_node",
+    "callee": "_serialize_objective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_objective",
+    "resolved_canonical": "_serialize_objective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._relevancy_node",
+    "callee": "_serialize_candidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_candidate",
+    "resolved_canonical": "_serialize_candidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._relevancy_node",
+    "callee": "_serialize_relevancy_candidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_relevancy_candidate",
+    "resolved_canonical": "_serialize_relevancy_candidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._score_candidates_with_llm_batch",
+    "callee": "RelevancyCandidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "RelevancyCandidate",
+    "resolved_canonical": "RelevancyCandidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._retrieval_node",
+    "callee": "ResearchPipeline._enrich_candidates",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._enrich_candidates",
+    "resolved_canonical": "ResearchPipeline._enrich_candidates"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._retrieval_node",
+    "callee": "ResearchCandidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchCandidate",
+    "resolved_canonical": "ResearchCandidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._retrieval_node",
+    "callee": "_serialize_candidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_candidate",
+    "resolved_canonical": "_serialize_candidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reducer_node",
+    "callee": "ResearchPipeline._reduce_context",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._reduce_context",
+    "resolved_canonical": "ResearchPipeline._reduce_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reducer_node",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reducer_node",
+    "callee": "_safe_ratio",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_safe_ratio",
+    "resolved_canonical": "_safe_ratio"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reducer_node",
+    "callee": "_serialize_enriched_context",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_enriched_context",
+    "resolved_canonical": "_serialize_enriched_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reducer_node",
+    "callee": "_serialize_reduced_context",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_serialize_reduced_context",
+    "resolved_canonical": "_serialize_reduced_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._rank_candidates",
+    "callee": "_cosine_similarity",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_cosine_similarity",
+    "resolved_canonical": "_cosine_similarity"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._rank_candidates",
+    "callee": "ResearchCandidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchCandidate",
+    "resolved_canonical": "ResearchCandidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._score_candidates_parallel",
+    "callee": "ResearchPipeline._score_candidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._score_candidate",
+    "resolved_canonical": "ResearchPipeline._score_candidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._score_candidate",
+    "callee": "RelevancyCandidate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "RelevancyCandidate",
+    "resolved_canonical": "RelevancyCandidate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._score_candidate",
+    "callee": "_tokenize_terms",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_tokenize_terms",
+    "resolved_canonical": "_tokenize_terms"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reduce_context",
+    "callee": "ResearchPipeline._build_relation_lines",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._build_relation_lines",
+    "resolved_canonical": "ResearchPipeline._build_relation_lines"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reduce_context",
+    "callee": "_truncate_to_token_budget",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_truncate_to_token_budget",
+    "resolved_canonical": "_truncate_to_token_budget"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reduce_context",
+    "callee": "_parse_relation_corpus",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_parse_relation_corpus",
+    "resolved_canonical": "_parse_relation_corpus"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._reduce_context",
+    "callee": "ReducedResearchContext",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ReducedResearchContext",
+    "resolved_canonical": "ReducedResearchContext"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_relation_lines",
+    "callee": "_context_key",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_context_key",
+    "resolved_canonical": "_context_key"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_relation_lines",
+    "callee": "_symbol_signature_ref",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_symbol_signature_ref",
+    "resolved_canonical": "_symbol_signature_ref"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_relation_lines",
+    "callee": "_build_relation_does_clause",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_build_relation_does_clause",
+    "resolved_canonical": "_build_relation_does_clause"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._build_relation_lines",
+    "callee": "_normalize_resolved_reference",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_normalize_resolved_reference",
+    "resolved_canonical": "_normalize_resolved_reference"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "_extract_evidence_snippets",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_extract_evidence_snippets",
+    "resolved_canonical": "_extract_evidence_snippets"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "_format_reducer_brief",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_format_reducer_brief",
+    "resolved_canonical": "_format_reducer_brief"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "_truncate_to_token_budget",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_truncate_to_token_budget",
+    "resolved_canonical": "_truncate_to_token_budget"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "ResearchPipeline._invoke_reducer_inference",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._invoke_reducer_inference",
+    "resolved_canonical": "ResearchPipeline._invoke_reducer_inference"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._summarize_context_for_agent",
+    "callee": "_derive_open_questions",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_derive_open_questions",
+    "resolved_canonical": "_derive_open_questions"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._invoke_reducer_batch_inference",
+    "callee": "_context_key",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_context_key",
+    "resolved_canonical": "_context_key"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._invoke_reducer_batch_inference",
+    "callee": "_context_key_parts",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_context_key_parts",
+    "resolved_canonical": "_context_key_parts"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._invoke_reducer_batch_inference",
+    "callee": "_format_reducer_brief",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_format_reducer_brief",
+    "resolved_canonical": "_format_reducer_brief"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._invoke_reducer_batch_inference",
+    "callee": "_extract_evidence_snippets",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_extract_evidence_snippets",
+    "resolved_canonical": "_extract_evidence_snippets"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._invoke_reducer_inference",
+    "callee": "_format_reducer_brief",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_format_reducer_brief",
+    "resolved_canonical": "_format_reducer_brief"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._recursive_reduce_groups",
+    "callee": "_truncate_to_token_budget",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_truncate_to_token_budget",
+    "resolved_canonical": "_truncate_to_token_budget"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._recursive_reduce_groups",
+    "callee": "ReducedResearchContext",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ReducedResearchContext",
+    "resolved_canonical": "ReducedResearchContext"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._recursive_reduce_groups",
+    "callee": "ResearchPipeline._merge_reducer_pair",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchPipeline._merge_reducer_pair",
+    "resolved_canonical": "ResearchPipeline._merge_reducer_pair"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._merge_reducer_pair",
+    "callee": "_extract_evidence_snippets",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_extract_evidence_snippets",
+    "resolved_canonical": "_extract_evidence_snippets"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._merge_reducer_pair",
+    "callee": "_format_reducer_brief",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_format_reducer_brief",
+    "resolved_canonical": "_format_reducer_brief"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._merge_reducer_pair",
+    "callee": "_truncate_to_token_budget",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_truncate_to_token_budget",
+    "resolved_canonical": "_truncate_to_token_budget"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._merge_reducer_pair",
+    "callee": "ReducedResearchContext",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ReducedResearchContext",
+    "resolved_canonical": "ReducedResearchContext"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._enrich_candidates",
+    "callee": "_build_canonical_symbol_map",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_build_canonical_symbol_map",
+    "resolved_canonical": "_build_canonical_symbol_map"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._enrich_candidates",
+    "callee": "_extract_symbol_body",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_extract_symbol_body",
+    "resolved_canonical": "_extract_symbol_body"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "ResearchPipeline._enrich_candidates",
+    "callee": "EnrichedResearchContext",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "EnrichedResearchContext",
+    "resolved_canonical": "EnrichedResearchContext"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_deterministic_objective",
+    "callee": "ResearchObjective",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "ResearchObjective",
+    "resolved_canonical": "ResearchObjective"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_deterministic_objective",
+    "callee": "_tokenize_terms",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_tokenize_terms",
+    "resolved_canonical": "_tokenize_terms"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_build_canonical_symbol_map",
+    "callee": "_module_name",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_module_name",
+    "resolved_canonical": "_module_name"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_extract_symbol_body",
+    "callee": "_find_parent_class_name",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_find_parent_class_name",
+    "resolved_canonical": "_find_parent_class_name"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_truncate_to_token_budget",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_context_key",
+    "callee": "_context_key_parts",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_context_key_parts",
+    "resolved_canonical": "_context_key_parts"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "caller_symbol": "_serialize_enriched_context",
+    "callee": "_token_estimate",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/research_pipeline.py",
+    "resolved_symbol": "_token_estimate",
+    "resolved_canonical": "_token_estimate"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "caller_symbol": "WriterPrService.open_pull_request",
+    "callee": "WriterPrService._resolve_ref_sha",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "resolved_symbol": "WriterPrService._resolve_ref_sha",
+    "resolved_canonical": "WriterPrService._resolve_ref_sha"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "caller_symbol": "WriterPrService.open_pull_request",
+    "callee": "WriterPrService._branch_exists",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "resolved_symbol": "WriterPrService._branch_exists",
+    "resolved_canonical": "WriterPrService._branch_exists"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "caller_symbol": "WriterPrService.open_pull_request",
+    "callee": "WriterPrService._find_open_pr",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "resolved_symbol": "WriterPrService._find_open_pr",
+    "resolved_canonical": "WriterPrService._find_open_pr"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "caller_symbol": "WriterPrService.open_pull_request",
+    "callee": "WriterPrService._default_branch_name",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "resolved_symbol": "WriterPrService._default_branch_name",
+    "resolved_canonical": "WriterPrService._default_branch_name"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "caller_symbol": "WriterPrService.open_pull_request",
+    "callee": "WriterPrService._resolve_content_sha",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/application/writer_pr_service.py",
+    "resolved_symbol": "WriterPrService._resolve_content_sha",
+    "resolved_canonical": "WriterPrService._resolve_content_sha"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "_build_parser",
+    "callee": "_env_int",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_env_int",
+    "resolved_canonical": "_env_int"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_read_manifest",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_read_manifest",
+    "resolved_canonical": "_read_manifest"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_write_manifest",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_write_manifest",
+    "resolved_canonical": "_write_manifest"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "run_index_once",
+    "callee": "_read_symbols",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_read_symbols",
+    "resolved_canonical": "_read_symbols"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "main",
+    "callee": "_load_environment",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_load_environment",
+    "resolved_canonical": "_load_environment"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "main",
+    "callee": "_build_parser",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "_build_parser",
+    "resolved_canonical": "_build_parser"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "caller_symbol": "main",
+    "callee": "run_index_once",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/cli.py",
+    "resolved_symbol": "run_index_once",
+    "resolved_canonical": "run_index_once"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_index_service",
+    "callee": "_build_embedding_generator",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "_build_embedding_generator",
+    "resolved_canonical": "_build_embedding_generator"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_index_service",
+    "callee": "build_persistent_observability_adapter",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "build_persistent_observability_adapter",
+    "resolved_canonical": "build_persistent_observability_adapter"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_index_service",
+    "callee": "_build_embedding_generator",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "_build_embedding_generator",
+    "resolved_canonical": "_build_embedding_generator"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_research_pipeline",
+    "callee": "build_persistent_observability_adapter",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "build_persistent_observability_adapter",
+    "resolved_canonical": "build_persistent_observability_adapter"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_research_pipeline",
+    "callee": "_build_embedding_generator",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "_build_embedding_generator",
+    "resolved_canonical": "_build_embedding_generator"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_research_pipeline",
+    "callee": "DeterministicReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicReasoningAgent",
+    "resolved_canonical": "DeterministicReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "caller_symbol": "build_persistent_research_pipeline",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/cross_file_linker.py",
+    "caller_symbol": "CrossFileLinker.link",
+    "callee": "CrossFileLinker._resolve",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/cross_file_linker.py",
+    "resolved_symbol": "CrossFileLinker._resolve",
+    "resolved_canonical": "CrossFileLinker._resolve"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._collect_import_aliases",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_import_aliases"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "ExtractedFile",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "ExtractedFile",
+    "resolved_canonical": "ExtractedFile"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._function_symbol",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._function_symbol"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._async_function_symbol",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._async_function_symbol"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._class_symbol",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._class_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._class_symbol"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor.extract",
+    "callee": "PythonAstSymbolExtractor._method_symbol",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "resolved_canonical": "PythonAstSymbolExtractor._method_symbol"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._function_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._async_function_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "callee": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._collect_callees",
+    "resolved_canonical": "PythonAstSymbolExtractor._collect_callees"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._method_symbol",
+    "callee": "PythonAstSymbolExtractor._build_signature",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "PythonAstSymbolExtractor._build_signature",
+    "resolved_canonical": "PythonAstSymbolExtractor._build_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "caller_symbol": "PythonAstSymbolExtractor._collect_import_aliases",
+    "callee": "ImportAliases",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/parsing/python_ast_symbol_extractor.py",
+    "resolved_symbol": "ImportAliases",
+    "resolved_canonical": "ImportAliases"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.__init__",
+    "callee": "GithubWebhookServerApp._build_oauth_token_store",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._build_oauth_token_store",
+    "resolved_canonical": "GithubWebhookServerApp._build_oauth_token_store"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.__init__",
+    "callee": "_build_queue",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "_build_queue",
+    "resolved_canonical": "_build_queue"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.__init__",
+    "callee": "GithubWebhookServerApp._build_github_app_auth_service",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._build_github_app_auth_service",
+    "resolved_canonical": "GithubWebhookServerApp._build_github_app_auth_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.__init__",
+    "callee": "GithubWebhookServerApp._build_chat_orchestrator_service",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._build_chat_orchestrator_service",
+    "resolved_canonical": "GithubWebhookServerApp._build_chat_orchestrator_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.github_auth_start",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.github_auth_callback",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.oauth_signup_start",
+    "callee": "GithubWebhookServerApp._oauth_flow_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._oauth_flow_start",
+    "resolved_canonical": "GithubWebhookServerApp._oauth_flow_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.oauth_signin_start",
+    "callee": "GithubWebhookServerApp._oauth_flow_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._oauth_flow_start",
+    "resolved_canonical": "GithubWebhookServerApp._oauth_flow_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp._oauth_flow_start",
+    "callee": "GithubWebhookServerApp.github_auth_start",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_start",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_start"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.oauth_callback",
+    "callee": "GithubWebhookServerApp._issue_session_token",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._issue_session_token",
+    "resolved_canonical": "GithubWebhookServerApp._issue_session_token"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.oauth_callback",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.authenticate_bearer_token",
+    "callee": "GithubWebhookServerApp._verify_session_token",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._verify_session_token",
+    "resolved_canonical": "GithubWebhookServerApp._verify_session_token"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp._issue_session_token",
+    "callee": "GithubWebhookServerApp._b64url_encode",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._b64url_encode",
+    "resolved_canonical": "GithubWebhookServerApp._b64url_encode"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp._verify_session_token",
+    "callee": "GithubWebhookServerApp._b64url_decode",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp._b64url_decode",
+    "resolved_canonical": "GithubWebhookServerApp._b64url_decode"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.github_installation_token",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.github_user_repositories",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.projects_add_repository",
+    "callee": "GithubWebhookServerApp.projects_get",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.projects_get",
+    "resolved_canonical": "GithubWebhookServerApp.projects_get"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.projects_add_repository",
+    "callee": "GithubWebhookServerApp.projects_list_repositories",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.projects_list_repositories",
+    "resolved_canonical": "GithubWebhookServerApp.projects_list_repositories"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.projects_list_repositories",
+    "callee": "GithubWebhookServerApp.projects_get",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.projects_get",
+    "resolved_canonical": "GithubWebhookServerApp.projects_get"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.projects_remove_repository",
+    "callee": "GithubWebhookServerApp.projects_get",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.projects_get",
+    "resolved_canonical": "GithubWebhookServerApp.projects_get"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.projects_remove_repository",
+    "callee": "GithubWebhookServerApp.projects_list_repositories",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.projects_list_repositories",
+    "resolved_canonical": "GithubWebhookServerApp.projects_list_repositories"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.writer_open_pr",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "GithubWebhookServerApp.github_register_webhook",
+    "callee": "GithubWebhookServerApp.github_auth_status",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp.github_auth_status",
+    "resolved_canonical": "GithubWebhookServerApp.github_auth_status"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "run_webhook_server",
+    "callee": "GithubWebhookServerApp",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "GithubWebhookServerApp",
+    "resolved_canonical": "GithubWebhookServerApp"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "run_webhook_server",
+    "callee": "_make_handler",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "_make_handler",
+    "resolved_canonical": "_make_handler"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "caller_symbol": "main",
+    "callee": "run_webhook_server",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/server.py",
+    "resolved_symbol": "run_webhook_server",
+    "resolved_canonical": "run_webhook_server"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_chat_orchestrator_service.py",
+    "caller_symbol": "test_chat_service_creates_session_and_sends_message",
+    "callee": "_build_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_chat_orchestrator_service.py",
+    "resolved_symbol": "_build_service",
+    "resolved_canonical": "_build_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_chat_orchestrator_service.py",
+    "caller_symbol": "test_chat_service_enforces_session_access_and_input_validation",
+    "callee": "_build_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_chat_orchestrator_service.py",
+    "resolved_symbol": "_build_service",
+    "resolved_canonical": "_build_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_linked_callees_resolved_across_files",
+    "callee": "_make_fixture_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_fixture_repo",
+    "resolved_canonical": "_make_fixture_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_linked_callees_resolved_across_files",
+    "callee": "_make_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_service",
+    "resolved_canonical": "_make_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_intra_file_call_also_resolved",
+    "callee": "_make_fixture_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_fixture_repo",
+    "resolved_canonical": "_make_fixture_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_intra_file_call_also_resolved",
+    "callee": "_make_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_service",
+    "resolved_canonical": "_make_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_symbols_without_cross_file_calls_have_empty_linked_callees",
+    "callee": "_make_fixture_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_fixture_repo",
+    "resolved_canonical": "_make_fixture_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_symbols_without_cross_file_calls_have_empty_linked_callees",
+    "callee": "_make_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_service",
+    "resolved_canonical": "_make_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_linked_callees_persist_and_reload",
+    "callee": "_make_fixture_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_fixture_repo",
+    "resolved_canonical": "_make_fixture_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_linked_callees_persist_and_reload",
+    "callee": "_make_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_service",
+    "resolved_canonical": "_make_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_link_callees_span_emitted",
+    "callee": "_make_fixture_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_fixture_repo",
+    "resolved_canonical": "_make_fixture_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "caller_symbol": "test_link_callees_span_emitted",
+    "callee": "_make_service",
+    "resolved_path": "apps/worker-indexer-py/tests/test_cross_file_linker.py",
+    "resolved_symbol": "_make_service",
+    "resolved_canonical": "_make_service"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "caller_symbol": "test_service_embeds_symbols_when_port_configured",
+    "callee": "_build_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "resolved_symbol": "_build_repo",
+    "resolved_canonical": "_build_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "caller_symbol": "test_service_emits_embed_symbols_span",
+    "callee": "_build_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "resolved_symbol": "_build_repo",
+    "resolved_canonical": "_build_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "caller_symbol": "test_service_skips_embedding_when_no_port_configured",
+    "callee": "_build_repo",
+    "resolved_path": "apps/worker-indexer-py/tests/test_embedding_standard.py",
+    "resolved_symbol": "_build_repo",
+    "resolved_canonical": "_build_repo"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "caller_symbol": "test_github_auth_start_returns_503_when_env_not_configured",
+    "callee": "_build_app",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "resolved_symbol": "_build_app",
+    "resolved_canonical": "_build_app"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "caller_symbol": "test_github_auth_flows_use_injected_service",
+    "callee": "_FakeGithubAppAuthService",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "resolved_symbol": "_FakeGithubAppAuthService",
+    "resolved_canonical": "_FakeGithubAppAuthService"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "caller_symbol": "test_github_auth_flows_use_injected_service",
+    "callee": "_build_app",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_app_server_auth.py",
+    "resolved_symbol": "_build_app",
+    "resolved_canonical": "_build_app"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "caller_symbol": "test_signature_verifier_validates_expected_signature",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "caller_symbol": "test_http_handler_queues_push_event_when_signature_is_valid",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "caller_symbol": "test_http_handler_ignores_duplicate_delivery_id_when_replay_guard_is_enabled",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "caller_symbol": "test_http_handler_ignores_non_push_event",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "_FakeClient.start_observation",
+    "callee": "_FakeLiveSpan",
+    "resolved_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeLiveSpan",
+    "resolved_canonical": "_FakeLiveSpan"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_creates_and_finishes_remote_span",
+    "callee": "_FakeClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeClient",
+    "resolved_canonical": "_FakeClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_health_check_uses_flush",
+    "callee": "_FakeClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeClient",
+    "resolved_canonical": "_FakeClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_links_child_spans_to_parent_observation",
+    "callee": "_FakeClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeClient",
+    "resolved_canonical": "_FakeClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "caller_symbol": "test_langfuse_adapter_strict_mode_raises_on_start_failure",
+    "callee": "_FakeClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_langfuse_observability_adapter.py",
+    "resolved_symbol": "_FakeClient",
+    "resolved_canonical": "_FakeClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_openai_embedding_generator_adapter.py",
+    "caller_symbol": "_FakeOpenAI.__init__",
+    "callee": "_FakeEmbeddingsApi",
+    "resolved_path": "apps/worker-indexer-py/tests/test_openai_embedding_generator_adapter.py",
+    "resolved_symbol": "_FakeEmbeddingsApi",
+    "resolved_canonical": "_FakeEmbeddingsApi"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "caller_symbol": "test_orchestrator_loop_executes_success_path_and_records_span",
+    "callee": "_result_with_context",
+    "resolved_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "resolved_symbol": "_result_with_context",
+    "resolved_canonical": "_result_with_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "caller_symbol": "test_orchestrator_loop_limits_tool_iterations_to_five",
+    "callee": "_result_with_context",
+    "resolved_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "resolved_symbol": "_result_with_context",
+    "resolved_canonical": "_result_with_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "caller_symbol": "test_orchestrator_loop_routes_conversational_messages_before_research",
+    "callee": "_result_with_context",
+    "resolved_path": "apps/worker-indexer-py/tests/test_orchestrator_loop_service.py",
+    "resolved_symbol": "_result_with_context",
+    "resolved_canonical": "_result_with_context"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "caller_symbol": "test_redis_queue_adapter_round_trip",
+    "callee": "_FakeRedisClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "resolved_symbol": "_FakeRedisClient",
+    "resolved_canonical": "_FakeRedisClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "caller_symbol": "test_redis_queue_adapter_dequeue_empty",
+    "callee": "_FakeRedisClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "resolved_symbol": "_FakeRedisClient",
+    "resolved_canonical": "_FakeRedisClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "caller_symbol": "test_redis_queue_adapter_writes_dead_letter_payload",
+    "callee": "_FakeRedisClient",
+    "resolved_path": "apps/worker-indexer-py/tests/test_redis_queue_adapter.py",
+    "resolved_symbol": "_FakeRedisClient",
+    "resolved_canonical": "_FakeRedisClient"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "caller_symbol": "_FakeChat.__init__",
+    "callee": "_FakeCompletions",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "resolved_symbol": "_FakeCompletions",
+    "resolved_canonical": "_FakeCompletions"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "caller_symbol": "_FakeOpenAI.__init__",
+    "callee": "_FakeChat",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "resolved_symbol": "_FakeChat",
+    "resolved_canonical": "_FakeChat"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "caller_symbol": "_FakeOpenAIQueries.__init__",
+    "callee": "_FakeChat",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_openai_agents.py",
+    "resolved_symbol": "_FakeChat",
+    "resolved_canonical": "_FakeChat"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "_build_pipeline",
+    "callee": "DeterministicReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicReasoningAgent",
+    "resolved_canonical": "DeterministicReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "_build_pipeline",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_expands_frontier_then_filters_with_relevancy",
+    "callee": "_build_pipeline",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "resolved_symbol": "_build_pipeline",
+    "resolved_canonical": "_build_pipeline"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_reducer_truncates_bodies_when_budget_is_tight",
+    "callee": "_build_pipeline",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "resolved_symbol": "_build_pipeline",
+    "resolved_canonical": "_build_pipeline"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_emits_all_research_spans_and_reducer_metrics",
+    "callee": "DeterministicReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicReasoningAgent",
+    "resolved_canonical": "DeterministicReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_emits_all_research_spans_and_reducer_metrics",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_uses_llm_batch_relevancy_when_available",
+    "callee": "LlmScoredReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "resolved_symbol": "LlmScoredReasoningAgent",
+    "resolved_canonical": "LlmScoredReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_phase5_pipeline.py",
+    "caller_symbol": "test_phase5_uses_llm_batch_relevancy_when_available",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_pipeline.py",
+    "caller_symbol": "test_research_pipeline_runs_end_to_end_on_real_index_data",
+    "callee": "DeterministicReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicReasoningAgent",
+    "resolved_canonical": "DeterministicReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_pipeline.py",
+    "caller_symbol": "test_research_pipeline_runs_end_to_end_on_real_index_data",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_pipeline.py",
+    "caller_symbol": "test_research_pipeline_respects_repo_scope_filter",
+    "callee": "DeterministicReasoningAgent",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicReasoningAgent",
+    "resolved_canonical": "DeterministicReasoningAgent"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_research_pipeline.py",
+    "caller_symbol": "test_research_pipeline_respects_repo_scope_filter",
+    "callee": "DeterministicQueryProdder",
+    "resolved_path": "apps/worker-indexer-py/src/ast_indexer/main.py",
+    "resolved_symbol": "DeterministicQueryProdder",
+    "resolved_canonical": "DeterministicQueryProdder"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_server_runtime.py",
+    "caller_symbol": "test_server_app_handles_valid_push_and_processes_job",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_server_runtime.py",
+    "caller_symbol": "test_server_app_uses_redis_queue_factory_when_requested",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_server_runtime.py",
+    "caller_symbol": "test_server_app_exposes_retry_outcome_and_logs_span",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_server_runtime.py",
+    "caller_symbol": "test_server_app_exposes_dead_letter_outcome",
+    "callee": "_signature",
+    "resolved_path": "apps/worker-indexer-py/tests/test_github_webhook_http_handler.py",
+    "resolved_symbol": "_signature",
+    "resolved_canonical": "_signature"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_webhook_index_jobs.py",
+    "caller_symbol": "test_worker_requeues_job_until_max_attempts_then_dead_letters",
+    "callee": "_AlwaysFailIndexService",
+    "resolved_path": "apps/worker-indexer-py/tests/test_webhook_index_jobs.py",
+    "resolved_symbol": "_AlwaysFailIndexService",
+    "resolved_canonical": "_AlwaysFailIndexService"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_writer_pr_service.py",
+    "caller_symbol": "test_writer_service_dry_run_returns_plan",
+    "callee": "_FakeGithubAuth",
+    "resolved_path": "apps/worker-indexer-py/tests/test_writer_pr_service.py",
+    "resolved_symbol": "_FakeGithubAuth",
+    "resolved_canonical": "_FakeGithubAuth"
+  },
+  {
+    "repo": ".",
+    "caller_path": "apps/worker-indexer-py/tests/test_writer_pr_service.py",
+    "caller_symbol": "test_writer_service_reuses_existing_open_pr",
+    "callee": "_FakeGithubAuth",
+    "resolved_path": "apps/worker-indexer-py/tests/test_writer_pr_service.py",
+    "resolved_symbol": "_FakeGithubAuth",
+    "resolved_canonical": "_FakeGithubAuth"
+  }
+]

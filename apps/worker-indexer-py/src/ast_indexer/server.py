@@ -34,6 +34,8 @@ from ast_indexer.application.index_job_dispatch_service import IndexJobDispatchS
 from ast_indexer.application.index_job_worker_service import IndexJobWorkerService
 from ast_indexer.application.orchestrator_loop_service import GrepRepoMatch, GrepRepoResult, OrchestratorLoopService
 from ast_indexer.application.oauth_session_service import OAuthSessionService
+from ast_indexer.application.research_openai_agents import OpenAIConversationalAgent
+from ast_indexer.application import runtime_config
 from ast_indexer.application.writer_pr_service import WriterFileChange, WriterPrService
 from ast_indexer.main import (
     build_persistent_index_service,
@@ -73,6 +75,8 @@ class GithubWebhookServerApp:
     ) -> None:
         self._session_secret = os.getenv('AST_INDEXER_SESSION_SECRET', webhook_secret)
         self._session_ttl_seconds = max(300, int(os.getenv('AST_INDEXER_SESSION_TTL_SECONDS', '604800')))
+        self._openai_api_key = openai_api_key
+        self._openai_base_url = openai_base_url
         observability = build_persistent_observability_adapter(
             state_root=state_root,
             backend=observability_backend,
@@ -238,10 +242,19 @@ class GithubWebhookServerApp:
             }
             return payload
 
+        conversational_agent_tool = None
+        if self._openai_api_key or os.getenv('OPENAI_API_KEY'):
+            conversational_model = os.getenv('AST_INDEXER_CONVERSATIONAL_MODEL') or runtime_config.default_openai_model()
+            conversational_agent_tool = OpenAIConversationalAgent(
+                model=conversational_model,
+                api_key=self._openai_api_key,
+                base_url=self._openai_base_url,
+            )
+
         orchestrator = OrchestratorLoopService(
-            observability=self._observability,
             search_tool=_search_tool,
             grep_repo_tool=_grep_repo_tool,
+            conversational_agent_tool=conversational_agent_tool,
             memory_threshold_messages=20,
             max_tool_iterations=5,
         )
@@ -1763,7 +1776,7 @@ def run_webhook_server(
     workspace_root: Path,
     state_root: Path,
     webhook_secret: str,
-    host: str = '127.0.0.1',
+    host: str | None = None,
     port: int = 8080,
     queue_backend: Literal['memory', 'redis'] = 'memory',
     redis_url: str | None = None,
@@ -1783,6 +1796,7 @@ def run_webhook_server(
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
 ) -> None:
+    resolved_host = host or runtime_config.default_bind_host()
     app = GithubWebhookServerApp(
         workspace_root=workspace_root,
         state_root=state_root,
@@ -1805,7 +1819,7 @@ def run_webhook_server(
         langfuse_secret_key=langfuse_secret_key,
         observability_strict=observability_strict,
     )
-    server = ThreadingHTTPServer((host, port), _make_handler(app))
+    server = ThreadingHTTPServer((resolved_host, port), _make_handler(app))
     try:
         server.serve_forever()
     finally:
@@ -1817,7 +1831,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument('--workspace-root', type=Path, required=True)
     parser.add_argument('--state-root', type=Path, required=True)
     parser.add_argument('--webhook-secret', type=str, required=True)
-    parser.add_argument('--host', type=str, default='127.0.0.1')
+    parser.add_argument('--host', type=str, default=runtime_config.default_bind_host())
     parser.add_argument('--port', type=int, default=8080)
     parser.add_argument('--queue-backend', type=str, choices=['memory', 'redis'], default='memory')
     parser.add_argument('--redis-url', type=str, required=False)

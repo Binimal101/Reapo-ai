@@ -1,0 +1,135 @@
+name: reapo-prodtest
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-langfuse}
+      POSTGRES_USER: ${POSTGRES_USER:-langfuse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-langfuse} -d ${POSTGRES_DB:-langfuse}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  langfuse:
+    image: langfuse/langfuse:2
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-langfuse}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-langfuse}
+      NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:?set LANGFUSE_NEXTAUTH_SECRET}
+      SALT: ${LANGFUSE_SALT:?set LANGFUSE_SALT}
+      NEXTAUTH_URL: ${LANGFUSE_NEXTAUTH_URL:-http://localhost:3000}
+      TELEMETRY_ENABLED: "false"
+      LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: "false"
+    ports:
+      - "${LANGFUSE_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://$(hostname -i):3000/api/public/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/backend.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      langfuse:
+        condition: service_healthy
+    environment:
+      AST_INDEXER_WEBHOOK_SECRET: ${AST_INDEXER_WEBHOOK_SECRET:?set AST_INDEXER_WEBHOOK_SECRET}
+      AST_INDEXER_HOST: 0.0.0.0
+      AST_INDEXER_PORT: 8090
+      AST_INDEXER_QUEUE_BACKEND: redis
+      AST_INDEXER_REDIS_URL: redis://redis:6379/0
+      AST_INDEXER_OBSERVABILITY_BACKEND: ${AST_INDEXER_OBSERVABILITY_BACKEND:-langfuse}
+      LANGFUSE_HOST: ${LANGFUSE_HOST:-http://langfuse:3000}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      AST_INDEXER_OPENAI_BASE_URL: ${AST_INDEXER_OPENAI_BASE_URL:-}
+      AST_INDEXER_RESEARCH_MODEL: ${AST_INDEXER_RESEARCH_MODEL:-}
+      AST_INDEXER_CONVERSATIONAL_MODEL: ${AST_INDEXER_CONVERSATIONAL_MODEL:-}
+    volumes:
+      - ../..:/workspace
+      - backend_state:/data/state
+    command:
+      - python
+      - -m
+      - ast_indexer.cli
+      - serve-webhook
+      - --workspace-root
+      - /workspace
+      - --state-root
+      - /data/state
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8090"
+    ports:
+      - "${BACKEND_PORT:-8090}:8090"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/auth/github/status', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/frontend.Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_LANGFUSE_SOCKET_URL: ${VITE_LANGFUSE_SOCKET_URL:-}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+
+  langfuse-mcp:
+    image: ${LANGFUSE_MCP_IMAGE:-langfuse/langfuse-mcp:latest}
+    profiles: ["mcp"]
+    restart: unless-stopped
+    depends_on:
+      langfuse:
+        condition: service_healthy
+    environment:
+      LANGFUSE_HOST: http://langfuse:3000
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+    ports:
+      - "${LANGFUSE_MCP_PORT:-3001}:3000"
+
+volumes:
+  postgres_data:
+  redis_data:
+  backend_state:

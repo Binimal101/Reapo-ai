@@ -52,6 +52,19 @@ function createDiffFromRun(run) {
   return ["diff --git a/analysis.md b/analysis.md", "--- a/analysis.md", "+++ b/analysis.md", ...lines].join("\n");
 }
 
+function runHasAgenticTrace(run) {
+  const steps = Array.isArray(run?.steps) ? run.steps : [];
+  return steps.some((step) => {
+    const name = typeof step?.name === "string" ? step.name : "";
+    return (
+      name === "execute_step.search"
+      || name === "execute_step.grep_repo"
+      || name.startsWith("execute_step.tool")
+      || name.startsWith("execute_step.agent")
+    );
+  });
+}
+
 export default function DashboardPage({ project, sessionToken }) {
   const [selectedProjectId, setSelectedProjectId] = useState(() => project?.project_id || "");
   const [sessionId, setSessionId] = useState("");
@@ -76,7 +89,7 @@ export default function DashboardPage({ project, sessionToken }) {
       const run = await getChatRun(sessionToken, runId);
       setGitDiff(createDiffFromRun(run));
       const traceId = typeof run?.trace_id === "string" ? run.trace_id : "";
-      if (traceId) {
+      if (traceId && runHasAgenticTrace(run)) {
         const traceSnapshot = await pullTraceSnapshot(sessionToken, traceId);
         setSnapshot(traceSnapshot);
       } else {
@@ -169,9 +182,14 @@ export default function DashboardPage({ project, sessionToken }) {
       setGitDiff(createDiffFromRun(payload?.run));
       writeProjectSession(selectedProjectId, sessionId);
 
-      const traceId = typeof payload?.run?.trace_id === "string" ? payload.run.trace_id : "";
-      const traceSnapshot = await pullTraceSnapshot(sessionToken, traceId || undefined);
-      setSnapshot(traceSnapshot);
+      const run = payload?.run;
+      const traceId = typeof run?.trace_id === "string" ? run.trace_id : "";
+      if (traceId && runHasAgenticTrace(run)) {
+        const traceSnapshot = await pullTraceSnapshot(sessionToken, traceId);
+        setSnapshot(traceSnapshot);
+      } else {
+        setSnapshot(null);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send message");
     } finally {

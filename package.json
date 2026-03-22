@@ -6,7 +6,7 @@
   "scripts": {
     "test": "vitest run --coverage",
     "build": "tsc -b",
-    "backend:dev": ".venv\\Scripts\\python.exe apps/worker-indexer-py/dev_serve_webhook.py serve-webhook --workspace-root . --state-root state --webhook-secret dev-secret --port 8094",
+    "backend:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File infra/scripts/backend_dev.ps1 -Port 8090",
     "frontend:dev": "npm run dev -w @reapo/frontend",
     "frontend:build": "npm run build -w @reapo/frontend",
     "frontend:preview": "npm run preview -w @reapo/frontend",

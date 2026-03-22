@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from ast_indexer.application import runtime_config
 from ast_indexer.adapters.embeddings.openai_embedding_generator_adapter import OpenAIEmbeddingGeneratorAdapter
 from ast_indexer.adapters.embeddings.sentence_transformers_embedding_generator_adapter import (
     SentenceTransformersEmbeddingGeneratorAdapter,
@@ -188,7 +189,7 @@ def build_persistent_research_pipeline(
     langfuse_public_key: str | None = None,
     langfuse_secret_key: str | None = None,
     observability_strict: bool = False,
-    research_model: str = 'gpt-4o-mini',
+    research_model: str | None = None,
 ) -> ResearchPipeline:
     observability = build_persistent_observability_adapter(
         state_root=state_root,
@@ -213,17 +214,18 @@ def build_persistent_research_pipeline(
     extractor = PythonAstSymbolExtractor()
     reasoning_agent: ReasoningAgentPort = DeterministicReasoningAgent()
     query_prodder: QueryProdderPort = DeterministicQueryProdder()
+    resolved_research_model = research_model or runtime_config.default_openai_model()
     reducer_use_inference = False
     relevancy_use_inference = False
 
     if openai_api_key or os.getenv('OPENAI_API_KEY'):
         reasoning_agent = OpenAIReasoningAgent(
-            model=research_model,
+            model=resolved_research_model,
             api_key=openai_api_key,
             base_url=openai_base_url,
         )
         query_prodder = OpenAIQueryProdder(
-            model=research_model,
+            model=resolved_research_model,
             api_key=openai_api_key,
             base_url=openai_base_url,
         )

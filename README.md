@@ -35,6 +35,22 @@ docker compose -f infra/docker/docker-compose.phase1.yml up -d postgres redis la
 docker compose -f infra/docker/docker-compose.phase1.yml ps
 ```
 
+### Production-like full stack with repo-level env file
+
+This stack starts postgres, redis, langfuse, backend, and frontend.
+
+Place your env file at repository root (`Reapo-ai/.env`), then run from repository root:
+
+```powershell
+docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest up -d --build
+```
+
+Optional stop command from repository root:
+
+```powershell
+docker compose --env-file ./.env -f infra/docker/docker-compose.prodtest.yml --project-name reapo-prodtest down
+```
+
 ### Validate required Phase 1 secrets and auth settings
 From repository root:
 

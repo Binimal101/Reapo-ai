@@ -155,6 +155,8 @@ class IndexPythonRepositoryService:
         metrics = IndexRunMetrics(
             files_scanned=len(file_paths),
             symbols_indexed=total_symbols,
+            linked_edges=0,
+            embeddings_generated=vectors_upserted,
             vectors_upserted=vectors_upserted,
             vectors_deleted=removed_vectors,
             started_at=started,
@@ -168,6 +170,8 @@ class IndexPythonRepositoryService:
                 'symbols_indexed': metrics.symbols_indexed,
                 'deleted_files': len(deleted_paths),
                 'deleted_symbols': removed_symbols,
+                'linked_edges': metrics.linked_edges,
+                'embeddings_generated': metrics.embeddings_generated,
                 'vectors_upserted': metrics.vectors_upserted,
                 'vectors_deleted': metrics.vectors_deleted,
                 'tree_sha': self._compute_tree_sha(file_blob_shas),
