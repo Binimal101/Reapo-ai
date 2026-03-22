@@ -31,12 +31,13 @@ class IndexJobDispatchService:
         correlation_id: str | None = None,
         user_id: str | None = None,
     ) -> IndexJob:
-        owner_clean = owner.strip()
-        name_clean = name.strip()
-        if not owner_clean or not name_clean:
-            raise ValueError('owner and name are required')
+        job = self.build_repository_full_index_job(
+            owner=owner,
+            name=name,
+            trace_id=trace_id,
+        )
 
-        repo_full_name = f'{owner_clean}/{name_clean}'
+        repo_full_name = job.repo
         span = self._observability.start_span(
             name='enqueue_index_job',
             trace_id=trace_id,
@@ -49,15 +50,6 @@ class IndexJobDispatchService:
             user_id=user_id,
         )
 
-        job = IndexJob(
-            repo=repo_full_name,
-            repo_full_name=repo_full_name,
-            changed_paths=(),
-            deleted_paths=(),
-            trace_id=trace_id,
-            max_attempts=self._max_attempts,
-            source='project_repository_linked',
-        )
         self._queue.enqueue(job)
 
         self._observability.end_span(
@@ -72,6 +64,29 @@ class IndexJobDispatchService:
             },
         )
         return job
+
+    def build_repository_full_index_job(
+        self,
+        *,
+        owner: str,
+        name: str,
+        trace_id: str,
+    ) -> IndexJob:
+        owner_clean = owner.strip()
+        name_clean = name.strip()
+        if not owner_clean or not name_clean:
+            raise ValueError('owner and name are required')
+
+        repo_full_name = f'{owner_clean}/{name_clean}'
+        return IndexJob(
+            repo=repo_full_name,
+            repo_full_name=repo_full_name,
+            changed_paths=(),
+            deleted_paths=(),
+            trace_id=trace_id,
+            max_attempts=self._max_attempts,
+            source='project_repository_linked',
+        )
 
     def enqueue_from_github_push_with_context(
         self,

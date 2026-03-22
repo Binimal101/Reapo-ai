@@ -455,8 +455,66 @@ def test_projects_add_repository_triggers_immediate_indexing(tmp_path: Path) -> 
 
     assert add_code == 200
     assert add_payload['status'] == 'ok'
-    assert add_payload['indexing']['queued'] is True
     assert add_payload['indexing']['worker_outcome'] in {'processed', 'retried', 'dead_lettered'}
+    if add_payload['indexing']['worker_outcome'] == 'retried':
+        assert add_payload['indexing']['queued'] is True
+    else:
+        assert add_payload['indexing']['queued'] is False
+
+    process_spans = [span for span in app._observability.list_spans() if span.name == 'process_index_job']
+    assert process_spans
+    assert process_spans[-1].trace_id == add_payload['indexing']['trace_id']
+
+
+def test_projects_add_repository_processes_linked_repo_even_with_queue_backlog(tmp_path: Path) -> None:
+    workspace_root = tmp_path / 'workspace'
+    target_repo_root = workspace_root / 'acme' / 'checkout-service' / 'src'
+    target_repo_root.mkdir(parents=True)
+    (target_repo_root / 'orders.py').write_text('def process(order_id):\n    return order_id\n', encoding='utf-8')
+
+    app = GithubWebhookServerApp(
+        workspace_root=workspace_root,
+        state_root=tmp_path / 'state',
+        webhook_secret='server-secret',
+    )
+
+    # Pre-seed the FIFO queue with an unrelated job to ensure immediate project-link indexing
+    # does not process the wrong repo when backlog exists.
+    app._queue.enqueue(
+        IndexJob(
+            repo='legacy/queued-first',
+            changed_paths=(),
+            deleted_paths=(),
+            trace_id='queue-backlog-trace',
+            source='github_push',
+        )
+    )
+
+    created_code, created_payload = app.projects_create(
+        user_id='alice',
+        name='Acme Project',
+        description='seeded project',
+    )
+    assert created_code == 201
+    project_id = str(created_payload['project']['project_id'])
+
+    add_code, add_payload = app.projects_add_repository(
+        user_id='alice',
+        project_id=project_id,
+        owner='acme',
+        name='checkout-service',
+        github_repo_id=1234,
+        visibility='private',
+    )
+
+    assert add_code == 200
+    assert add_payload['status'] == 'ok'
+    assert add_payload['indexing']['repo'] == 'acme/checkout-service'
+    assert add_payload['indexing']['worker_outcome'] in {'processed', 'retried', 'dead_lettered'}
+
+    queued_job = app._queue.dequeue()
+    assert queued_job is not None
+    assert queued_job.repo == 'legacy/queued-first'
 
 
 def test_projects_sync_all_repositories_links_missing_and_queues_jobs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:

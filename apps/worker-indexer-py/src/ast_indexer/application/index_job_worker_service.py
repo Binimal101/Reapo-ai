@@ -27,6 +27,12 @@ class IndexJobWorkerService:
         if job is None:
             return IndexJobProcessOutcome(status='no_job')
 
+        return self.process_job(job)
+
+    def process_job(self, job: IndexJob) -> IndexJobProcessOutcome:
+        if job is None:
+            return IndexJobProcessOutcome(status='no_job')
+
         try:
             if not job.changed_paths and not job.deleted_paths:
                 metrics = self._index_service.index_repository(

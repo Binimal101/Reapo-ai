@@ -990,14 +990,34 @@ class GithubWebhookServerApp:
         index_job = None
         index_outcome = None
         try:
-            index_job = self._dispatch.enqueue_repository_full_index(
+            index_job = self._dispatch.build_repository_full_index_job(
                 owner=owner,
                 name=name,
                 trace_id=index_trace_id,
-                correlation_id=f'project-{project_id}',
+            )
+            process_span = self._observability.start_span(
+                name='process_index_job',
+                trace_id=index_trace_id,
+                input_payload={
+                    'repo': index_job.repo,
+                    'changed_files': [],
+                    'deleted_files': [],
+                    'source': 'project_repository_linked',
+                },
+                session_id=f'project-{project_id}',
                 user_id=user_id,
             )
-            index_outcome = self._worker.process_next()
+            index_outcome = self._worker.process_job(index_job)
+            self._observability.end_span(
+                process_span,
+                output_payload={
+                    'worker_outcome': index_outcome.status,
+                    'processed': bool(index_outcome.status == 'processed'),
+                    'retry_scheduled': bool(index_outcome.status == 'retried'),
+                    'dead_lettered': bool(index_outcome.status == 'dead_lettered'),
+                },
+                metadata={'correlation_id': f'project-{project_id}'},
+            )
         except Exception:
             index_job = None
             index_outcome = None
@@ -1005,9 +1025,9 @@ class GithubWebhookServerApp:
         code, listing = self.projects_list_repositories(user_id=user_id, project_id=project_id, require_owner=True)
         indexing_payload = {
             'indexing': {
-                'queued': index_job is not None,
+                'queued': bool(index_outcome is not None and index_outcome.status == 'retried'),
                 'trace_id': index_trace_id,
-                'repo': index_job.repo if index_job is not None else f'{owner}/{name}',
+                'repo': index_outcome.job.repo if index_outcome is not None and index_outcome.job is not None else (index_job.repo if index_job is not None else f'{owner}/{name}'),
                 'worker_outcome': index_outcome.status if index_outcome is not None else 'enqueue_failed',
                 'processed': bool(index_outcome is not None and index_outcome.status == 'processed'),
             }

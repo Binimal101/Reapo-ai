@@ -9,7 +9,7 @@ export default function ProjectsPage({
   onListProjectRepositories,
   onAddRepository,
   onRemoveRepository,
-  onAttachAllRepositories,
+  onCheckRepositoryInstallation,
   onReloadRepositories,
   repositoryLoadError,
   githubAppConfigured,
@@ -26,8 +26,9 @@ export default function ProjectsPage({
   const [selectedRepositoryNames, setSelectedRepositoryNames] = useState(() => new Set());
   const [currentLinkedRepositories, setCurrentLinkedRepositories] = useState([]);
   const [saving, setSaving] = useState(false);
-  const [syncingAll, setSyncingAll] = useState(false);
   const [refreshingRepositories, setRefreshingRepositories] = useState(false);
+  const [checkingInstallations, setCheckingInstallations] = useState(false);
+  const [missingInstallOwners, setMissingInstallOwners] = useState([]);
   const [deletingProjectId, setDeletingProjectId] = useState("");
   const [error, setError] = useState("");
 
@@ -78,6 +79,39 @@ export default function ProjectsPage({
     }
   };
 
+  const findMissingInstallOwners = async (repoRows) => {
+    if (!Array.isArray(repoRows) || repoRows.length === 0) {
+      return [];
+    }
+
+    const ownerToRepo = new Map();
+    for (const repo of repoRows) {
+      const owner = typeof repo?.owner === "string" ? repo.owner : "";
+      const name = typeof repo?.name === "string" ? repo.name : "";
+      if (!owner || !name || ownerToRepo.has(owner)) {
+        continue;
+      }
+      ownerToRepo.set(owner, name);
+    }
+
+    const checks = await Promise.all(
+      Array.from(ownerToRepo.entries()).map(async ([owner, name]) => {
+        try {
+          const result = await onCheckRepositoryInstallation(owner, name);
+          const status = result?.data?.status;
+          if (!result?.ok && status === "needs_installation") {
+            return { owner, repo: name };
+          }
+          return null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    return checks.filter(Boolean);
+  };
+
   const handleSave = async () => {
     setError("");
     if (!projectName.trim()) {
@@ -87,6 +121,14 @@ export default function ProjectsPage({
     setSaving(true);
     try {
       const selectedList = repositories.filter((repo) => selectedRepositoryNames.has(repo.full_name));
+      setCheckingInstallations(true);
+      const missingOwners = await findMissingInstallOwners(selectedList);
+      setMissingInstallOwners(missingOwners);
+      if (missingOwners.length > 0) {
+        setError("GitHub App is not installed for one or more repository owners. Install first, then retry.");
+        return;
+      }
+
       if (mode === "create") {
         const created = await onCreateProject(projectName.trim(), projectDescription.trim());
         await Promise.all(selectedList.map((repo) => onAddRepository(created.project_id, repo)));
@@ -117,6 +159,7 @@ export default function ProjectsPage({
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unable to save project");
     } finally {
+      setCheckingInstallations(false);
       setSaving(false);
     }
   };
@@ -136,23 +179,26 @@ export default function ProjectsPage({
     }
   };
 
-  const handleAttachAllRepositories = async () => {
-    if (!editingProjectId) {
-      setError("Create the project first, then attach all repositories.");
+  const handleInstallMissingOwners = () => {
+    if (!githubAppInstallUrl || missingInstallOwners.length === 0) {
       return;
     }
-    setError("");
-    setSyncingAll(true);
-    try {
-      const payload = await onAttachAllRepositories(editingProjectId);
-      const linked = Array.isArray(payload?.repositories) ? payload.repositories : [];
-      setCurrentLinkedRepositories(linked);
-      setSelectedRepositoryNames(new Set(linked.map((repo) => repo.full_name)));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to attach all repositories");
-    } finally {
-      setSyncingAll(false);
+
+    for (const ownerRow of missingInstallOwners) {
+      const owner = ownerRow?.owner;
+      const state = typeof owner === "string" && owner ? `owner:${owner}` : "install";
+      const separator = githubAppInstallUrl.includes("?") ? "&" : "?";
+      window.open(`${githubAppInstallUrl}${separator}state=${encodeURIComponent(state)}`, "_blank", "noopener,noreferrer");
     }
+  };
+
+  const buildInstallUrlForOwner = (owner) => {
+    if (!githubAppInstallUrl) {
+      return "";
+    }
+    const state = typeof owner === "string" && owner ? `owner:${owner}` : "install";
+    const separator = githubAppInstallUrl.includes("?") ? "&" : "?";
+    return `${githubAppInstallUrl}${separator}state=${encodeURIComponent(state)}`;
   };
 
   const handleRefreshRepositories = async () => {
@@ -276,7 +322,7 @@ export default function ProjectsPage({
           </div>
         </article>
 
-        <article className="panel">
+        <article className="panel projects-editor-panel">
           <div className="panel-head">
             <h2>{mode === "create" ? "Create Project" : "Edit Project"}</h2>
             <span className="mono">{linkedCount} repos selected</span>
@@ -302,16 +348,6 @@ export default function ProjectsPage({
           <div className="panel-head repo-selection-head">
             <h2>Repository Selection</h2>
             <span className="mono">OAuth /user/repos</span>
-          </div>
-          <div className="projects-header-actions">
-            <button
-              type="button"
-              className="cta secondary"
-              onClick={handleAttachAllRepositories}
-              disabled={!editingProjectId || syncingAll || saving}
-            >
-              {syncingAll ? "Attaching all..." : "Attach All Repositories"}
-            </button>
           </div>
           <div className="repo-search-wrap">
             <input
@@ -346,6 +382,42 @@ export default function ProjectsPage({
                     Install GitHub App
                   </a>
                 ) : null}
+              </div>
+            </div>
+          ) : null}
+          {missingInstallOwners.length > 0 ? (
+            <div className="panel repo-guidance">
+              <p className="mono">Missing GitHub App installations</p>
+              <p className="mono">
+                Install the app for these owners before indexing can run:
+                {" "}
+                {missingInstallOwners.map((row) => row.owner).join(", ")}
+              </p>
+              <div className="projects-header-actions">
+                {missingInstallOwners.map((row) => {
+                  const href = buildInstallUrlForOwner(row.owner);
+                  return href ? (
+                    <a
+                      key={`install-owner-${row.owner}`}
+                      className="cta secondary"
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {`Install for ${row.owner}`}
+                    </a>
+                  ) : null;
+                })}
+              </div>
+              <div className="projects-header-actions">
+                <button
+                  type="button"
+                  className="cta primary"
+                  onClick={handleInstallMissingOwners}
+                  disabled={!githubAppInstallUrl}
+                >
+                  Install For Missing Owners
+                </button>
               </div>
             </div>
           ) : null}

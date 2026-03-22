@@ -169,6 +169,29 @@ export async function getGithubAuthStatus() {
   return apiFetch("/auth/github/status", { method: "GET" });
 }
 
+export async function checkGithubAppInstallationAccess(owner, repo, operation = "read") {
+  const url = `${apiBase()}/auth/github/installation-token`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ owner, repo, operation }),
+  });
+
+  const text = await res.text();
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
+  return {
+    ok: res.ok,
+    statusCode: res.status,
+    data,
+  };
+}
+
 export function githubAppInstallUrlFromEnv() {
   const url = import.meta.env.VITE_GITHUB_APP_INSTALL_URL;
   return typeof url === "string" && url.trim() ? url.trim() : "";

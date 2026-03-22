@@ -7,6 +7,7 @@ import LandingPage from "./pages/LandingPage.jsx";
 import ProjectsPage from "./pages/ProjectsPage.jsx";
 import {
   addRepositoryToProject,
+  checkGithubAppInstallationAccess,
   clearSessionToken,
   createProject,
   deleteProject,
@@ -18,7 +19,6 @@ import {
   listUserProjects,
   removeRepositoryFromProject,
   startOAuthFlow,
-  syncAllRepositoriesToProject,
   updateProject,
   validateSessionToken,
 } from "./lib/authApi.js";
@@ -187,8 +187,6 @@ export default function App() {
     }
   }, [sessionToken]);
 
-       getGithubAuthStatus,
-       githubAppInstallUrlFromEnv,
   useEffect(() => {
     if (route !== "project" || !hasSession) {
       return;
@@ -283,10 +281,9 @@ export default function App() {
             if (!sessionToken) throw new Error("Missing session token");
             return removeRepositoryFromProject(sessionToken, projectId, repositoryId);
           }}
-          onAttachAllRepositories={async (projectId) => {
-            if (!sessionToken) throw new Error("Missing session token");
-            return syncAllRepositoriesToProject(sessionToken, projectId);
-          }}
+          onCheckRepositoryInstallation={(owner, repo) =>
+            checkGithubAppInstallationAccess(owner, repo, "read")
+          }
           onReloadRepositories={refreshGithubRepositories}
           repositoryLoadError={repositoryLoadError}
           githubAppConfigured={githubAppConfigured}

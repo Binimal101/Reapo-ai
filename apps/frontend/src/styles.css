@@ -425,6 +425,12 @@ body {
   overflow: hidden;
 }
 
+.projects-grid .projects-editor-panel {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
 .project-form {
   display: grid;
   gap: 10px;
@@ -537,7 +543,8 @@ body {
   align-items: start;
   overflow-y: auto;
   min-height: 0;
-  flex: 1;
+  flex: 0 0 auto;
+  max-height: min(42vh, 420px);
   padding-right: 2px;
 }
 
