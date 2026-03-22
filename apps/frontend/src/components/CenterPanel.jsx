@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 export default function CenterPanel({
   messages,
   prompt,
@@ -8,6 +10,12 @@ export default function CenterPanel({
   gitDiff,
 }) {
   const hasMessages = Array.isArray(messages) && messages.length > 0;
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
   return (
     <section className="panel center" aria-label="Main workspace">
       <div className="hero">
@@ -30,6 +38,7 @@ export default function CenterPanel({
               </article>
             ))
           : null}
+        <div ref={bottomRef} />
       </section>
 
       <div className="composer">

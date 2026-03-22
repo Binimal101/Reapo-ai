@@ -744,6 +744,10 @@ body {
   overflow: auto;
   display: grid;
   gap: 8px;
+  scrollbar-width: none;
+}
+.chat-history::-webkit-scrollbar {
+  display: none;
 }
 
 .chat-msg {
