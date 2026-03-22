@@ -1,37 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CenterPanel from "./components/CenterPanel.jsx";
-
-const MOCK_MESSAGES = [
-  { role: "user", content: "Can you explain how the order processing pipeline works?", timestamp: 1 },
-  { role: "assistant", content: "Sure! The order pipeline runs in three stages: validation, fulfillment, and notification. Each stage is an async step that writes to the event log.", timestamp: 2 },
-  { role: "user", content: "Where does the retry logic live?", timestamp: 3 },
-  { role: "assistant", content: "Retry logic is in `src/fulfillment/retry.ts`. It uses exponential backoff with a max of 5 attempts before moving the order to a dead-letter queue.", timestamp: 4 },
-];
-
-function PreviewDashboard() {
-  const [messages, setMessages] = useState(MOCK_MESSAGES);
-  const [prompt, setPrompt] = useState("");
-  return (
-    <div className="layout-grid" style={{ padding: "24px", maxWidth: 800, margin: "0 auto" }}>
-      <CenterPanel
-        messages={messages}
-        prompt={prompt}
-        onPromptChange={setPrompt}
-        onSend={() => {
-          if (!prompt.trim()) return;
-          setMessages((m) => [...m, { role: "user", content: prompt, timestamp: Date.now() }]);
-          setPrompt("");
-          setTimeout(() => {
-            setMessages((m) => [...m, { role: "assistant", content: "This is a preview response.", timestamp: Date.now() }]);
-          }, 600);
-        }}
-        sending={false}
-        error={null}
-        gitDiff={null}
-      />
-    </div>
-  );
-}
 import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import AppNavbar from "./components/AppNavbar.jsx";
 import AuthPage from "./pages/AuthPage.jsx";
@@ -57,9 +24,6 @@ import {
 } from "./lib/authApi.js";
 
 function routeFromPath(pathname) {
-  if (pathname === "/preview") {
-    return { route: "preview", projectId: null };
-  }
   if (pathname.startsWith("/oauth/callback")) {
     return { route: "callback", projectId: null };
   }
@@ -356,10 +320,6 @@ export default function App() {
 
     if (route === "signin") {
       return <AuthPage mode="signin" busyFlow={busyFlow} onStartFlow={handleStartFlow} />;
-    }
-
-    if (route === "preview") {
-      return <PreviewDashboard />;
     }
 
     return <LandingPage hasSession={hasSession} onNavigate={navigate} />;
